@@ -3,6 +3,9 @@
 Tableau de bord général pour centraliser tous vos outils de travail en un seul endroit.
 Chaque outil est présenté sous forme de vignette cliquable, avec gestion des accès par utilisateur.
 
+## Capture d'écran :
+<img width="1859" height="589" alt="Capture d&#39;écran 2026-02-24 120039" src="https://github.com/user-attachments/assets/be1c6d27-1f2f-4521-a3c3-af0aafbb9312" />
+
 ---
 
 ## Fonctionnalités
