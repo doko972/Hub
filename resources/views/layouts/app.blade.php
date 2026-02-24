@@ -81,7 +81,20 @@
         </nav>
 
         <div class="sidebar__footer">
-            <p class="sidebar-version">Hub v1.0</p>
+            <div class="sidebar-footer__brand">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/>
+                </svg>
+                <span class="sidebar-footer__name">Hub</span>
+                <span class="sidebar-footer__version">v1.1</span>
+            </div>
+            <p class="sidebar-footer__author">par Doko972</p>
+            <a href="https://claude.ai" target="_blank" rel="noopener" class="sidebar-footer__collab">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
+                </svg>
+                en coopération avec Claude.ai
+            </a>
         </div>
     </aside>
 

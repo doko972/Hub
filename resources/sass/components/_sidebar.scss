@@ -96,14 +96,14 @@
     &__footer {
         padding: $spacing-md;
         border-top: 1px solid rgba(255, 255, 255, 0.08);
-
-        .sidebar-version {
-            font-size: $font-size-xs;
-            color: rgba(255, 255, 255, 0.25);
-            text-align: center;
-        }
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
     }
+}
 
+.sidebar {
     // ---- Responsive ----
     // Sur mobile/tablette : masqué par défaut, slide-in au clic burger
     @media (max-width: $bp-lg) {
@@ -111,6 +111,65 @@
 
         &.is-open {
             transform: translateX(0);
+        }
+    }
+}
+
+.sidebar-footer {
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: rgba(255, 255, 255, 0.4);
+
+        svg {
+            width: 13px;
+            height: 13px;
+            flex-shrink: 0;
+        }
+    }
+
+    &__name {
+        font-size: $font-size-xs;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    &__version {
+        font-size: 10px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: $radius-full;
+        padding: 1px 6px;
+        color: rgba(255, 255, 255, 0.35);
+    }
+
+    &__author {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.2);
+    }
+
+    &__collab {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.35);
+        font-style: italic;
+        text-decoration: none;
+        margin-top: 2px;
+        transition: color $transition-fast;
+
+        svg {
+            width: 11px;
+            height: 11px;
+            flex-shrink: 0;
+            opacity: 0.6;
+        }
+
+        &:hover {
+            color: rgba(255, 255, 255, 0.65);
+
+            svg { opacity: 1; }
         }
     }
 }
