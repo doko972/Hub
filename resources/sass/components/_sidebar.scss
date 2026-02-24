@@ -1,0 +1,123 @@
+// =============================================
+// SIDEBAR
+// =============================================
+
+.sidebar {
+    position: fixed;
+    top: $navbar-height;
+    left: 0;
+    bottom: 0;
+    width: $sidebar-width;
+    background: $color-sidebar-bg;
+    display: flex;
+    flex-direction: column;
+    z-index: 45;
+    transition: transform $transition-base;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    // Navigation principale
+    &__nav {
+        flex: 1;
+        padding: $spacing-md 0;
+    }
+
+    &__section-title {
+        font-size: $font-size-xs;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.35);
+        padding: $spacing-sm $spacing-md;
+        margin-top: $spacing-sm;
+    }
+
+    // Lien de navigation
+    &__link {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-md;
+        color: $color-sidebar-text;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        border-radius: 0;
+        transition: background $transition-fast, color $transition-fast;
+        position: relative;
+        white-space: nowrap;
+
+        svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            opacity: 0.7;
+            transition: opacity $transition-fast;
+        }
+
+        &:hover {
+            background: $color-sidebar-hover;
+            color: white;
+
+            svg {
+                opacity: 1;
+            }
+        }
+
+        &.is-active {
+            background: rgba($color-primary, 0.25);
+            color: white;
+            border-left: 3px solid $color-primary;
+
+            svg {
+                opacity: 1;
+            }
+
+            &::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 3px;
+                background: $color-sidebar-active;
+                border-radius: 0 2px 2px 0;
+            }
+        }
+    }
+
+    // Séparateur
+    &__divider {
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin: $spacing-sm $spacing-md;
+    }
+
+    // Footer sidebar (version, info)
+    &__footer {
+        padding: $spacing-md;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+
+        .sidebar-version {
+            font-size: $font-size-xs;
+            color: rgba(255, 255, 255, 0.25);
+            text-align: center;
+        }
+    }
+
+    // ---- Responsive ----
+    // Sur mobile/tablette : masqué par défaut, slide-in au clic burger
+    @media (max-width: $bp-lg) {
+        transform: translateX(-100%);
+
+        &.is-open {
+            transform: translateX(0);
+        }
+    }
+}
+
+// Décalage du contenu quand sidebar visible sur desktop
+@media (min-width: calc($bp-lg + 1px)) {
+    .main-content {
+        margin-left: $sidebar-width;
+    }
+}

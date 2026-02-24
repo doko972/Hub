@@ -1,0 +1,205 @@
+// =============================================
+// FORMULAIRES
+// =============================================
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.form-label {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+
+    .required {
+        color: $color-danger;
+        margin-left: 2px;
+    }
+}
+
+.form-control {
+    width: 100%;
+    padding: 10px $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text;
+    background: $color-surface;
+    border: 1.5px solid $color-border;
+    border-radius: $radius-md;
+    outline: none;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    line-height: 1.5;
+
+    &::placeholder {
+        color: $color-text-light;
+    }
+
+    &:hover {
+        border-color: #CBD5E1;
+    }
+
+    &:focus {
+        border-color: $color-primary;
+        box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+    }
+
+    &--error {
+        border-color: $color-danger;
+        &:focus {
+            box-shadow: 0 0 0 3px rgba($color-danger, 0.12);
+        }
+    }
+
+    &[disabled],
+    &[readonly] {
+        background: $color-bg;
+        color: $color-text-muted;
+        cursor: not-allowed;
+    }
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right $spacing-md center;
+    padding-right: $spacing-xl;
+}
+
+.form-hint {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+}
+
+.form-error {
+    font-size: $font-size-xs;
+    color: $color-danger;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+}
+
+// ---- Toggle switch ----
+.form-toggle {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+        display: none;
+
+        &:checked + .toggle-track {
+            background: $color-primary;
+
+            .toggle-thumb {
+                transform: translateX(20px);
+            }
+        }
+    }
+
+    .toggle-track {
+        position: relative;
+        width: 44px;
+        height: 24px;
+        background: $color-border;
+        border-radius: $radius-full;
+        transition: background $transition-fast;
+        flex-shrink: 0;
+    }
+
+    .toggle-thumb {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 18px;
+        height: 18px;
+        background: white;
+        border-radius: $radius-full;
+        box-shadow: $shadow-sm;
+        transition: transform $transition-base;
+    }
+
+    .toggle-label {
+        font-size: $font-size-sm;
+        color: $color-text;
+        font-weight: 500;
+    }
+}
+
+// ---- Upload image ----
+.form-upload {
+    border: 2px dashed $color-border;
+    border-radius: $radius-md;
+    padding: $spacing-xl;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    &:hover {
+        border-color: $color-primary;
+        background: $color-primary-light;
+    }
+
+    &__icon {
+        width: 40px;
+        height: 40px;
+        color: $color-text-muted;
+        margin: 0 auto $spacing-sm;
+    }
+
+    &__text {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+    }
+
+    &__input {
+        display: none;
+    }
+
+    &__preview {
+        width: 80px;
+        height: 80px;
+        border-radius: $radius-md;
+        object-fit: cover;
+        margin: 0 auto $spacing-sm;
+        border: 2px solid $color-border;
+    }
+}
+
+// ---- Row de formulaire (colonnes) ----
+.form-row {
+    display: grid;
+    gap: $spacing-md;
+
+    &--2 {
+        grid-template-columns: 1fr 1fr;
+
+        @media (max-width: $bp-sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    &--3 {
+        grid-template-columns: 1fr 1fr 1fr;
+
+        @media (max-width: $bp-md) {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        @media (max-width: $bp-sm) {
+            grid-template-columns: 1fr;
+        }
+    }
+}

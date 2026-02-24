@@ -1,0 +1,32 @@
+// =============================================
+// APP.SCSS - Point d'entrée SASS
+// Utilise @import : les variables définies en premier
+// sont disponibles dans tous les fichiers suivants.
+// =============================================
+
+// 1. Variables (doit être en premier)
+@import 'components/variables';
+
+// 2. Reset & base
+@import 'components/reset';
+
+// 3. Layout
+@import 'components/layout';
+
+// 4. Composants de navigation
+@import 'components/navbar';
+@import 'components/sidebar';
+@import 'components/burger';
+
+// 5. Composants UI
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/tiles';
+
+// 6. Sections métier
+@import 'components/admin';
+@import 'components/auth';
+@import 'components/profile';
+
+// 7. Thème sombre (toujours en dernier pour overrider)
+@import 'components/dark';

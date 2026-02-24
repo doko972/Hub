@@ -1,0 +1,54 @@
+// =============================================
+// BURGER MENU
+// =============================================
+
+.burger {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    gap: 5px;
+    padding: 8px;
+    flex-shrink: 0;
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $color-bg;
+    }
+
+    // Chaque barre
+    &__line {
+        display: block;
+        width: 22px;
+        height: 2px;
+        background-color: $color-text;
+        border-radius: 2px;
+        transition:
+            transform $transition-base,
+            opacity $transition-base,
+            width $transition-base;
+        transform-origin: center;
+    }
+
+    // Animation vers croix
+    &.is-active {
+        .burger__line:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+
+        .burger__line:nth-child(2) {
+            opacity: 0;
+            width: 0;
+        }
+
+        .burger__line:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+    }
+}

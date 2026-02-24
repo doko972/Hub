@@ -1,0 +1,204 @@
+// =============================================
+// NAVBAR (barre du haut)
+// =============================================
+
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: $navbar-height;
+    background: $color-surface;
+    border-bottom: 1px solid $color-border;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 $spacing-lg;
+    z-index: 50;
+    gap: $spacing-md;
+    box-shadow: $shadow-sm;
+
+    &__left {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+    }
+
+    &__right {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+    }
+
+    &__brand {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-primary;
+        white-space: nowrap;
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: $color-primary;
+            border-radius: $radius-sm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            svg {
+                width: 18px;
+                height: 18px;
+                fill: white;
+            }
+        }
+    }
+
+    // Breadcrumb ou titre de page dans la navbar
+    &__page-title {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        font-weight: 500;
+
+        @media (max-width: $bp-sm) {
+            display: none;
+        }
+    }
+
+    // Infos utilisateur
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        cursor: pointer;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: $radius-full;
+        transition: background $transition-fast;
+
+        &:hover {
+            background: $color-bg;
+        }
+
+        .user-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: $radius-full;
+            background: $color-primary;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: $font-size-sm;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .user-name {
+            font-size: $font-size-sm;
+            font-weight: 500;
+            color: $color-text;
+
+            @media (max-width: $bp-sm) {
+                display: none;
+            }
+        }
+
+        .user-role {
+            font-size: $font-size-xs;
+            color: $color-text-muted;
+
+            @media (max-width: $bp-sm) {
+                display: none;
+            }
+        }
+    }
+
+    // Menu déroulant utilisateur
+    &__dropdown {
+        position: relative;
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + $spacing-sm);
+            right: 0;
+            background: $color-surface;
+            border: 1px solid $color-border;
+            border-radius: $radius-md;
+            box-shadow: $shadow-lg;
+            min-width: 180px;
+            overflow: hidden;
+            z-index: 100;
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: opacity $transition-fast, transform $transition-fast;
+
+            &.is-open {
+                opacity: 1;
+                transform: translateY(0);
+                pointer-events: all;
+            }
+
+            a, button {
+                display: flex;
+                align-items: center;
+                gap: $spacing-sm;
+                padding: $spacing-sm $spacing-md;
+                font-size: $font-size-sm;
+                color: $color-text;
+                width: 100%;
+                text-align: left;
+                transition: background $transition-fast;
+
+                &:hover {
+                    background: $color-bg;
+                    color: $color-primary;
+                }
+
+                svg {
+                    width: 16px;
+                    height: 16px;
+                    opacity: 0.6;
+                }
+            }
+
+            hr {
+                border: none;
+                border-top: 1px solid $color-border;
+                margin: $spacing-xs 0;
+            }
+        }
+    }
+}
+
+// ---- Bouton toggle Dark / Light ----
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: $radius-sm;
+    border: none;
+    background: transparent;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+    flex-shrink: 0;
+
+    &:hover {
+        background: $color-bg;
+        color: $color-primary;
+    }
+
+    svg {
+        display: block;
+        transition: transform $transition-base;
+    }
+
+    &:hover svg {
+        transform: rotate(12deg);
+    }
+}

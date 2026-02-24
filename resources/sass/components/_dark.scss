@@ -1,0 +1,259 @@
+// =============================================
+// THÈME SOMBRE
+// Tous les overrides via [data-theme="dark"] sur <html>
+// La sidebar reste sombre dans les deux thèmes (déjà dark by design).
+// =============================================
+
+[data-theme="dark"] {
+
+    // ---- Fond & surfaces ----
+    --bg:           #0F172A;
+    --surface:      #1E293B;
+    --surface-2:    #263348;
+    --border:       #334155;
+    --text:         #F1F5F9;
+    --text-muted:   #94A3B8;
+    --text-light:   #64748B;
+
+    // ---- Application des variables CSS ----
+    body {
+        background-color: var(--bg);
+        color: var(--text);
+    }
+
+    // ---- Navbar ----
+    .navbar {
+        background: var(--surface);
+        border-bottom-color: var(--border);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .navbar__brand {
+        color: #A78BFA;
+    }
+
+    .navbar__user:hover {
+        background: var(--surface-2);
+    }
+
+    .navbar__page-title {
+        color: var(--text-muted);
+    }
+
+    .user-name  { color: var(--text); }
+    .user-role  { color: var(--text-muted); }
+
+    // ---- Dropdown menu ----
+    .dropdown-menu {
+        background: var(--surface);
+        border-color: var(--border);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+        a, button {
+            color: var(--text);
+
+            &:hover {
+                background: var(--surface-2);
+                color: #A78BFA;
+            }
+        }
+
+        hr { border-top-color: var(--border); }
+    }
+
+    // ---- Cards ----
+    .card {
+        background: var(--surface);
+        border-color: var(--border);
+
+        &__header {
+            border-bottom-color: var(--border);
+        }
+
+        &__footer {
+            border-top-color: var(--border);
+        }
+
+        &__title {
+            color: var(--text);
+        }
+    }
+
+    // ---- Layout ----
+    .page-header__title    { color: var(--text); }
+    .page-header__subtitle { color: var(--text-muted); }
+
+    // ---- Formulaires ----
+    .form-label  { color: var(--text); }
+    .form-hint   { color: var(--text-muted); }
+
+    .form-control {
+        background: var(--surface-2);
+        border-color: var(--border);
+        color: var(--text);
+
+        &::placeholder { color: var(--text-light); }
+
+        &:hover  { border-color: #475569; }
+
+        &:focus {
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+
+        &[disabled],
+        &[readonly] {
+            background: var(--bg);
+            color: var(--text-muted);
+        }
+    }
+
+    select.form-control {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    }
+
+    .form-upload {
+        border-color: var(--border);
+        background: var(--surface-2);
+
+        &:hover {
+            border-color: #7C3AED;
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        &__text { color: var(--text-muted); }
+    }
+
+    .form-toggle {
+        .toggle-track { background: #334155; }
+        .toggle-label { color: var(--text); }
+
+        input:checked + .toggle-track {
+            background: #7C3AED;
+        }
+    }
+
+    // ---- Boutons ----
+    .btn--secondary {
+        background: var(--surface-2);
+        color: var(--text);
+        border-color: var(--border);
+
+        &:hover {
+            background: #334155;
+            border-color: #475569;
+        }
+    }
+
+    .btn--ghost {
+        &:hover { background: rgba(124, 58, 237, 0.15); }
+    }
+
+    // ---- Vignettes ----
+    .tile {
+        background: var(--surface);
+        border-color: var(--border);
+
+        &__title { color: var(--text); }
+
+        &:hover {
+            border-color: #5B21B6;
+            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+        }
+
+        // Fonds clairs → versions sombres
+        &--violet .tile__image-wrap { background: rgba(124, 58, 237, 0.2); }
+        &--blue   .tile__image-wrap { background: rgba(59, 130, 246, 0.2); }
+        &--green  .tile__image-wrap { background: rgba(16, 185, 129, 0.2); }
+        &--orange .tile__image-wrap { background: rgba(245, 158, 11, 0.2); }
+        &--red    .tile__image-wrap { background: rgba(239, 68, 68, 0.2);  }
+        &--pink   .tile__image-wrap { background: rgba(236, 72, 153, 0.2); }
+        &--teal   .tile__image-wrap { background: rgba(20, 184, 166, 0.2); }
+        &--indigo .tile__image-wrap { background: rgba(99, 102, 241, 0.2); }
+    }
+
+    .tile--add {
+        border-color: var(--border);
+        background: transparent;
+
+        &:hover {
+            border-color: #7C3AED;
+            background: rgba(124, 58, 237, 0.12);
+        }
+    }
+
+    // ---- Tables (admin) ----
+    .table-wrap {
+        background: var(--surface);
+        border-color: var(--border);
+    }
+
+    .table {
+        thead {
+            background: var(--bg);
+            border-bottom-color: var(--border);
+
+            th { color: var(--text-muted); }
+        }
+
+        tbody {
+            tr {
+                border-bottom-color: var(--border);
+
+                &:hover { background: var(--surface-2); }
+            }
+
+            td { color: var(--text); }
+        }
+    }
+
+    .table-thumb {
+        background: rgba(124, 58, 237, 0.2);
+    }
+
+    // ---- Stat cards ----
+    .stat-card {
+        background: var(--surface);
+        border-color: var(--border);
+    }
+
+    // ---- Overlay sidebar ----
+    .sidebar-overlay {
+        background: rgba(0, 0, 0, 0.7);
+    }
+
+    // ---- Avatar (page profil) ----
+    .avatar-display__img {
+        border-color: var(--border);
+    }
+
+    .user-avatar--photo {
+        border-color: var(--border);
+    }
+
+    // ---- Page profil : infos lecture seule ----
+    .profile-layout .card {
+        hr { border-top-color: var(--border); }
+    }
+
+    // ---- Alertes ----
+    // Les alertes gardent leurs couleurs vives, elles sont déjà lisibles
+
+    // ---- Bouton theme toggle ----
+    .theme-toggle {
+        color: #94A3B8;
+
+        &:hover {
+            background: var(--surface-2);
+            color: #A78BFA;
+        }
+    }
+
+    // ---- Titres et textes généraux ----
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--text);
+    }
+
+    // ---- Textes inline dans les vues ----
+    strong { color: var(--text); }
+}

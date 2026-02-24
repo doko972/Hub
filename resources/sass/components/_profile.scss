@@ -1,0 +1,130 @@
+// =============================================
+// PROFIL UTILISATEUR
+// =============================================
+
+// ---- Layout deux colonnes ----
+.profile-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: $spacing-xl;
+    align-items: start;
+
+    @media (max-width: $bp-lg) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-avatar-col,
+.profile-info-col {
+    min-width: 0;
+}
+
+// ---- Affichage de l'avatar (grand, page profil) ----
+.avatar-display {
+    width: 120px;
+    height: 120px;
+    border-radius: $radius-full;
+    margin: 0 auto $spacing-sm;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: $radius-full;
+        border: 3px solid $color-border;
+    }
+
+    &__initials {
+        width: 100%;
+        height: 100%;
+        background: $color-primary;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        font-weight: 700;
+        border-radius: $radius-full;
+        border: 3px solid $color-primary-light;
+        letter-spacing: -1px;
+    }
+}
+
+// ---- Mini profil dans la sidebar ----
+.sidebar__profile {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    margin-top: $spacing-xs;
+}
+
+.sidebar-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: $radius-full;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    &__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: $radius-full;
+    }
+
+    &__initials {
+        width: 100%;
+        height: 100%;
+        background: $color-primary;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-sm;
+        font-weight: 700;
+        border-radius: $radius-full;
+    }
+
+    &__info {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    &__name {
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: white;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__link {
+        font-size: $font-size-xs;
+        color: $color-sidebar-text;
+        opacity: 0.7;
+        transition: opacity $transition-fast;
+
+        &:hover {
+            opacity: 1;
+            color: white;
+        }
+    }
+}
+
+// ---- Avatar photo dans la navbar ----
+.user-avatar--photo {
+    width: 34px;
+    height: 34px;
+    border-radius: $radius-full;
+    object-fit: cover;
+    border: 2px solid $color-border;
+    flex-shrink: 0;
+    background: $color-primary-light;
+}
