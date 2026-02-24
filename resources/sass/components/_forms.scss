@@ -90,6 +90,43 @@ select.form-control {
     gap: $spacing-xs;
 }
 
+// ---- Champ mot de passe avec bouton afficher/masquer ----
+.input-password {
+    position: relative;
+
+    .form-control {
+        padding-right: 44px;
+    }
+
+    &__toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: $color-text-muted;
+        padding: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: $radius-sm;
+        transition: color $transition-fast;
+
+        &:hover {
+            color: $color-text;
+        }
+
+        svg {
+            width: 18px;
+            height: 18px;
+            display: block;
+            pointer-events: none;
+        }
+    }
+}
+
 // ---- Toggle switch ----
 .form-toggle {
     display: flex;

@@ -9,8 +9,9 @@ import { initBurger }        from './components/burger.js';
 import { initDropdowns }     from './components/dropdown.js';
 import { initTooltips }      from './components/tooltip.js';
 import { initImagePreview }  from './components/imagePreview.js';
-import { initConfirmDelete } from './components/confirmDelete.js';
-import { initTheme }         from './components/theme.js';
+import { initConfirmDelete }   from './components/confirmDelete.js';
+import { initTheme }           from './components/theme.js';
+import { initPasswordToggle }  from './components/passwordToggle.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -19,4 +20,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initTooltips();
     initImagePreview();
     initConfirmDelete();
+    initPasswordToggle();
 });
