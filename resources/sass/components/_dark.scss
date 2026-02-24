@@ -217,6 +217,21 @@
         border-color: var(--border);
     }
 
+    // ---- Burger menu ----
+    .burger {
+        &:hover { background: var(--surface-2); }
+
+        &__line { background-color: var(--text); }
+    }
+
+    // ---- Page de connexion ----
+    .auth-card {
+        background: var(--surface);
+
+        &__title    { color: var(--text); }
+        &__subtitle { color: var(--text-muted); }
+    }
+
     // ---- Overlay sidebar ----
     .sidebar-overlay {
         background: rgba(0, 0, 0, 0.7);
