@@ -7,7 +7,7 @@
 
 <div class="page-header">
     <div>
-        <h1 class="page-header__title">Bonjour, {{ auth()->user()->name }} 👋</h1>
+        <h1 class="page-header__title">Bonjour, {{ auth()->user()->name }}</h1>
         <p class="page-header__subtitle">Accédez rapidement à vos outils de travail.</p>
     </div>
 
