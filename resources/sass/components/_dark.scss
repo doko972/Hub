@@ -217,6 +217,30 @@
         border-color: var(--border);
     }
 
+    // ---- Sidebar ----
+    .sidebar {
+        background: #0F172A;
+
+        &__link {
+            &:hover {
+                background: rgba(255, 255, 255, 0.06);
+            }
+
+            &.is-active {
+                background: rgba(124, 58, 237, 0.25);
+                border-left-color: #7C3AED;
+            }
+        }
+
+        &__footer {
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+
+        &__divider {
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+    }
+
     // ---- Logo Lottie (swap light → dark) ----
     .brand-lottie--light { display: none; }
     .brand-lottie--dark  { display: block; }
