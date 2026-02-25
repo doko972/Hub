@@ -8,6 +8,18 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/js/app.js'])
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
+
+    {{-- Anti-flash thème --}}
+    <script>
+        (function () {
+            var saved = localStorage.getItem('hub-theme');
+            var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            if ((saved || sys) === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 </head>
 <body>
 
@@ -16,9 +28,20 @@
 
         {{-- Logo --}}
         <div class="auth-card__logo">
-            <div class="logo-icon">
-                <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
-            </div>
+            <dotlottie-player class="brand-lottie brand-lottie--light"
+                src="{{ asset('logo.json') }}"
+                background="transparent"
+                speed="1"
+                style="width: 52px; height: 52px;"
+                autoplay>
+            </dotlottie-player>
+            <dotlottie-player class="brand-lottie brand-lottie--dark"
+                src="{{ asset('logo-dark.json') }}"
+                background="transparent"
+                speed="1"
+                style="width: 52px; height: 52px;"
+                autoplay>
+            </dotlottie-player>
             <span class="logo-name">Hub</span>
         </div>
 

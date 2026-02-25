@@ -30,21 +30,7 @@
         gap: $spacing-sm;
         margin-bottom: $spacing-xl;
 
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: $color-primary;
-            border-radius: $radius-md;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg {
-                width: 26px;
-                height: 26px;
-                fill: white;
-            }
-        }
+        .brand-lottie--dark { display: none; }
 
         .logo-name {
             font-size: $font-size-xl;

@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/js/app.js'])
+    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
     {{-- Anti-flash : applique le thème AVANT le rendu CSS pour éviter le clignotement --}}
     <script>
@@ -115,9 +116,20 @@
                 </button>
 
                 <a href="{{ route('dashboard') }}" class="navbar__brand">
-                    <div class="brand-icon">
-                        <svg viewBox="0 0 24 24"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/></svg>
-                    </div>
+                    <dotlottie-player class="brand-lottie brand-lottie--light"
+                        src="{{ asset('logo.json') }}"
+                        background="transparent"
+                        speed="1"
+                        style="width: 36px; height: 36px;"
+                        autoplay>
+                    </dotlottie-player>
+                    <dotlottie-player class="brand-lottie brand-lottie--dark"
+                        src="{{ asset('logo-dark.json') }}"
+                        background="transparent"
+                        speed="1"
+                        style="width: 36px; height: 36px;"
+                        autoplay>
+                    </dotlottie-player>
                     Hub
                 </a>
 

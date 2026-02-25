@@ -39,21 +39,7 @@
         color: $color-primary;
         white-space: nowrap;
 
-        .brand-icon {
-            width: 32px;
-            height: 32px;
-            background: $color-primary;
-            border-radius: $radius-sm;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-
-            svg {
-                width: 18px;
-                height: 18px;
-                fill: white;
-            }
-        }
+        .brand-lottie--dark { display: none; }
     }
 
     // Breadcrumb ou titre de page dans la navbar
