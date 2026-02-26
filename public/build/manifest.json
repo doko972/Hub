@@ -1,15 +1,15 @@
 {
   "resources/js/app.js": {
-    "file": "assets/app-BZpfDy1d.js",
+    "file": "assets/app-CtQ9-nft.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
     "css": [
-      "assets/app-DNuIkbb_.css"
+      "assets/app-Cm529maC.css"
     ]
   },
   "resources/sass/app.scss": {
-    "file": "assets/app-DNuIkbb_.css",
+    "file": "assets/app-Cm529maC.css",
     "src": "resources/sass/app.scss",
     "isEntry": true,
     "name": "app",

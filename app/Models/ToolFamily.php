@@ -5,52 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Tool extends Model
+class ToolFamily extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title',
+        'name',
         'description',
-        'url',
-        'image_path',
         'color',
-        'is_active',
-        'is_public',
         'sort_order',
-        'tool_family_id',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active'  => 'boolean',
-            'is_public'  => 'boolean',
             'sort_order' => 'integer',
         ];
     }
 
     // ---- Relations ----
-    public function users()
+    public function tools()
     {
-        return $this->belongsToMany(User::class)->withTimestamps();
+        return $this->hasMany(Tool::class);
     }
 
-    public function family()
-    {
-        return $this->belongsTo(ToolFamily::class, 'tool_family_id');
-    }
-
-    // ---- Helper image ----
-    public function imageUrl(): ?string
-    {
-        if ($this->image_path) {
-            return asset('storage/' . $this->image_path);
-        }
-        return null;
-    }
-
-    // ---- Couleurs disponibles ----
+    // ---- Couleurs disponibles (même palette que Tool) ----
     public static function availableColors(): array
     {
         return [

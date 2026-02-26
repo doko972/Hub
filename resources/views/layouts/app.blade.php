@@ -61,6 +61,15 @@
                 <hr class="sidebar__divider">
                 <span class="sidebar__section-title">Administration</span>
 
+                <a href="{{ route('admin.families.index') }}"
+                   class="sidebar__link {{ request()->routeIs('admin.families.*') ? 'is-active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="3" width="8" height="8" rx="1"/><rect x="14" y="3" width="8" height="8" rx="1"/>
+                        <rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/>
+                    </svg>
+                    Familles
+                </a>
+
                 <a href="{{ route('admin.tools.index') }}"
                    class="sidebar__link {{ request()->routeIs('admin.tools.*') ? 'is-active' : '' }}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

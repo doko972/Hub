@@ -33,6 +33,7 @@
                     <th style="width:48px;">#</th>
                     <th style="width:52px;">Image</th>
                     <th>Titre</th>
+                    <th>Famille</th>
                     <th>URL</th>
                     <th>Visibilité</th>
                     <th>Statut</th>
@@ -59,6 +60,13 @@
                         <strong>{{ $tool->title }}</strong>
                         @if($tool->description)
                             <br><span style="font-size:12px; color:#9CA3AF;">{{ Str::limit($tool->description, 60) }}</span>
+                        @endif
+                    </td>
+                    <td>
+                        @if($tool->family)
+                            <span class="badge badge--{{ $tool->family->color }}">{{ $tool->family->name }}</span>
+                        @else
+                            <span style="color:#D1D5DB; font-size:12px;">—</span>
                         @endif
                     </td>
                     <td>

@@ -176,6 +176,20 @@
     &--indigo .tile__icon       { color: #6366F1; }
 }
 
+// ---- Groupe de vignettes par famille ----
+.tool-group {
+    margin-bottom: $spacing-2xl;
+
+    &__title {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-text;
+        margin-bottom: $spacing-md;
+        padding-bottom: $spacing-sm;
+        border-bottom: 2px solid $color-border;
+    }
+}
+
 // ---- Bouton "Ajouter un outil" (admin) ----
 .tile--add {
     border: 2px dashed $color-border;

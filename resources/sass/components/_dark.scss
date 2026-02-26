@@ -149,6 +149,12 @@
         &:hover { background: rgba(124, 58, 237, 0.15); }
     }
 
+    // ---- Groupes de familles ----
+    .tool-group__title {
+        color: var(--text);
+        border-bottom-color: var(--border);
+    }
+
     // ---- Vignettes ----
     .tile {
         background: var(--surface);

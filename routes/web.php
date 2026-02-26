@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ToolController;
+use App\Http\Controllers\Admin\ToolFamilyController;
 use App\Http\Controllers\Admin\UserController;
 
 // ---- Authentification ----
@@ -28,6 +29,11 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
+
+        // Familles d'outils
+        Route::resource('families', ToolFamilyController::class)->except(['show'])
+            ->parameters(['families' => 'family']);
+        Route::get('families/{family}', [ToolFamilyController::class, 'show'])->name('families.show');
 
         // Outils
         Route::resource('tools', ToolController::class)->except(['show']);

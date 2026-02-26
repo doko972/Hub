@@ -1,10 +1,37 @@
 {{--
     Partiel formulaire outil
-    Variables attendues : $tool (null pour create), $colors, $users, $assigned (tableau d'IDs)
+    Variables attendues : $tool (null pour create), $colors, $users, $assigned (tableau d'IDs), $families
 --}}
 
 <div class="card">
     <div class="card__body">
+
+        {{-- Famille --}}
+        <div class="form-group">
+            <label class="form-label" for="tool_family_id">
+                Famille <span class="required">*</span>
+            </label>
+            <select id="tool_family_id" name="tool_family_id"
+                    class="form-control {{ $errors->has('tool_family_id') ? 'form-control--error' : '' }}"
+                    required>
+                <option value="">— Sélectionner une famille —</option>
+                @foreach($families as $family)
+                    <option value="{{ $family->id }}"
+                        {{ old('tool_family_id', $tool->tool_family_id ?? '') == $family->id ? 'selected' : '' }}>
+                        {{ $family->name }}
+                    </option>
+                @endforeach
+            </select>
+            @error('tool_family_id')
+                <span class="form-error">{{ $message }}</span>
+            @enderror
+            @if($families->isEmpty())
+                <span class="form-hint" style="color:#EF4444;">
+                    Aucune famille disponible.
+                    <a href="{{ route('admin.families.create') }}">Créer une famille</a> d'abord.
+                </span>
+            @endif
+        </div>
 
         <div class="form-row form-row--2">
 
