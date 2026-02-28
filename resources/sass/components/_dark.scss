@@ -149,6 +149,20 @@
         &:hover { background: rgba(124, 58, 237, 0.15); }
     }
 
+    // ---- Recherche dashboard ----
+    .dashboard-search__input {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+
+        &::placeholder { color: var(--text-muted); }
+
+        &:focus {
+            border-color: #7C3AED;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+        }
+    }
+
     // ---- Groupes de familles ----
     .tool-group__title {
         color: var(--text);
@@ -323,6 +337,43 @@
         &.is-checked &__check {
             background: #7C3AED;
         }
+    }
+
+    // ---- Toasts ----
+    .toast {
+        background: var(--surface);
+        border-color: var(--border);
+
+        &__message { color: var(--text); }
+
+        &__close {
+            color: var(--text-muted);
+            &:hover { background: var(--surface-2); color: var(--text); }
+        }
+    }
+
+    // ---- Modal de confirmation ----
+    .confirm-modal {
+        background: var(--surface);
+
+        &__title   { color: var(--text); }
+        &__message { color: var(--text-muted); }
+    }
+
+    // ---- Pagination ----
+    .hub-pagination__btn {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--text);
+
+        &:hover:not(.hub-pagination__btn--disabled):not(.hub-pagination__btn--active) {
+            background: rgba(124, 58, 237, 0.15);
+            border-color: #7C3AED;
+            color: #A78BFA;
+        }
+
+        &--dots { color: var(--text-muted); }
+        &--disabled { color: var(--text-muted); }
     }
 
     // ---- Titres et textes généraux ----

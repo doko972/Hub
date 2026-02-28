@@ -8,7 +8,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-header__title">Outils</h1>
-        <p class="page-header__subtitle">{{ $tools->count() }} outil(s) enregistré(s)</p>
+        <p class="page-header__subtitle">{{ $tools->total() }} outil(s) enregistré(s)</p>
     </div>
     <a href="{{ route('admin.tools.create') }}" class="btn btn--primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
@@ -30,6 +30,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th style="width:32px;"></th>
                     <th style="width:48px;">#</th>
                     <th style="width:52px;">Image</th>
                     <th>Titre</th>
@@ -41,9 +42,22 @@
                     <th style="width:120px;"></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody
+                data-sortable
+                data-sortable-url="{{ route('admin.tools.reorder') }}"
+                data-page="{{ $tools->currentPage() }}"
+                data-per-page="{{ $tools->perPage() }}">
                 @foreach($tools as $tool)
-                <tr>
+                <tr data-id="{{ $tool->id }}">
+                    <td style="padding:0 8px;">
+                        <span class="drag-handle" title="Déplacer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9"  cy="5"  r="1" fill="currentColor"/><circle cx="15" cy="5"  r="1" fill="currentColor"/>
+                                <circle cx="9"  cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/>
+                                <circle cx="9"  cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </td>
                     <td style="color:#9CA3AF; font-size:12px;">{{ $tool->id }}</td>
                     <td>
                         <div class="table-thumb">
@@ -116,6 +130,7 @@
                 @endforeach
             </tbody>
         </table>
+        {{ $tools->links() }}
     </div>
 @endif
 

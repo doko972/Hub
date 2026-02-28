@@ -8,7 +8,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-header__title">Utilisateurs</h1>
-        <p class="page-header__subtitle">{{ $users->count() }} utilisateur(s) enregistré(s)</p>
+        <p class="page-header__subtitle">{{ $users->total() }} utilisateur(s) enregistré(s)</p>
     </div>
     <a href="{{ route('admin.users.create') }}" class="btn btn--primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
@@ -109,6 +109,7 @@
                 @endforeach
             </tbody>
         </table>
+        {{ $users->links() }}
     </div>
 @endif
 

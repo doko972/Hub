@@ -1,0 +1,56 @@
+// =============================================
+// PAGINATION (listes admin)
+// =============================================
+
+.hub-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-top: $spacing-lg;
+    padding: $spacing-md 0;
+
+    &__btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 $spacing-sm;
+        border-radius: $radius-md;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        color: $color-text;
+        background: $color-surface;
+        border: 1px solid $color-border;
+        text-decoration: none;
+        transition: background $transition-fast, border-color $transition-fast, color $transition-fast;
+
+        &:hover:not(.hub-pagination__btn--disabled):not(.hub-pagination__btn--active) {
+            background: $color-primary-light;
+            border-color: $color-primary;
+            color: $color-primary;
+        }
+
+        &--active {
+            background: $color-primary;
+            border-color: $color-primary;
+            color: white;
+            cursor: default;
+        }
+
+        &--disabled {
+            color: $color-text-muted;
+            cursor: default;
+            opacity: 0.5;
+        }
+
+        &--dots {
+            border-color: transparent;
+            background: transparent;
+            cursor: default;
+            color: $color-text-muted;
+        }
+    }
+}

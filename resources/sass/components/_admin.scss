@@ -124,7 +124,36 @@
         background: #DBEAFE;
         color: #1E40AF;
     }
+
+    &--danger {
+        background: #FEE2E2;
+        color: #991B1B;
+    }
 }
+
+// ---- Drag & drop ----
+.drag-handle {
+    cursor: grab;
+    color: $color-text-muted;
+    opacity: 0.4;
+    display: flex;
+    align-items: center;
+    padding: 4px;
+    border-radius: $radius-sm;
+    transition: opacity $transition-fast, background $transition-fast;
+
+    &:hover {
+        opacity: 1;
+        background: $color-border;
+    }
+
+    &:active { cursor: grabbing; }
+
+    svg { width: 16px; height: 16px; }
+}
+
+tr.sortable-ghost  { opacity: 0.4; background: $color-primary-light; }
+tr.sortable-chosen { background: $color-primary-light; box-shadow: $shadow-md; outline: 2px solid $color-primary; outline-offset: -1px; }
 
 // ---- Panneau d'admin (sidebar admin) ----
 .admin-panel {
@@ -132,6 +161,91 @@
     border-radius: $radius-lg;
     border: 1px solid $color-border;
     overflow: hidden;
+}
+
+// ---- Assignation en masse ----
+.assign-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-lg;
+
+    @media (max-width: $bp-md) { grid-template-columns: 1fr; }
+}
+
+.assign-list {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.assign-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border-bottom: 1px solid $color-border;
+    cursor: pointer;
+    transition: background $transition-fast;
+    user-select: none;
+    position: relative;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: $color-bg; }
+    &.is-checked { background: $color-primary-light; }
+
+    &__checkbox { position: absolute; opacity: 0; width: 0; height: 0; }
+
+    &__thumb {
+        width: 34px; height: 34px;
+        border-radius: $radius-sm;
+        flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        background: $color-primary-light;
+        img { width: 100%; height: 100%; object-fit: cover; border-radius: $radius-sm; }
+        svg { color: $color-primary; }
+        &.tile--violet { background: #EDE9FE; svg { color: #7C3AED; } }
+        &.tile--blue   { background: #DBEAFE; svg { color: #3B82F6; } }
+        &.tile--green  { background: #D1FAE5; svg { color: #10B981; } }
+        &.tile--orange { background: #FEF3C7; svg { color: #F59E0B; } }
+        &.tile--red    { background: #FEE2E2; svg { color: #EF4444; } }
+        &.tile--pink   { background: #FCE7F3; svg { color: #EC4899; } }
+        &.tile--teal   { background: #CCFBF1; svg { color: #14B8A6; } }
+        &.tile--indigo { background: #E0E7FF; svg { color: #6366F1; } }
+    }
+
+    &__avatar {
+        width: 34px; height: 34px;
+        border-radius: $radius-full;
+        background: $color-primary;
+        color: white;
+        font-size: $font-size-xs; font-weight: 700;
+        flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden;
+        img { width: 100%; height: 100%; object-fit: cover; }
+    }
+
+    &__info { flex: 1; min-width: 0; }
+
+    &__name {
+        display: block;
+        font-size: $font-size-sm; font-weight: 600;
+        color: $color-text;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    &__meta { display: block; font-size: $font-size-xs; color: $color-text-muted; }
+
+    &__check {
+        width: 20px; height: 20px;
+        border-radius: $radius-full;
+        background: $color-border;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        transition: background $transition-fast;
+        svg { stroke: white; opacity: 0; transition: opacity $transition-fast; }
+    }
+
+    &.is-checked &__check { background: $color-primary; svg { opacity: 1; } }
 }
 
 // ---- Stat cards (optionnel pour admin dashboard) ----

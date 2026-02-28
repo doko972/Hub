@@ -38,6 +38,22 @@
 
 @else
 
+    {{-- Barre de recherche rapide --}}
+    <div class="dashboard-search">
+        <div class="dashboard-search__wrap">
+            <svg class="dashboard-search__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+                type="search"
+                id="tool-search"
+                class="dashboard-search__input"
+                placeholder="Rechercher un outil…"
+                autocomplete="off"
+            >
+        </div>
+    </div>
+
     @foreach($families as $family)
         <div class="tool-group">
             <h2 class="tool-group__title">{{ $family->name }}</h2>
@@ -87,6 +103,45 @@
         </div>
     @endforeach
 
+    {{-- Message aucun résultat --}}
+    <div id="search-empty" style="display:none; text-align:center; padding:48px 20px; color:var(--color-text-muted, #6B7280);">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin: 0 auto 12px; opacity: 0.4;">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <p style="font-size:16px; font-weight:600; margin-bottom:6px;">Aucun résultat</p>
+        <p style="font-size:14px;">Aucun outil ne correspond à votre recherche.</p>
+    </div>
+
 @endif
+
+@push('scripts')
+<script>
+    const searchInput = document.getElementById('tool-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const q = this.value.trim().toLowerCase();
+            let anyVisible = false;
+
+            document.querySelectorAll('.tool-group').forEach(group => {
+                const tiles = group.querySelectorAll('.tile:not(.tile--add)');
+                let groupVisible = 0;
+
+                tiles.forEach(tile => {
+                    const title = (tile.querySelector('.tile__title')?.textContent || '').toLowerCase();
+                    const match = !q || title.includes(q);
+                    tile.style.display = match ? '' : 'none';
+                    if (match) groupVisible++;
+                });
+
+                group.style.display = groupVisible > 0 || !q ? '' : 'none';
+                if (groupVisible > 0) anyVisible = true;
+            });
+
+            const empty = document.getElementById('search-empty');
+            if (empty) empty.style.display = !anyVisible && q ? '' : 'none';
+        });
+    }
+</script>
+@endpush
 
 @endsection

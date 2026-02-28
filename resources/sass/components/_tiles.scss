@@ -176,6 +176,49 @@
     &--indigo .tile__icon       { color: #6366F1; }
 }
 
+// ---- Barre de recherche dashboard ----
+.dashboard-search {
+    margin-bottom: $spacing-lg;
+
+    &__wrap {
+        position: relative;
+        max-width: 400px;
+    }
+
+    &__icon {
+        position: absolute;
+        left: $spacing-md;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 17px;
+        height: 17px;
+        color: $color-text-muted;
+        pointer-events: none;
+    }
+
+    &__input {
+        width: 100%;
+        padding: 10px $spacing-md 10px calc(#{$spacing-md} + 17px + #{$spacing-sm});
+        border: 1px solid $color-border;
+        border-radius: $radius-md;
+        font-size: $font-size-sm;
+        font-family: $font-family;
+        background: $color-surface;
+        color: $color-text;
+        transition: border-color $transition-fast, box-shadow $transition-fast;
+
+        &::placeholder { color: $color-text-muted; }
+
+        &:focus {
+            outline: none;
+            border-color: $color-primary;
+            box-shadow: 0 0 0 3px rgba(54, 42, 215, 0.12);
+        }
+
+        &::-webkit-search-cancel-button { display: none; }
+    }
+}
+
 // ---- Groupe de vignettes par famille ----
 .tool-group {
     margin-bottom: $spacing-2xl;

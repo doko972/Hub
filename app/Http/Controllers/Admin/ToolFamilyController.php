@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\ToolFamily;
 use Illuminate\Http\Request;
 
@@ -10,7 +11,7 @@ class ToolFamilyController extends Controller
 {
     public function index()
     {
-        $families = ToolFamily::withCount('tools')->orderBy('sort_order')->orderBy('name')->get();
+        $families = ToolFamily::withCount('tools')->orderBy('sort_order')->orderBy('name')->paginate(20);
         return view('admin.families.index', compact('families'));
     }
 
@@ -39,6 +40,8 @@ class ToolFamilyController extends Controller
             'sort_order'  => $validated['sort_order'] ?? 0,
             'is_active'   => $request->boolean('is_active'),
         ]);
+
+        ActivityLog::record('created', 'Famille', $family->id, $family->name);
 
         return redirect()->route('admin.families.index')
             ->with('success', 'Famille "' . $family->name . '" créée avec succès.');
@@ -73,16 +76,27 @@ class ToolFamilyController extends Controller
             'is_active'   => $request->boolean('is_active'),
         ]);
 
+        ActivityLog::record('updated', 'Famille', $family->id, $family->name);
+
         return redirect()->route('admin.families.index')
             ->with('success', 'Famille "' . $family->name . '" mise à jour.');
     }
 
     public function destroy(ToolFamily $family)
     {
-        // Les outils orphelins auront tool_family_id = null (nullOnDelete)
+        $name = $family->name;
         $family->delete();
+        ActivityLog::record('deleted', 'Famille', null, $name);
 
         return redirect()->route('admin.families.index')
             ->with('success', 'Famille supprimée. Les outils associés sont désormais sans famille.');
+    }
+
+    public function reorder(Request $request)
+    {
+        foreach ($request->input('order', []) as $item) {
+            ToolFamily::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
+        }
+        return response()->json(['ok' => true]);
     }
 }

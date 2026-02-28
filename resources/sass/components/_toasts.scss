@@ -1,0 +1,99 @@
+// =============================================
+// TOASTS — Notifications bottom-right
+// =============================================
+
+.toast-container {
+    position: fixed;
+    bottom: $spacing-lg;
+    right: $spacing-lg;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    pointer-events: none;
+
+    @media (max-width: $bp-sm) {
+        left: $spacing-md;
+        right: $spacing-md;
+        bottom: $spacing-md;
+    }
+}
+
+.toast {
+    display: flex;
+    align-items: flex-start;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    min-width: 280px;
+    max-width: 420px;
+    pointer-events: all;
+
+    // Animation slide-in depuis la droite
+    transform: translateX(calc(100% + #{$spacing-lg}));
+    opacity: 0;
+    transition:
+        transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.25s ease;
+
+    &.is-visible {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    &__icon {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        margin-top: 1px;
+    }
+
+    &__message {
+        flex: 1;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        color: $color-text;
+        line-height: 1.45;
+    }
+
+    &__close {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3px;
+        border-radius: $radius-sm;
+        color: $color-text-muted;
+        cursor: pointer;
+        transition: background $transition-fast, color $transition-fast;
+
+        &:hover {
+            background: $color-border;
+            color: $color-text;
+        }
+    }
+
+    // ---- Variantes ----
+    &--success {
+        border-left: 4px solid $color-secondary;
+        .toast__icon { color: $color-secondary; }
+    }
+
+    &--error {
+        border-left: 4px solid $color-danger;
+        .toast__icon { color: $color-danger; }
+    }
+
+    &--info {
+        border-left: 4px solid $color-info;
+        .toast__icon { color: $color-info; }
+    }
+
+    &--warning {
+        border-left: 4px solid $color-warning;
+        .toast__icon { color: $color-warning; }
+    }
+}

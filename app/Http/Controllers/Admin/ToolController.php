@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Tool;
 use App\Models\ToolFamily;
 use App\Models\User;
@@ -13,7 +14,7 @@ class ToolController extends Controller
 {
     public function index()
     {
-        $tools = Tool::with('family')->orderBy('sort_order')->orderBy('title')->get();
+        $tools = Tool::with('family')->orderBy('sort_order')->orderBy('title')->paginate(20);
         return view('admin.tools.index', compact('tools'));
     }
 
@@ -69,6 +70,8 @@ class ToolController extends Controller
         if (!$request->boolean('is_public') && !empty($validated['users'])) {
             $tool->users()->sync($validated['users']);
         }
+
+        ActivityLog::record('created', 'Outil', $tool->id, $tool->title);
 
         return redirect()->route('admin.tools.index')
             ->with('success', 'Outil "' . $tool->title . '" créé avec succès.');
@@ -132,6 +135,8 @@ class ToolController extends Controller
             $tool->users()->sync($validated['users'] ?? []);
         }
 
+        ActivityLog::record('updated', 'Outil', $tool->id, $tool->title);
+
         return redirect()->route('admin.tools.index')
             ->with('success', 'Outil "' . $tool->title . '" mis à jour.');
     }
@@ -141,10 +146,20 @@ class ToolController extends Controller
         if ($tool->image_path) {
             Storage::disk('public')->delete($tool->image_path);
         }
+        $name = $tool->title;
         $tool->users()->detach();
         $tool->delete();
+        ActivityLog::record('deleted', 'Outil', null, $name);
 
         return redirect()->route('admin.tools.index')
             ->with('success', 'Outil supprimé.');
+    }
+
+    public function reorder(Request $request)
+    {
+        foreach ($request->input('order', []) as $item) {
+            Tool::where('id', $item['id'])->update(['sort_order' => $item['sort_order']]);
+        }
+        return response()->json(['ok' => true]);
     }
 }

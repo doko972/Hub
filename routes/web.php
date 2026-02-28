@@ -3,8 +3,12 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ResetPasswordController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\ToolFamilyController;
 use App\Http\Controllers\Admin\UserController;
@@ -13,6 +17,14 @@ use App\Http\Controllers\Admin\UserController;
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ---- Réinitialisation du mot de passe ----
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [ForgotPasswordController::class, 'show'])->name('password.request');
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'send'])->name('password.email');
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'show'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+});
 
 // ---- Dashboard & profil (auth requis) ----
 Route::middleware(['auth'])->group(function () {
@@ -36,15 +48,24 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])
     ->group(function () {
 
         // Familles d'outils
+        Route::post('families/reorder', [ToolFamilyController::class, 'reorder'])->name('families.reorder');
         Route::resource('families', ToolFamilyController::class)->except(['show'])
             ->parameters(['families' => 'family']);
         Route::get('families/{family}', [ToolFamilyController::class, 'show'])->name('families.show');
 
         // Outils
+        Route::post('tools/reorder', [ToolController::class, 'reorder'])->name('tools.reorder');
         Route::resource('tools', ToolController::class)->except(['show']);
         Route::get('tools/{tool}', [ToolController::class, 'show'])->name('tools.show');
 
         // Utilisateurs
         Route::resource('users', UserController::class)->except(['show']);
         Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
+
+        // Assignation en masse
+        Route::get('assignments',  [AssignmentController::class, 'index'])->name('assignments.index');
+        Route::post('assignments', [AssignmentController::class, 'update'])->name('assignments.update');
+
+        // Journaux d'activité
+        Route::get('logs', [ActivityLogController::class, 'index'])->name('logs.index');
     });

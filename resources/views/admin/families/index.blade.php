@@ -8,7 +8,7 @@
 <div class="page-header">
     <div>
         <h1 class="page-header__title">Familles d'outils</h1>
-        <p class="page-header__subtitle">{{ $families->count() }} famille(s) enregistrée(s)</p>
+        <p class="page-header__subtitle">{{ $families->total() }} famille(s) enregistrée(s)</p>
     </div>
     <a href="{{ route('admin.families.create') }}" class="btn btn--primary">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
@@ -30,6 +30,7 @@
         <table class="table">
             <thead>
                 <tr>
+                    <th style="width:32px;"></th>
                     <th style="width:48px;">#</th>
                     <th>Nom</th>
                     <th>Description</th>
@@ -40,9 +41,22 @@
                     <th style="width:120px;"></th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody
+                data-sortable
+                data-sortable-url="{{ route('admin.families.reorder') }}"
+                data-page="{{ $families->currentPage() }}"
+                data-per-page="{{ $families->perPage() }}">
                 @foreach($families as $family)
-                <tr>
+                <tr data-id="{{ $family->id }}">
+                    <td style="padding:0 8px;">
+                        <span class="drag-handle" title="Déplacer">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9"  cy="5"  r="1" fill="currentColor"/><circle cx="15" cy="5"  r="1" fill="currentColor"/>
+                                <circle cx="9"  cy="12" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/>
+                                <circle cx="9"  cy="19" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/>
+                            </svg>
+                        </span>
+                    </td>
                     <td style="color:#9CA3AF; font-size:12px;">{{ $family->id }}</td>
                     <td><strong>{{ $family->name }}</strong></td>
                     <td>
@@ -94,6 +108,7 @@
                 @endforeach
             </tbody>
         </table>
+        {{ $families->links() }}
     </div>
 @endif
 

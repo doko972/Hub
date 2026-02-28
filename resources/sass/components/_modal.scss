@@ -1,0 +1,71 @@
+// =============================================
+// MODAL DE CONFIRMATION
+// =============================================
+
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $transition-fast;
+    backdrop-filter: blur(2px);
+
+    &.is-open {
+        opacity: 1;
+        pointer-events: all;
+
+        .confirm-modal {
+            transform: scale(1);
+        }
+    }
+}
+
+.confirm-modal {
+    background: $color-surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    padding: $spacing-xl;
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    transform: scale(0.92);
+    transition: transform $transition-base;
+
+    &__icon {
+        width: 56px;
+        height: 56px;
+        border-radius: $radius-full;
+        background: #FEF3C7;
+        color: $color-warning;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto $spacing-md;
+    }
+
+    &__title {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-text;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__message {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        line-height: 1.6;
+        margin-bottom: $spacing-lg;
+    }
+
+    &__actions {
+        display: flex;
+        gap: $spacing-sm;
+        justify-content: center;
+    }
+}
