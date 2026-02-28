@@ -1,0 +1,150 @@
+// =============================================
+// PAGE PRÉFÉRENCES (sélection des outils)
+// =============================================
+
+// ---- Toolbar (contrôles rapides + bouton save) ----
+.pref-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-xl;
+    gap: $spacing-md;
+
+    &__controls {
+        display: flex;
+        gap: $spacing-sm;
+    }
+}
+
+// ---- Grille des items ----
+.pref-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    @media (max-width: $bp-sm) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ---- Item individuel (label cliquable) ----
+.pref-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-md;
+    background: $color-surface;
+    border: 2px solid $color-border;
+    border-radius: $radius-md;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+    position: relative;
+    user-select: none;
+
+    &:hover {
+        border-color: #C4B5FD;
+        background: $color-primary-light;
+    }
+
+    &.is-checked {
+        border-color: $color-primary;
+        background: $color-primary-light;
+    }
+
+    // Masquer la vraie checkbox
+    &__checkbox {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    // Miniature couleur
+    &__thumb {
+        width: 44px;
+        height: 44px;
+        border-radius: $radius-sm;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: $color-primary-light;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: $radius-sm;
+        }
+
+        svg {
+            width: 22px;
+            height: 22px;
+            color: $color-primary;
+        }
+
+        // Couleurs d'accent (reprend les classes tile--)
+        &.tile--violet { background: #EDE9FE; svg { color: #7C3AED; } }
+        &.tile--blue   { background: #DBEAFE; svg { color: #3B82F6; } }
+        &.tile--green  { background: #D1FAE5; svg { color: #10B981; } }
+        &.tile--orange { background: #FEF3C7; svg { color: #F59E0B; } }
+        &.tile--red    { background: #FEE2E2; svg { color: #EF4444; } }
+        &.tile--pink   { background: #FCE7F3; svg { color: #EC4899; } }
+        &.tile--teal   { background: #CCFBF1; svg { color: #14B8A6; } }
+        &.tile--indigo { background: #E0E7FF; svg { color: #6366F1; } }
+    }
+
+    // Textes
+    &__info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__title {
+        display: block;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__desc {
+        display: block;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // Icône checkmark (visible si coché)
+    &__check {
+        width: 22px;
+        height: 22px;
+        border-radius: $radius-full;
+        background: $color-border;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: background $transition-fast;
+
+        svg {
+            width: 13px;
+            height: 13px;
+            stroke: white;
+            opacity: 0;
+            transition: opacity $transition-fast;
+        }
+    }
+
+    &.is-checked &__check {
+        background: $color-primary;
+
+        svg { opacity: 1; }
+    }
+}

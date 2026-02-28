@@ -298,6 +298,33 @@
         }
     }
 
+    // ---- Page préférences ----
+    .pref-item {
+        background: var(--surface);
+        border-color: var(--border);
+
+        &:hover {
+            border-color: #7C3AED;
+            background: rgba(124, 58, 237, 0.1);
+        }
+
+        &.is-checked {
+            border-color: #7C3AED;
+            background: rgba(124, 58, 237, 0.15);
+        }
+
+        &__title { color: var(--text); }
+        &__desc  { color: var(--text-muted); }
+
+        &__check {
+            background: var(--border);
+        }
+
+        &.is-checked &__check {
+            background: #7C3AED;
+        }
+    }
+
     // ---- Titres et textes généraux ----
     h1, h2, h3, h4, h5, h6 {
         color: var(--text);

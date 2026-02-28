@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\ToolFamilyController;
@@ -16,6 +17,10 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 // ---- Dashboard & profil (auth requis) ----
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Préférences d'affichage
+    Route::get('/preferences',  [PreferencesController::class, 'edit'])->name('preferences.edit');
+    Route::post('/preferences', [PreferencesController::class, 'update'])->name('preferences.update');
 
     // Profil utilisateur
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

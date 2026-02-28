@@ -69,6 +69,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Tool::class)->withTimestamps();
     }
 
+    // Outils explicitement sélectionnés pour le dashboard
+    public function selectedTools()
+    {
+        return $this->belongsToMany(Tool::class, 'user_tool_selection');
+    }
+
     // Outils visibles par cet utilisateur (publics + ceux qui lui sont assignés)
     public function visibleTools()
     {
