@@ -15,6 +15,7 @@ import { initPasswordToggle } from './components/passwordToggle.js';
 import { initToasts }         from './components/toast.js';
 import { initSortable }           from './components/sortable.js';
 import { initBackgroundRemover }  from './components/backgroundRemover.js';
+import { initImageConverter }  from './components/imageconverter.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -27,4 +28,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initToasts();
     initSortable();
     initBackgroundRemover();
+    initImageConverter();
 });

@@ -1,0 +1,352 @@
+// =============================================
+// IMAGE CONVERTER
+// =============================================
+
+.img-converter {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+}
+
+// Zone de dépôt
+.drop-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed $color-border;
+    border-radius: $radius-md;
+    padding: $spacing-xl;
+    cursor: pointer;
+    transition: border-color $transition-fast, background $transition-fast;
+    min-height: 180px;
+    text-align: center;
+
+    &.dragover {
+        border-color: $color-primary;
+        background: $color-bg;
+    }
+
+    .drop-icon   { font-size: 2.5rem; }
+    .drop-text    { font-size: $font-size-lg; font-weight: 600; color: $color-text; margin-top: $spacing-sm; }
+    .drop-subtext { font-size: $font-size-sm; color: $color-text-muted; margin-top: $spacing-xs; }
+}
+
+// Formats supportés
+.formats-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    background: $color-bg;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+
+    .formats-title { font-size: $font-size-sm; font-weight: 600; color: $color-text; white-space: nowrap; }
+    .formats-list  { font-size: $font-size-sm; color: $color-text-muted; }
+}
+
+// Liste des fichiers sélectionnés
+.files-container {
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    overflow: hidden;
+
+    .files-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: $spacing-sm $spacing-md;
+        background: $color-bg;
+        border-bottom: 1px solid $color-border;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text;
+    }
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    border-bottom: 1px solid $color-border;
+
+    &:last-child { border-bottom: none; }
+
+    .file-preview {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: $radius-sm;
+        flex-shrink: 0;
+        border: 1px solid $color-border;
+    }
+
+    .file-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .file-name {
+        font-size: $font-size-sm;
+        font-weight: 500;
+        color: $color-text;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .file-details {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        margin-top: $spacing-xs;
+    }
+
+    .file-format {
+        font-size: $font-size-xs;
+        font-weight: 600;
+        color: $color-primary;
+        background: $color-primary-light;
+        padding: 2px $spacing-xs;
+        border-radius: $radius-full;
+    }
+
+    .file-size {
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+    }
+
+    .file-actions { flex-shrink: 0; }
+}
+
+// Petits boutons (supprimer, effacer tout)
+.btn-small {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    border-radius: $radius-sm;
+    border: 1px solid $color-border;
+    background: $color-surface;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: all $transition-fast;
+
+    &:hover { border-color: $color-text-muted; color: $color-text; }
+}
+
+.btn-remove {
+    border-color: lighten($color-danger, 20%);
+    color: $color-danger;
+
+    &:hover { background: $color-danger; color: #fff; border-color: $color-danger; }
+}
+
+// Options de conversion
+.conversion-options {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+    padding: $spacing-lg;
+    background: $color-bg;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+}
+
+.options-title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-text;
+}
+
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+}
+
+.option-label {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+}
+
+.format-selector {
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: $color-surface;
+    color: $color-text;
+    font-size: $font-size-sm;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: border-color $transition-fast;
+
+    &:focus {
+        outline: none;
+        border-color: $color-primary;
+    }
+}
+
+.format-info {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    padding: $spacing-xs $spacing-sm;
+    background: $color-primary-light;
+    border-radius: $radius-sm;
+    border-left: 3px solid $color-primary;
+}
+
+// Qualité
+.quality-container {
+    flex-direction: row;
+    align-items: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+
+    .option-label { white-space: nowrap; }
+}
+
+.quality-slider {
+    flex: 1;
+    accent-color: $color-primary;
+    cursor: pointer;
+    min-width: 120px;
+}
+
+.quality-display {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-primary;
+    min-width: 40px;
+    text-align: right;
+}
+
+// Bouton de conversion
+.convert-btn {
+    padding: $spacing-sm $spacing-lg;
+    background: $color-primary;
+    color: #fff;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $font-size-base;
+    font-weight: 600;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: background $transition-fast;
+    align-self: flex-start;
+
+    &:hover    { background: darken($color-primary, 8%); }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
+// Barre de progression
+.progress-container {
+    display: none;
+    flex-direction: column;
+    gap: $spacing-xs;
+}
+
+.progress-bar {
+    height: 8px;
+    background: $color-border;
+    border-radius: $radius-full;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: $color-primary;
+    border-radius: $radius-full;
+    width: 0%;
+    transition: width $transition-base;
+}
+
+.progress-text {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+}
+
+// Résultats
+.results-container {
+    display: none;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+.results-title {
+    font-size: $font-size-base;
+    font-weight: 600;
+    color: $color-secondary;
+}
+
+.download-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: $spacing-sm $spacing-md;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    gap: $spacing-md;
+}
+
+.download-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    min-width: 0;
+}
+
+.download-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+.download-details { min-width: 0; }
+
+.download-name {
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.download-size {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+}
+
+.download-btn {
+    padding: $spacing-xs $spacing-md;
+    background: $color-primary;
+    color: #fff;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: background $transition-fast;
+    white-space: nowrap;
+    flex-shrink: 0;
+
+    &:hover { background: darken($color-primary, 8%); }
+}
+
+.download-all-btn {
+    padding: $spacing-sm $spacing-lg;
+    background: $color-secondary;
+    color: #fff;
+    border: none;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    font-family: $font-family;
+    cursor: pointer;
+    transition: background $transition-fast;
+    align-self: flex-start;
+
+    &:hover { background: darken($color-secondary, 8%); }
+}

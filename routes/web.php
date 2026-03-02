@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\ToolFamilyController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
+use App\Http\Controllers\Tools\ImageConverterController;
 
 // ---- Authentification ----
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -42,8 +43,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
 
     // Tools
-    Route::get('/tools/background-remover', [BackgroundRemoverController::class, 'index'])->name('tools.background-remover');
-Route::post('/tools/background-remover', [BackgroundRemoverController::class, 'remove'])->name('tools.background-remover.remove');
+    Route::get('/tools/background-remover',  [BackgroundRemoverController::class, 'index'])->name('tools.background-remover');
+    Route::post('/tools/background-remover', [BackgroundRemoverController::class, 'remove'])->name('tools.background-remover.remove');
+    Route::get('/tools/image-converter',     [ImageConverterController::class, 'index'])->name('tools.image-converter');
 });
 
 // ---- Administration (auth + admin requis) ----

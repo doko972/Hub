@@ -83,13 +83,23 @@
             <span class="sidebar__section-title">Outils</span>
 
             <a href="{{ route('tools.background-remover') }}"
-               class="sidebar__link {{ request()->routeIs('tools.*') ? 'is-active' : '' }}">
+               class="sidebar__link {{ request()->routeIs('tools.background-remover*') ? 'is-active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="m15 4-8.5 8.5a3 3 0 0 0 4.24 4.24L19 8.24"/>
                     <path d="M3 21h18"/>
                     <path d="m17.5 2.5 4 4"/>
                 </svg>
                 Suppresseur d'arrière-plan
+            </a>
+
+            <a href="{{ route('tools.image-converter') }}"
+               class="sidebar__link {{ request()->routeIs('tools.image-converter*') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="m3 9 5-5 4 4 3-3 6 6"/>
+                    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor" stroke="none"/>
+                </svg>
+                Convertisseur d'images
             </a>
 
             @if(auth()->user()->isAdmin())
