@@ -79,6 +79,19 @@
                 Mon profil
             </a>
 
+            <hr class="sidebar__divider">
+            <span class="sidebar__section-title">Outils</span>
+
+            <a href="{{ route('tools.background-remover') }}"
+               class="sidebar__link {{ request()->routeIs('tools.*') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="m15 4-8.5 8.5a3 3 0 0 0 4.24 4.24L19 8.24"/>
+                    <path d="M3 21h18"/>
+                    <path d="m17.5 2.5 4 4"/>
+                </svg>
+                Suppresseur d'arrière-plan
+            </a>
+
             @if(auth()->user()->isAdmin())
                 <hr class="sidebar__divider">
                 <span class="sidebar__section-title">Administration</span>

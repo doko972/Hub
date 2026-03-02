@@ -13,7 +13,8 @@ import { initConfirmDelete }  from './components/confirmDelete.js';
 import { initTheme }          from './components/theme.js';
 import { initPasswordToggle } from './components/passwordToggle.js';
 import { initToasts }         from './components/toast.js';
-import { initSortable }       from './components/sortable.js';
+import { initSortable }           from './components/sortable.js';
+import { initBackgroundRemover }  from './components/backgroundRemover.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -25,4 +26,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initPasswordToggle();
     initToasts();
     initSortable();
+    initBackgroundRemover();
 });
