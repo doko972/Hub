@@ -32,8 +32,9 @@ function buildModal() {
 
     overlay.querySelector('#confirm-cancel').addEventListener('click', closeModal);
     overlay.querySelector('#confirm-ok').addEventListener('click', () => {
+        const form = pendingForm;
         closeModal();
-        if (pendingForm) pendingForm.submit();
+        if (form) form.submit();
     });
 
     // Fermeture au clic sur le fond
