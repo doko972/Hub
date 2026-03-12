@@ -17,31 +17,30 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email'    => ['required', 'email'],
+        $request->validate([
+            'name'     => ['required', 'string'],
             'password' => ['required'],
         ], [
-            'email.required'    => 'L\'adresse email est obligatoire.',
-            'email.email'       => 'L\'adresse email n\'est pas valide.',
+            'name.required'     => 'Le nom d\'utilisateur est obligatoire.',
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
         $remember = $request->boolean('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt(['name' => $request->input('name'), 'password' => $request->input('password')], $remember)) {
             $request->session()->regenerate();
 
             if (!Auth::user()->is_active) {
                 Auth::logout();
-                return back()->withErrors(['email' => 'Votre compte est désactivé.']);
+                return back()->withErrors(['name' => 'Votre compte est désactivé.']);
             }
 
             return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors([
-            'email' => 'Email ou mot de passe incorrect.',
-        ])->onlyInput('email');
+            'name' => 'Nom d\'utilisateur ou mot de passe incorrect.',
+        ])->onlyInput('name');
     }
 
     public function logout(Request $request)

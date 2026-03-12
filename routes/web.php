@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\ToolFamilyController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\CredentialController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
 use App\Http\Controllers\Tools\ImageConverterController;
 
@@ -41,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+
+    // Credentials (identifiants par outil)
+    Route::post('/credentials/{tool}',   [CredentialController::class, 'store'])->name('credentials.store');
+    Route::delete('/credentials/{tool}', [CredentialController::class, 'destroy'])->name('credentials.destroy');
 
     // Tools
     Route::get('/tools/background-remover',  [BackgroundRemoverController::class, 'index'])->name('tools.background-remover');

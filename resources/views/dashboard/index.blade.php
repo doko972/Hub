@@ -61,32 +61,53 @@
             <div class="tiles-grid">
 
                 @foreach($family->tools as $tool)
-                    <a href="{{ $tool->url }}"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="tile tile--{{ $tool->color }}"
-                       title="{{ $tool->title }}">
+                    @php $hasCreds = isset($credentials[$tool->id]); @endphp
+                    <div class="tile-wrap">
 
-                        {{-- Image ou icône --}}
-                        <div class="tile__image-wrap">
-                            @if($tool->imageUrl())
-                                <img src="{{ $tool->imageUrl() }}" alt="{{ $tool->title }}" class="tile__image">
-                            @else
-                                <svg class="tile__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                                </svg>
+                        <a href="{{ $tool->url }}"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="tile tile--{{ $tool->color }}"
+                           title="{{ $tool->title }}">
+
+                            {{-- Image ou icône --}}
+                            <div class="tile__image-wrap">
+                                @if($tool->imageUrl())
+                                    <img src="{{ $tool->imageUrl() }}" alt="{{ $tool->title }}" class="tile__image">
+                                @else
+                                    <svg class="tile__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                                    </svg>
+                                @endif
+                            </div>
+
+                            {{-- Titre --}}
+                            <span class="tile__title">{{ $tool->title }}</span>
+
+                            {{-- Tooltip (description au survol) --}}
+                            @if($tool->description)
+                                <span class="tile__tooltip" role="tooltip">{{ $tool->description }}</span>
                             @endif
-                        </div>
 
-                        {{-- Titre --}}
-                        <span class="tile__title">{{ $tool->title }}</span>
+                        </a>
 
-                        {{-- Tooltip (description au survol) --}}
-                        @if($tool->description)
-                            <span class="tile__tooltip" role="tooltip">{{ $tool->description }}</span>
+                        {{-- Bouton credentials --}}
+                        @if($tool->url)
+                            <button
+                                class="tile__key {{ $hasCreds ? 'tile__key--saved' : '' }}"
+                                data-tool-id="{{ $tool->id }}"
+                                data-tool-name="{{ $tool->title }}"
+                                data-tool-url="{{ $tool->url }}"
+                                data-login="{{ $hasCreds ? $credentials[$tool->id]['login'] : '' }}"
+                                data-password="{{ $hasCreds ? $credentials[$tool->id]['password'] : '' }}"
+                                title="Identifiants">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+                                    <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+                                </svg>
+                            </button>
                         @endif
 
-                    </a>
+                    </div>
                 @endforeach
 
                 {{-- Bouton ajout (admin uniquement, dans la dernière famille) --}}

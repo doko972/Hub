@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ToolFamily;
+use App\Models\UserToolCredential;
 
 class DashboardController extends Controller
 {
@@ -31,6 +32,15 @@ class DashboardController extends Controller
             ->get()
             ->filter(fn($f) => $f->tools->isNotEmpty());
 
-        return view('dashboard.index', compact('families'));
+        // Credentials de l'utilisateur, indexés par tool_id
+        $credentials = UserToolCredential::where('user_id', $user->id)
+            ->get()
+            ->keyBy('tool_id')
+            ->map(fn($c) => [
+                'login'    => $c->login,
+                'password' => $c->password, // auto-déchiffré par le cast 'encrypted'
+            ]);
+
+        return view('dashboard.index', compact('families', 'credentials'));
     }
 }

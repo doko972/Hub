@@ -66,15 +66,15 @@
             @csrf
 
             <div class="form-group">
-                <label class="form-label" for="email">Adresse email</label>
+                <label class="form-label" for="name">Nom d'utilisateur</label>
                 <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    class="form-control {{ $errors->has('email') ? 'form-control--error' : '' }}"
-                    value="{{ old('email') }}"
-                    placeholder="vous@exemple.com"
-                    autocomplete="email"
+                    type="text"
+                    id="name"
+                    name="name"
+                    class="form-control {{ $errors->has('name') ? 'form-control--error' : '' }}"
+                    value="{{ old('name') }}"
+                    placeholder="Votre nom d'utilisateur"
+                    autocomplete="username"
                     autofocus
                     required
                 >
