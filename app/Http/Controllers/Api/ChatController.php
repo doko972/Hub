@@ -244,7 +244,7 @@ class ChatController extends Controller
         $calendarNote = $calendarConnected
             ? "\nTu as accès à Google Calendar de l'utilisateur via des outils dédiés. Tu peux :\n- Lister les événements (list_calendar_events)\n- Créer, modifier, supprimer des événements\n- Envoyer par email un résumé des RDV (send_calendar_summary) : utilise TOUJOURS cet outil quand l'utilisateur demande d'envoyer ses RDV par email, ne jamais refuser ou simuler l'envoi.\nFuseau horaire : Europe/Paris. Format des dates : ISO 8601 (ex: 2025-01-20T14:00:00+01:00)."
             : '';
-        $searchNote = "\nTu as accès à un outil de recherche web (search_web) pour obtenir des informations récentes ou actuelles. Utilise-le dès que la question porte sur l'actualité, des prix, des événements récents, la météo, ou toute information susceptible d'avoir changé après ta date d'entraînement.";
+        $searchNote = "\nTu as accès à un outil de recherche web (search_web). RÈGLE ABSOLUE : appelle cet outil IMMÉDIATEMENT et SANS générer aucun texte préalable dès que la question porte sur l'actualité, des prix, des événements récents, la météo ou toute information susceptible d'avoir changé. N'écris jamais de phrases du type \"Je vais vérifier\", \"Je recherche\", \"J'explore\" — appelle l'outil directement.";
 
         // Mémoires utilisateur persistantes
         $memoryNote = '';
@@ -481,6 +481,12 @@ class ChatController extends Controller
 
             // Accumuler les tool calls streamés
             if (!empty($delta->toolCalls)) {
+                // Effacer le texte pré-tool éventuellement généré
+                if (!empty($fullContent)) {
+                    $fullContent = '';
+                    echo "data: " . json_encode(['clear_chunks' => true]) . "\n\n";
+                    ob_flush(); flush();
+                }
                 foreach ($delta->toolCalls as $tc) {
                     $idx = $tc->index ?? 0;
                     if (!isset($toolCalls[$idx])) {
@@ -515,14 +521,17 @@ class ChatController extends Controller
                         try {
                             $results = $this->searchWeb($query);
                             if ($results) {
-                                $fullContent = $results['text'];
+                                // Envoyer les cartes sources au frontend
                                 echo "data: " . json_encode(['search_results' => $results['data']]) . "\n\n";
+                                ob_flush(); flush();
+                                // Passer les résultats bruts à l'IA pour synthèse conversationnelle
+                                $silentToolResults[$toolCall['id']] = $results['text'];
                             } else {
                                 $err = "❌ Aucun résultat trouvé pour : *{$query}*";
                                 $fullContent = $err;
                                 echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
+                                ob_flush(); flush();
                             }
-                            ob_flush(); flush();
                         } catch (\Exception $e) {
                             $err = "❌ Erreur de recherche : " . $e->getMessage();
                             $fullContent = $err;
@@ -745,7 +754,7 @@ class ChatController extends Controller
                     }
 
                     $followUpMessages = array_merge(
-                        [['role' => 'system', 'content' => $enrichedSystemPrompt]],
+                        [['role' => 'system', 'content' => $enrichedSystemPrompt . "\n\nIMPORTANT : Tu viens d'exécuter un ou plusieurs outils. Réponds DIRECTEMENT avec ta synthèse ou ta réponse. N'écris PAS de phrases introductives comme \"Je vais vérifier\", \"Voici ce que j'ai trouvé\", \"Je recherche\", \"J'explore\", \"Je consulte\", etc. Va droit au but."]],
                         $history,
                         [$currentMessage],
                         [$assistantToolCallsMsg],
@@ -758,6 +767,8 @@ class ChatController extends Controller
                         'model'             => $model,
                         'messages'          => $followUpMessages,
                         $followUpTokenParam => 2000,
+                        'tools'             => $tools,
+                        'tool_choice'       => 'none', // interdit tout nouvel appel d'outil dans la synthèse
                     ];
                     if (!$followUpIsGpt5) {
                         $followUpParams['temperature'] = 0.7;
@@ -1183,16 +1194,19 @@ class ChatController extends Controller
         $data = $response->json();
         $results = $data['web']['results'] ?? [];
 
-        // Normalise un champ qui peut être string ou array imbriqué
-        $str = fn($v) => is_array($v) ? ($v['main'] ?? implode(' ', array_filter($v, 'is_string'))) : (string)($v ?? '');
+        // Normalise un champ qui peut être string ou array imbriqué, et nettoie le HTML
+        $clean = function($v) {
+            $s = is_array($v) ? ($v['main'] ?? implode(' ', array_filter($v, 'is_string'))) : (string)($v ?? '');
+            return html_entity_decode(strip_tags($s), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        };
 
         // Texte brut pour le stockage en base de données
         $text = "Résultats de recherche web pour: \"{$query}\"\n\nSources:\n";
         foreach ($results as $index => $result) {
             $num   = $index + 1;
-            $title = $str($result['title'] ?? '');
-            $url   = $str($result['url']   ?? '');
-            $desc  = $str($result['description'] ?? '');
+            $title = $clean($result['title'] ?? '');
+            $url   = $clean($result['url']   ?? '');
+            $desc  = $clean($result['description'] ?? '');
             $text .= "{$num}. {$title}\n   URL: {$url}\n   {$desc}\n\n";
         }
 
@@ -1200,9 +1214,9 @@ class ChatController extends Controller
         $sources = [];
         foreach ($results as $result) {
             $sources[] = [
-                'title'   => $str($result['title']       ?? ''),
-                'url'     => $str($result['url']         ?? ''),
-                'content' => $str($result['description'] ?? ''),
+                'title'   => $clean($result['title']       ?? ''),
+                'url'     => $clean($result['url']         ?? ''),
+                'content' => $clean($result['description'] ?? ''),
             ];
         }
 

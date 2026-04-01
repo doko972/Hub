@@ -104,12 +104,12 @@
                         🌙
                     </button>
                     <select class="model-selector" id="modelSelector">
-                        <option value="gpt-5">GPT-5</option>
-                        <option value="gpt-5-mini">GPT-5 Mini</option>
+                        <option value="gpt-4o" selected>GPT-4o</option>
                         <option value="gpt-4o-mini">GPT-4o Mini</option>
-                        <option value="gpt-4o">GPT-4o</option>
-                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                        <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option>
+                        <option value="gpt-5-mini">GPT-5 Mini</option>
+                        <option value="gpt-5">GPT-5</option>
+                        {{-- <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                        <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option> --}}
                     </select>
                 </div>
             </header>
@@ -120,9 +120,9 @@
                     <lottie-player src="/animations/logo.json" background="transparent" speed="1"
                         style="width: 80px; height: 80px; margin-bottom: 1rem;" loop autoplay>
                     </lottie-player>
-                    <h2>Bonjour, {{ Auth::user()->name }} !</h2>
-                    <p>Comment puis-je vous aider aujourd'hui ?</p>
-                    <div class="suggestions">
+                    <h2>Bonjour, {{ Auth::user()->name }}</h2>
+                    <p>Toujours prêt à répondre.</p>
+                    {{-- <div class="suggestions">
                         <div class="suggestion-card" data-suggestion="Explique-moi un concept complexe simplement">
                             <div class="icon">💡</div>
                             <div class="text">Explique-moi un concept complexe simplement</div>
@@ -143,7 +143,7 @@
                             <div class="icon">📅</div>
                             <div class="text">Quels sont mes rendez-vous cette semaine ?</div>
                         </div>
-                    </div>
+                    </div> --}}
                 </div>
             </div>
 
@@ -840,22 +840,30 @@
                                 const parsed = JSON.parse(data);
                                 if (parsed.chunk) {
                                     if (firstChunk) {
-                                        contentDiv.innerHTML = '';
+                                        if (!contentDiv.dataset.searchHtml) contentDiv.innerHTML = '';
                                         firstChunk = false;
                                     }
+                                    contentDiv.querySelector('.synthesis-note')?.remove();
                                     fullContent += parsed.chunk;
-                                    contentDiv.innerHTML = formatMarkdown(fullContent);
+                                    const prefix = contentDiv.dataset.searchHtml || '';
+                                    contentDiv.innerHTML = prefix + formatMarkdown(fullContent);
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
+                                }
+                                if (parsed.clear_chunks) {
+                                    fullContent = '';
+                                    if (!contentDiv.dataset.searchHtml) { contentDiv.innerHTML = ''; firstChunk = true; }
                                 }
                                 if (parsed.searching_web) {
                                     if (firstChunk) { contentDiv.innerHTML = ''; firstChunk = false; }
-                                    contentDiv.innerHTML = `<p class="searching-web-note">🔍 Recherche en cours : <em>${parsed.query || ''}</em></p>`;
+                                    contentDiv.innerHTML = `<p class="searching-web-note">🔍 Recherche web en cours…</p>`;
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                                 if (parsed.search_results) {
                                     if (firstChunk) { contentDiv.innerHTML = ''; firstChunk = false; }
                                     contentDiv.innerHTML = renderSearchResults(parsed.search_results);
-                                    fullContent = parsed.search_results.query;
+                                    contentDiv.innerHTML += `<p class="synthesis-note">✍️ Rédaction de la synthèse…</p>`;
+                                    contentDiv.dataset.searchHtml = renderSearchResults(parsed.search_results);
+                                    fullContent = '';
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                                 if (parsed.generating_image) {
@@ -998,9 +1006,9 @@
         });
 
         function renderSearchResults(data) {
-            const { query, answer, sources } = data;
+            const { answer, sources } = data;
             let html = `<div class="search-results-block">`;
-            html += `<div class="search-results-header">🔍 Résultats pour <em>${escapeHtml(query)}</em></div>`;
+            html += `<div class="search-results-header">🔍 Sources web</div>`;
 
             if (answer) {
                 html += `<div class="search-answer">`;
@@ -2433,22 +2441,30 @@
                                 const parsed = JSON.parse(data);
                                 if (parsed.chunk) {
                                     if (firstChunk) {
-                                        contentDiv.innerHTML = '';
+                                        if (!contentDiv.dataset.searchHtml) contentDiv.innerHTML = '';
                                         firstChunk = false;
                                     }
+                                    contentDiv.querySelector('.synthesis-note')?.remove();
                                     fullContent += parsed.chunk;
-                                    contentDiv.innerHTML = formatMarkdown(fullContent);
+                                    const prefix = contentDiv.dataset.searchHtml || '';
+                                    contentDiv.innerHTML = prefix + formatMarkdown(fullContent);
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
+                                }
+                                if (parsed.clear_chunks) {
+                                    fullContent = '';
+                                    if (!contentDiv.dataset.searchHtml) { contentDiv.innerHTML = ''; firstChunk = true; }
                                 }
                                 if (parsed.searching_web) {
                                     if (firstChunk) { contentDiv.innerHTML = ''; firstChunk = false; }
-                                    contentDiv.innerHTML = `<p class="searching-web-note">🔍 Recherche en cours : <em>${parsed.query || ''}</em></p>`;
+                                    contentDiv.innerHTML = `<p class="searching-web-note">🔍 Recherche web en cours…</p>`;
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                                 if (parsed.search_results) {
                                     if (firstChunk) { contentDiv.innerHTML = ''; firstChunk = false; }
                                     contentDiv.innerHTML = renderSearchResults(parsed.search_results);
-                                    fullContent = parsed.search_results.query;
+                                    contentDiv.innerHTML += `<p class="synthesis-note">✍️ Rédaction de la synthèse…</p>`;
+                                    contentDiv.dataset.searchHtml = renderSearchResults(parsed.search_results);
+                                    fullContent = '';
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                                 if (parsed.generating_image) {

@@ -1147,6 +1147,26 @@ body.layout-chat.is-embedded {
     50%       { opacity: 0.5; }
 }
 
+.synthesis-note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin: 0.75rem 0 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    animation: pulse-text 1.2s ease-in-out infinite;
+}
+
+// Séparateur entre les cartes sources et la synthèse IA
+.search-results-block + * {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
 // Loader génération image
 .generating-loader {
     display: flex;
