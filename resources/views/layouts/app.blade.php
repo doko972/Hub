@@ -222,6 +222,15 @@
 
             <div class="navbar__right">
 
+                {{-- Bouton Installer l'app (PWA) — affiché uniquement si disponible --}}
+                <button id="btn-install-pwa" class="btn-install-pwa" style="display:none;" title="Installer l'application">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 15V3m0 12-4-4m4 4 4-4"/>
+                        <path d="M2 17l.621 2.485A2 2 0 0 0 4.561 21H19.44a2 2 0 0 0 1.94-1.515L22 17"/>
+                    </svg>
+                    <span>Installer</span>
+                </button>
+
                 {{-- Bouton Dark / Light mode --}}
                 <button id="theme-toggle"
                         class="theme-toggle"
@@ -383,6 +392,31 @@
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     }
+
+    // PWA — bouton d'installation
+    let deferredInstallPrompt = null;
+    const btnInstallPwa = document.getElementById('btn-install-pwa');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        btnInstallPwa.style.display = 'flex';
+    });
+
+    btnInstallPwa.addEventListener('click', async () => {
+        if (!deferredInstallPrompt) return;
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') {
+            btnInstallPwa.style.display = 'none';
+        }
+        deferredInstallPrompt = null;
+    });
+
+    window.addEventListener('appinstalled', () => {
+        btnInstallPwa.style.display = 'none';
+        deferredInstallPrompt = null;
+    });
 </script>
 </body>
 </html>

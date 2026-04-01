@@ -188,3 +188,30 @@
         transform: rotate(12deg);
     }
 }
+
+// ---- Bouton installer PWA ----
+.btn-install-pwa {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: $color-primary;
+    color: #fff;
+    border: none;
+    border-radius: $radius-md;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background $transition-fast, transform $transition-fast;
+    white-space: nowrap;
+
+    &:hover {
+        background: darken($color-primary, 8%);
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: $bp-sm) {
+        span { display: none; }
+        padding: 6px;
+    }
+}
