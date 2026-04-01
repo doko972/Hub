@@ -1,0 +1,127 @@
+// ============================================
+// FOOTER — Composant principal
+// ============================================
+
+.footer {
+    background: var(--bg-card);
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    padding: 3rem 2rem 1.5rem;
+
+    &-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 2rem;
+    }
+
+    &-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-light);
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+    }
+
+    &-description {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        max-width: 280px;
+        line-height: 1.6;
+    }
+
+    &-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        &-title {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+
+            &:hover { color: var(--primary); }
+        }
+    }
+
+    &-social {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        &-title {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 0.25rem;
+        }
+
+        &-links {
+            display: flex;
+            gap: 1rem;
+        }
+    }
+
+    &-bottom {
+        max-width: 1200px;
+        margin: 2rem auto 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(148, 163, 184, 0.1);
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+
+    &:hover {
+        background: var(--primary);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+    }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+@media (max-width: 768px) {
+    .footer-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-description { max-width: 100%; }
+    .footer-links       { align-items: center; }
+    .footer-social      { align-items: center; }
+}

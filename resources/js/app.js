@@ -17,6 +17,7 @@ import { initSortable }           from './components/sortable.js';
 import { initBackgroundRemover }  from './components/backgroundRemover.js';
 import { initImageConverter }     from './components/imageconverter.js';
 import { initCredentials }        from './components/credentials.js';
+import { initChatbot }            from './components/chatbot.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -31,4 +32,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackgroundRemover();
     initImageConverter();
     initCredentials();
+    initChatbot();
 });

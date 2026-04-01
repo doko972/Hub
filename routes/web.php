@@ -12,7 +12,11 @@ use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\ToolController;
 use App\Http\Controllers\Admin\ToolFamilyController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ChatbotController;
 use App\Http\Controllers\CredentialController;
+use App\Http\Controllers\CortexWebController;
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\SharedConversationController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
 use App\Http\Controllers\Tools\ImageConverterController;
 
@@ -47,11 +51,25 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/credentials/{tool}',   [CredentialController::class, 'store'])->name('credentials.store');
     Route::delete('/credentials/{tool}', [CredentialController::class, 'destroy'])->name('credentials.destroy');
 
+    // Chatbot intégré (génère l'URL d'auto-login signée)
+    Route::get('/chatbot/url', [ChatbotController::class, 'getUrl'])->name('chatbot.url');
+
     // Tools
     Route::get('/tools/background-remover',  [BackgroundRemoverController::class, 'index'])->name('tools.background-remover');
     Route::post('/tools/background-remover', [BackgroundRemoverController::class, 'remove'])->name('tools.background-remover.remove');
     Route::get('/tools/image-converter',     [ImageConverterController::class, 'index'])->name('tools.image-converter');
+
+    // Chatbot / Cortex IA
+    Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');
+    Route::get('/chat/c/{conversation}', [CortexWebController::class, 'show'])->name('cortex.conversation');
 });
+
+// ---- Conversation partagée (publique) ----
+Route::get('/share/{token}', [SharedConversationController::class, 'show'])->name('share.conversation');
+
+// ---- Google OAuth ----
+Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 
 // ---- Administration (auth + admin requis) ----
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])

@@ -1,0 +1,278 @@
+// =============================================
+// CHATBOT – Bulle flottante & fenêtre de chat
+// Compatible dark / light mode via data-theme
+// =============================================
+
+// ---- Bulle ------------------------------------------------
+.chatbot-bubble {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 1002;
+
+    width: 64px;
+    height: 64px;
+    border-radius: $radius-full;
+
+    background: $color-primary;
+    box-shadow: 0 4px 20px rgba(54, 42, 215, 0.45);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    cursor: pointer;
+    border: none;
+    padding: 0;
+
+    transition:
+        transform $transition-fast,
+        box-shadow $transition-fast;
+
+    // État actif (fenêtre ouverte)
+    &.is-active {
+        transform: scale(0.92);
+        box-shadow: 0 2px 10px rgba(54, 42, 215, 0.35);
+    }
+
+    &:hover:not(.is-active) {
+        transform: scale(1.07);
+        box-shadow: 0 6px 28px rgba(54, 42, 215, 0.55);
+    }
+
+    // Pulse subtil au repos pour attirer l'œil
+    &:not(.is-active) {
+        animation: chatbot-pulse 3s ease-in-out infinite;
+    }
+}
+
+@keyframes chatbot-pulse {
+    0%, 100% { box-shadow: 0 4px 20px rgba(54, 42, 215, 0.45); }
+    50%       { box-shadow: 0 4px 28px rgba(54, 42, 215, 0.70); }
+}
+
+// ---- Backdrop semi-transparent ----------------------------
+.chatbot-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+
+    // Arrière-plan très légèrement assombri
+    background: rgba(0, 0, 0, 0.15);
+
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+
+    // Padding pour aligner la fenêtre au-dessus de la bulle
+    padding: 0 28px 108px 0;
+
+    // Caché par défaut
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity $transition-base;
+
+    &.is-open {
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+// ---- Fenêtre de chat --------------------------------------
+.chatbot-window {
+    width: 420px;
+    height: 620px;
+    max-height: calc(100vh - 140px);
+    min-width: 320px;
+    min-height: 400px;
+
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    // Redimensionnable librement depuis le coin bas-gauche
+    resize: both;
+
+    // Entrée en douceur (slide-up)
+    transform: translateY(24px) scale(0.97);
+    transition: transform $transition-base, width $transition-base, height $transition-base;
+
+    .chatbot-overlay.is-open & {
+        transform: translateY(0) scale(1);
+    }
+
+    // État agrandi
+    &.is-expanded {
+        width: min(860px, calc(100vw - 56px));
+        height: calc(100vh - 120px);
+    }
+}
+
+// ---- En-tête de la fenêtre --------------------------------
+.chatbot-window__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+
+    background: $color-primary;
+    color: #fff;
+    flex-shrink: 0;
+    border-radius: $radius-lg $radius-lg 0 0;
+}
+
+.chatbot-window__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: $font-size-sm;
+    letter-spacing: 0.02em;
+}
+
+.chatbot-window__actions {
+    display: flex;
+    gap: 4px;
+}
+
+.chatbot-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 30px;
+    height: 30px;
+    border-radius: $radius-sm;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: pointer;
+    transition: background $transition-fast, color $transition-fast;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+    }
+}
+
+// ---- Corps (iframe + loading) -----------------------------
+.chatbot-window__body {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+}
+
+// Spinner de chargement
+.chatbot-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: $color-bg;
+    font-size: $font-size-sm;
+    background: $color-surface;
+
+    svg {
+        animation: chatbot-spin 1.2s linear infinite;
+        color: $color-primary;
+    }
+
+    &--error {
+        color: $color-danger;
+
+        svg {
+            animation: none;
+            color: $color-danger;
+        }
+    }
+}
+
+@keyframes chatbot-spin {
+    to { transform: rotate(360deg); }
+}
+
+// Iframe
+.chatbot-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    transition: opacity $transition-base;
+
+    &--visible {
+        opacity: 1;
+    }
+}
+
+// ---- Responsive -------------------------------------------
+@media (max-width: $bp-sm) {
+    .chatbot-bubble {
+        bottom: 20px;
+        right: 20px;
+        width: 56px;
+        height: 56px;
+    }
+
+    .chatbot-overlay {
+        padding: 0 0 96px 0;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .chatbot-window {
+        width: 100vw;
+        height: 85vh;
+        max-height: 85vh;
+        border-radius: $radius-lg $radius-lg 0 0;
+    }
+}
+
+// ---- Thème sombre -----------------------------------------
+[data-theme="dark"] {
+    .chatbot-bubble {
+        background: #4F46E5;
+        box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5);
+
+        &:not(.is-active) {
+            animation: chatbot-pulse-dark 3s ease-in-out infinite;
+        }
+
+        &:hover:not(.is-active) {
+            box-shadow: 0 6px 28px rgba(79, 70, 229, 0.7);
+        }
+    }
+
+    @keyframes chatbot-pulse-dark {
+        0%, 100% { box-shadow: 0 4px 20px rgba(79, 70, 229, 0.5); }
+        50%       { box-shadow: 0 4px 28px rgba(79, 70, 229, 0.75); }
+    }
+
+    .chatbot-overlay {
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .chatbot-window {
+        background: var(--surface);
+        border-color: var(--border);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .chatbot-window__header {
+        background: #3730A3;
+    }
+
+    .chatbot-loading {
+        background: var(--surface);
+        color: var(--text-muted);
+    }
+}

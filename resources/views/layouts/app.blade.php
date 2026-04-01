@@ -163,14 +163,14 @@
                     <path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/>
                 </svg>
                 <span class="sidebar-footer__name">Hub</span>
-                <span class="sidebar-footer__version">v1.1</span>
+                <span class="sidebar-footer__version">v2.1.1</span>
             </div>
             <p class="sidebar-footer__author">par Doko972</p>
             <a href="https://claude.ai" target="_blank" rel="noopener" class="sidebar-footer__collab">
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
                 </svg>
-                en coopération avec Claude.ai
+                Développé avec Amour
             </a>
         </div>
     </aside>
@@ -293,6 +293,71 @@
 
     </div>{{-- /main-content --}}
 </div>{{-- /app-wrapper --}}
+
+{{-- ===== CHATBOT BUBBLE ===== --}}
+<button id="chatbot-bubble"
+        class="chatbot-bubble"
+        aria-label="Ouvrir le chatbot Cortex IA"
+        title="Cortex IA – Assistant chatbot">
+    <dotlottie-player
+        src="{{ asset('chatbot-bubble.json') }}"
+        background="transparent"
+        speed="1"
+        style="width: 44px; height: 44px; pointer-events: none;"
+        loop
+        autoplay>
+    </dotlottie-player>
+</button>
+
+{{-- ===== CHATBOT PANEL ===== --}}
+<div class="chatbot-overlay" id="chatbot-overlay">
+    <div class="chatbot-window" id="chatbot-window">
+
+        <div class="chatbot-window__header">
+            <div class="chatbot-window__title">
+                {{-- <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V15a1 1 0 0 0-2 0v1.93A8 8 0 0 1 4.07 9H6a1 1 0 0 0 0-2H4.07A8 8 0 0 1 11 2.07V4a1 1 0 0 0 2 0V2.07A8 8 0 0 1 19.93 9H18a1 1 0 0 0 0 2h1.93A8 8 0 0 1 13 16.93z"/>
+                </svg> --}}
+                ChatBot
+            </div>
+            <div class="chatbot-window__actions">
+                <button class="chatbot-action-btn" id="chatbot-expand" title="Agrandir">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <polyline points="15 3 21 3 21 9"/>
+                        <polyline points="9 21 3 21 3 15"/>
+                        <line x1="21" y1="3" x2="14" y2="10"/>
+                        <line x1="3" y1="21" x2="10" y2="14"/>
+                    </svg>
+                </button>
+                <button class="chatbot-action-btn" id="chatbot-open-tab" title="Ouvrir dans un onglet">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                        <polyline points="15 3 21 3 21 9"/>
+                        <line x1="10" y1="14" x2="21" y2="3"/>
+                    </svg>
+                </button>
+                <button class="chatbot-action-btn" id="chatbot-close" title="Fermer">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <div class="chatbot-window__body">
+            <div class="chatbot-loading" id="chatbot-loading">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                </svg>
+                Chargement…
+            </div>
+            <iframe class="chatbot-frame" id="chatbot-frame" src="" title="Cortex IA"></iframe>
+        </div>
+
+    </div>
+</div>
+{{-- /CHATBOT PANEL --}}
 
 {{-- Données flash pour les toasts --}}
 <script>

@@ -1,0 +1,238 @@
+// ============================================
+// ADMIN — Gestion des releases
+// Palette propre : fond #1a1a2e, accent #00d4ff
+// ============================================
+
+// Variables locales admin
+$admin-accent: #00d4ff;
+$admin-bg: #1a1a2e;
+
+.layout-admin {
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+
+        // Limiter le form create
+        &.container--narrow { max-width: 600px; }
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    h1 { color: $admin-accent; }
+
+    // ----------------------------------------
+    // Boutons (palette admin distincte)
+    // ----------------------------------------
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+
+        &:hover { transform: translateY(-2px); }
+
+        &-primary   { background: linear-gradient(135deg, #00d4ff, #0099cc); color: #000; }
+        &-danger    { background: linear-gradient(135deg, #ff4757, #cc0033); color: #fff; }
+        &-secondary { background: linear-gradient(135deg, #666, #444); color: #fff; }
+        &-small     { padding: 0.5rem 1rem; font-size: 0.875rem; }
+    }
+
+    // ----------------------------------------
+    // Alertes admin
+    // ----------------------------------------
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+
+        &-success {
+            background-color: rgba(0, 212, 255, 0.1);
+            border: 1px solid $admin-accent;
+            color: $admin-accent;
+        }
+
+        &-error {
+            background-color: rgba(255, 71, 87, 0.1);
+            border: 1px solid #ff4757;
+            color: #ff4757;
+        }
+    }
+
+    // ----------------------------------------
+    // Tableau
+    // ----------------------------------------
+    .table-container {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+        background: rgba(0, 212, 255, 0.1);
+        color: $admin-accent;
+        font-weight: 600;
+    }
+
+    tr:hover { background: rgba(255, 255, 255, 0.05); }
+
+    // ----------------------------------------
+    // Badges
+    // ----------------------------------------
+    .badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+
+        &-active    { background-color: rgba(0, 255, 100, 0.2);  color: #00ff64; }
+        &-inactive  { background-color: rgba(255, 71, 87, 0.2);  color: #ff4757; }
+        &-mandatory { background-color: rgba(255, 165, 0, 0.2);  color: #ffa500; }
+    }
+
+    // ----------------------------------------
+    // Utilitaires
+    // ----------------------------------------
+    .actions     { display: flex; gap: 0.5rem; }
+    .empty-state { text-align: center; padding: 3rem; color: #888; }
+    .file-size   { color: #888; font-size: 0.875rem; }
+
+    .back-link {
+        color: $admin-accent;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+
+        &:hover { text-decoration: underline; }
+    }
+
+    // ----------------------------------------
+    // Formulaire (page create)
+    // ----------------------------------------
+    .form-card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: $admin-accent;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #eee;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+
+            &:focus {
+                outline: none;
+                border-color: $admin-accent;
+            }
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        select option {
+            background: $admin-bg;
+            color: #eee;
+        }
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        border: 2px dashed rgba(0, 212, 255, 0.3);
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        transition: border-color 0.3s, background 0.3s;
+        cursor: pointer;
+
+        &:hover {
+            border-color: $admin-accent;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        input[type="file"] {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+    }
+
+    .file-input-text {
+        color: #888;
+        span { color: $admin-accent; }
+    }
+
+    .file-name {
+        margin-top: 0.5rem;
+        color: $admin-accent;
+        font-weight: 500;
+    }
+
+    .checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        label {
+            margin-bottom: 0;
+            cursor: pointer;
+            color: #eee;
+        }
+    }
+
+    .error-message {
+        color: #ff4757;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+    }
+}

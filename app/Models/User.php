@@ -5,10 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
+use App\Models\Conversation;
+use App\Models\Folder;
+use App\Models\SystemPrompt;
+use App\Models\UserMemory;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name',
@@ -17,20 +22,41 @@ class User extends Authenticatable
         'role',
         'is_active',
         'avatar_path',
+        'google_id',
+        'google_access_token',
+        'google_refresh_token',
+        'google_token_expires_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'google_access_token',
+        'google_refresh_token',
     ];
 
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'is_active'         => 'boolean',
+            'email_verified_at'       => 'datetime',
+            'password'                => 'hashed',
+            'is_active'               => 'boolean',
+            'is_admin'                => 'boolean',
+            'google_token_expires_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Synchronise automatiquement is_admin avec role à chaque sauvegarde.
+     * Chatbot-api lit is_admin directement — on le garde en phase.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::saving(function (self $user) {
+            $user->is_admin = ($user->role === 'admin');
+        });
     }
 
     // ---- Helpers de rôle ----
@@ -63,19 +89,38 @@ class User extends Authenticatable
         return strtoupper(substr($this->name, 0, 2));
     }
 
-    // ---- Relations ----
+    // ---- Relations chatbot ----
+    public function conversations()
+    {
+        return $this->hasMany(Conversation::class);
+    }
+
+    public function folders()
+    {
+        return $this->hasMany(Folder::class);
+    }
+
+    public function systemPrompts()
+    {
+        return $this->hasMany(SystemPrompt::class);
+    }
+
+    public function memories()
+    {
+        return $this->hasMany(UserMemory::class);
+    }
+
+    // ---- Relations dashboard ----
     public function tools()
     {
         return $this->belongsToMany(Tool::class)->withTimestamps();
     }
 
-    // Outils explicitement sélectionnés pour le dashboard
     public function selectedTools()
     {
         return $this->belongsToMany(Tool::class, 'user_tool_selection');
     }
 
-    // Outils visibles par cet utilisateur (publics + ceux qui lui sont assignés)
     public function visibleTools()
     {
         if ($this->isAdmin()) {

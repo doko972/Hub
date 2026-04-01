@@ -1,0 +1,81 @@
+// ============================================
+// FORMULAIRES — Partagés entre auth & profil
+// ============================================
+
+.form-group {
+    margin-bottom: 1.25rem;
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: var(--text-light);
+    }
+
+    input {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+
+        &:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        &::placeholder { color: var(--text-muted); }
+    }
+}
+
+// Barre options (se souvenir de moi + mot de passe oublié)
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+
+    input {
+        width: 16px;
+        height: 16px;
+        accent-color: var(--primary);
+    }
+}
+
+.forgot-password {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover { text-decoration: underline; }
+}
+
+// Actions de formulaire (boutons submit + annuler)
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+    }
+}
+
+// Champ avec erreur de validation
+.input-error {
+    border-color: var(--error) !important;
+}

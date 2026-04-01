@@ -35,4 +35,23 @@ return [
         ],
     ],
 
+    // Intégration Chatbot-api (bulle de chat dans le dashboard)
+    'chatbot' => [
+        'url'    => env('CHATBOT_URL'),
+        'secret' => env('CHATBOT_SECRET'),
+    ],
+        'brave' => [
+        'api_key' => env('BRAVE_SEARCH_API_KEY'),
+    ],
+    'anthropic' => [
+        'api_key' => env('ANTHROPIC_API_KEY'),
+    ],
+    'tavily' => [
+        'api_key' => env('TAVILY_API_KEY'),
+    ],
+    'google' => [
+        'client_id'     => env('GOOGLE_CLIENT_ID'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+        'redirect'      => env('GOOGLE_REDIRECT_URI'),
+    ],
 ];

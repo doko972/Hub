@@ -1,0 +1,45 @@
+// ============================================
+// RESET
+// ============================================
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+// ============================================
+// CORPS DE BASE
+// ============================================
+body {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+// ============================================
+// MODIFICATEURS DE LAYOUT (classes sur <body>)
+// ============================================
+
+// Pages d'authentification (login, register, etc.)
+body.layout-auth {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+}
+
+// Page du chat (hauteur fixe, pas de défilement body)
+body.layout-chat {
+    height: 100vh;
+    overflow: hidden;
+    min-height: unset;
+}
+
+// Pages admin (palette couleur distincte)
+body.layout-admin {
+    background-color: #1a1a2e;
+    color: #eee;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 2rem;
+}

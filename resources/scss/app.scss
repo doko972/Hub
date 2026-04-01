@@ -1,0 +1,39 @@
+// ============================================
+// FONDATION — @use en premier (règle Dart Sass)
+// ============================================
+@use 'variables';
+@use 'base';
+
+// ============================================
+// COMPOSANTS PARTAGÉS
+// ============================================
+@use 'components/buttons';
+@use 'components/forms';
+@use 'components/alerts';
+@use 'components/navbar';
+@use 'components/footer';
+@use 'components/modals';
+@use 'components/chat';
+
+// ============================================
+// ADMIN
+// ============================================
+@use 'admin/releases';
+
+// ============================================
+// PAGES
+// ============================================
+@use 'pages/auth';
+@use 'pages/home';
+@use 'pages/dashboard';
+@use 'pages/download';
+@use 'pages/profile';
+@use 'pages/google';
+
+// ============================================
+// TAILWIND — après les @use (obligatoire)
+// Les utilitaires restent en dernière position
+// ============================================
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

@@ -1,0 +1,80 @@
+// ============================================
+// PAGE DASHBOARD
+// ============================================
+
+.main-content {
+    padding: 8rem 2rem 4rem;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 3rem;
+
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    p { color: var(--text-muted); font-size: 1.1rem; }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+
+    .icon  { font-size: 2rem; margin-bottom: 0.5rem; }
+    .value { font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .label { color: var(--text-muted); font-size: 0.9rem; }
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.action-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s;
+
+    &:hover { transform: translateY(-5px); }
+
+    .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    h3 { margin-bottom: 0.5rem; }
+
+    p {
+        color: var(--text-muted);
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+    }
+}
+
+// ============================================
+// RESPONSIVE
+// ============================================
+@media (max-width: 768px) {
+    .welcome-section h1 { font-size: 1.8rem; }
+
+    .main-content { padding: 6rem 1rem 2rem; }
+
+    .stats-grid,
+    .action-grid { grid-template-columns: 1fr; }
+}

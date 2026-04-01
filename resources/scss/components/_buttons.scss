@@ -1,0 +1,763 @@
+// ============================================
+// BOUTONS — Partagés entre toutes les pages
+// ============================================
+
+.btn {
+    padding: 0.6rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+
+    &-primary {
+        background: var(--primary);
+        color: white;
+
+        &:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+    }
+
+    &-outline {
+        border: 1px solid var(--text-muted);
+        color: var(--text-light);
+        background: transparent;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    &-danger {
+        background: var(--error);
+        color: white;
+
+        &:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+    }
+
+    &-large {
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+    }
+
+    // Page téléchargement
+    &-windows {
+        background: var(--windows);
+        color: white;
+
+        &:hover {
+            background: #006cbd;
+            transform: translateY(-2px);
+        }
+    }
+
+    &-android {
+        background: var(--android);
+        color: #1a1a1a;
+
+        &:hover {
+            background: #32cb73;
+            transform: translateY(-2px);
+        }
+    }
+}
+
+// ============================================
+// BOUTON DÉCONNEXION (navbar & sidebar)
+// ============================================
+.btn-logout {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.6rem 1rem;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+
+    &:hover {
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+    }
+}
+
+// Déconnexion dans la sidebar du chat (icône seule)
+.sidebar .btn-logout {
+    font-size: 1.2rem;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: var(--danger);
+    }
+}
+
+// ============================================
+// BOUTONS CHAT — Icônes de la zone de saisie
+// ============================================
+
+// Mixin pour les boutons icône transparents
+@mixin btn-icon {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+    }
+}
+
+.btn-send {
+    background: var(--primary);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+
+    &:hover { background: var(--primary-hover); }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.btn-attach    { @include btn-icon; }
+.btn-imagine   { @include btn-icon; }
+
+.btn-web-search {
+    @include btn-icon;
+
+    &.active {
+        background: var(--primary);
+        color: white;
+    }
+}
+
+.btn-mic {
+    @include btn-icon;
+
+    &.recording {
+        background: var(--danger);
+        color: white;
+        animation: pulse-mic 1.5s infinite;
+    }
+
+    &.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+@keyframes pulse-mic {
+    0%, 100% { transform: scale(1); }
+    50%       { transform: scale(1.1); }
+}
+
+.btn-actions-menu {
+    @include btn-icon;
+
+    &.open {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-light);
+        transform: rotate(45deg);
+    }
+}
+
+.btn-theme {
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    transition: all 0.2s;
+
+    &:hover { background: var(--bg-message-ai); }
+}
+
+.btn-menu-mobile {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+}
+
+// ============================================
+// BOUTONS SIDEBAR CHAT
+// ============================================
+.btn-new-chat {
+    width: calc(100% - 2rem);
+    padding: 0.75rem 1rem;
+    margin: 1rem 1rem 0.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.2s;
+
+    &:hover { background: var(--primary-hover); }
+}
+
+.btn-add-folder {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1rem;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+    }
+}
+
+// ============================================
+// BOUTONS MODAUX
+// ============================================
+.btn-cancel {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: rgba(255, 255, 255, 0.1); }
+}
+
+.btn-confirm {
+    background: var(--primary);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover { background: var(--primary-hover); }
+}
+
+// ============================================
+// BOUTON GOOGLE CALENDAR (header)
+// ============================================
+.btn-google-calendar {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-light);
+    }
+
+    &.connected {
+        border-color: #22c55e;
+        color: #22c55e;
+        background: rgba(34, 197, 94, 0.08);
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+    }
+}
+
+// ============================================
+// BOUTON NOTIFICATIONS PUSH
+// ============================================
+.btn-push-notif {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--text-light);
+    }
+
+    &.active {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background: rgba(245, 158, 11, 0.08);
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+    }
+}
+
+// ============================================
+// SIDEBAR MENU DROPDOWN
+// ============================================
+.sidebar-menu {
+    position: relative;
+
+    &-trigger {
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-light);
+        }
+
+        &.has-active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+    }
+
+    &-dropdown {
+        position: absolute;
+        bottom: calc(100% + 8px);
+        right: 0;
+        background: var(--bg-sidebar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 0.4rem;
+        min-width: 210px;
+        display: none;
+        flex-direction: column;
+        gap: 0.15rem;
+        z-index: 500;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+
+        &.open {
+            display: flex;
+        }
+    }
+
+    &-item {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.6rem 0.75rem;
+        background: transparent;
+        border: none;
+        border-radius: 8px;
+        color: var(--text-muted);
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        transition: all 0.15s;
+
+        .item-icon {
+            font-size: 1.05rem;
+            flex-shrink: 0;
+            width: 22px;
+            text-align: center;
+        }
+
+        .item-label {
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        .item-status {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: transparent;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-light);
+        }
+
+        &.connected {
+            .item-status { background: #22c55e; }
+            &:hover {
+                color: #ef4444;
+                .item-status { background: #ef4444; }
+            }
+        }
+
+        &.active {
+            .item-status { background: #f59e0b; }
+            &:hover {
+                color: #ef4444;
+                .item-status { background: #ef4444; }
+            }
+        }
+    }
+}
+
+// ============================================
+// BOUTON STOP (streaming)
+// ============================================
+.btn-stop {
+    background: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    transition: background 0.2s;
+
+    &:hover { background: #dc2626; }
+}
+
+// ============================================
+// BOUTON RÉGÉNÉRER (messages IA)
+// ============================================
+.btn-regenerate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--text-light);
+        border-color: var(--text-muted);
+    }
+}
+
+// ============================================
+// BOUTON COPIER (messages IA)
+// ============================================
+.btn-copy-message {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.75rem;
+    margin-right: 0.5rem;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--text-light);
+        border-color: var(--text-muted);
+    }
+
+    &.copied {
+        color: #22c55e;
+        border-color: #22c55e;
+    }
+}
+
+// Note de génération arrêtée
+.stop-note {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+// ============================================
+// BOUTON ÉDITER (messages utilisateur)
+// ============================================
+.btn-edit-message {
+    display: none;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    margin-left: 0.25rem;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+}
+
+.message.user:hover .btn-edit-message {
+    display: inline-flex;
+}
+
+// Bouton copier sur messages utilisateur : masqué par défaut, visible au survol
+.message.user .btn-copy-message {
+    display: none;
+    margin-top: 0.5rem;
+}
+
+.message.user:hover .btn-copy-message {
+    display: inline-flex;
+}
+
+// Formulaire d'édition inline
+.edit-textarea {
+    width: 100%;
+    min-height: 60px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--primary);
+    border-radius: 8px;
+    padding: 0.6rem 0.75rem;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    margin-bottom: 0.5rem;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+
+    .btn-cancel-edit {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-muted);
+        padding: 0.35rem 0.9rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+
+        &:hover { color: var(--text-primary); border-color: var(--text-muted); }
+    }
+}
+
+// ============================================
+// BOUTON PARTAGER (header chat)
+// ============================================
+.btn-share-conv {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+}
+
+// ============================================
+// BOUTON DANGER (révoquer partage)
+// ============================================
+.btn-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        background: rgba(239, 68, 68, 0.25);
+    }
+}
+
+// ============================================
+// BOUTON PERSONNALITÉ (header chat)
+// ============================================
+.btn-personality {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        color: var(--primary);
+        border-color: var(--primary);
+    }
+
+    &.active {
+        color: var(--primary);
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.12);
+    }
+}
+
+// ============================================
+// LISTE DES PERSONNALITÉS (dans le modal)
+// ============================================
+.personality-item {
+    padding: 0.65rem 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.06);
+    }
+
+    &.active {
+        border-color: var(--primary);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .personality-item-name {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    .personality-item-desc {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+    }
+}
+
+.personality-active-badge {
+    font-size: 0.72rem;
+    background: var(--primary);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-weight: 600;
+}
+
+.personality-default-badge {
+    font-size: 0.72rem;
+    background: rgba(234, 179, 8, 0.2);
+    color: #eab308;
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-weight: 600;
+}
+
+.personality-btn-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 0.1rem 0.2rem;
+    border-radius: 4px;
+    transition: background 0.15s;
+
+    &:hover { background: rgba(255,255,255,0.08); }
+    &.danger:hover { background: rgba(239,68,68,0.15); }
+}
