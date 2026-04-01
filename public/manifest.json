@@ -2,7 +2,7 @@
     "name": "Hub — Dashboard",
     "short_name": "Hub",
     "description": "Dashboard personnel avec outils et assistant IA",
-    "start_url": "/dashboard",
+    "start_url": "/",
     "scope": "/",
     "display": "standalone",
     "orientation": "portrait-primary",
@@ -32,7 +32,7 @@
         {
             "name": "Mon dashboard",
             "short_name": "Dashboard",
-            "url": "/dashboard",
+            "url": "/",
             "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
         }
     ],

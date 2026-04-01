@@ -3,10 +3,10 @@
  * Stratégie : Cache First pour les assets statiques, Network First pour les pages
  */
 
-const CACHE_NAME     = 'hub-v1';
+const CACHE_NAME     = 'hub-v2';
 const ASSETS_TO_CACHE = [
     '/',
-    '/dashboard',
+    '/chat',
     '/manifest.json',
     '/icon-192x192.png',
     '/icon-512x512.png',
