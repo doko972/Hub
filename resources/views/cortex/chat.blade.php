@@ -10,9 +10,9 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="HR Chatbot">
+    <meta name="apple-mobile-web-app-title" content="Hub">
     <link rel="manifest" href="/manifest.json">
-    <link rel="apple-touch-icon" href="/images/logo-192.png">
+    <link rel="apple-touch-icon" href="/icon-192x192.png">
     <title>ChatBot</title>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"></script>
     <!-- Markdown & Syntax Highlighting -->
