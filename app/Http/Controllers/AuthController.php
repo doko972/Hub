@@ -25,9 +25,14 @@ class AuthController extends Controller
             'password.required' => 'Le mot de passe est obligatoire.',
         ]);
 
-        $remember = $request->boolean('remember');
+        $remember  = $request->boolean('remember');
+        $identifier = $request->input('name');
+        $password   = $request->input('password');
 
-        if (Auth::attempt(['name' => $request->input('name'), 'password' => $request->input('password')], $remember)) {
+        $authenticated = Auth::attempt(['name' => $identifier, 'password' => $password], $remember)
+                      || Auth::attempt(['email' => $identifier, 'password' => $password], $remember);
+
+        if ($authenticated) {
             $request->session()->regenerate();
 
             if (!Auth::user()->is_active) {

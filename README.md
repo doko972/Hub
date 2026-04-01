@@ -104,6 +104,10 @@ CREATE DATABASE dashboard_general CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_
 ```bash
 php artisan migrate --seed
 ```
+## 6.1 Ou
+```bash
+php artisan db:seed --class=AdminSeeder
+```
 
 ### 7. Créer le lien symbolique pour le stockage
 
