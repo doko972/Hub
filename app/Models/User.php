@@ -127,11 +127,16 @@ class User extends Authenticatable
             return Tool::where('is_active', true)->orderBy('sort_order')->orderBy('title')->get();
         }
 
+        if ($this->tools()->exists()) {
+            return Tool::where('is_active', true)
+                ->whereHas('users', fn($q) => $q->where('users.id', $this->id))
+                ->orderBy('sort_order')
+                ->orderBy('title')
+                ->get();
+        }
+
         return Tool::where('is_active', true)
-            ->where(function ($q) {
-                $q->where('is_public', true)
-                  ->orWhereHas('users', fn($u) => $u->where('users.id', $this->id));
-            })
+            ->where('is_public', true)
             ->orderBy('sort_order')
             ->orderBy('title')
             ->get();
