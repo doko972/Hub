@@ -27,10 +27,9 @@ class PreferencesController extends Controller
             ->get()
             ->filter(fn($f) => $f->tools->isNotEmpty());
 
-        $selectedIds       = $user->selectedTools()->pluck('tools.id')->toArray();
-        $allCheckedByDefault = empty($selectedIds);
+        $selectedIds = $user->selectedTools()->pluck('tools.id')->toArray();
 
-        return view('preferences.edit', compact('families', 'selectedIds', 'allCheckedByDefault'));
+        return view('preferences.edit', compact('families', 'selectedIds'));
     }
 
     public function update(\Illuminate\Http\Request $request)

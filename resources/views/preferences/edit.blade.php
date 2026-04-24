@@ -40,7 +40,7 @@
             <div class="pref-grid">
                 @foreach($family->tools as $tool)
                     @php
-                        $checked = $allCheckedByDefault || in_array($tool->id, $selectedIds);
+                        $checked = in_array($tool->id, $selectedIds);
                     @endphp
                     <label class="pref-item {{ $checked ? 'is-checked' : '' }}">
                         <input type="checkbox"
