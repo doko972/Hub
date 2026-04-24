@@ -27,7 +27,7 @@ class PreferencesController extends Controller
             ->get()
             ->filter(fn($f) => $f->tools->isNotEmpty());
 
-        $selectedIds = $user->selectedTools()->pluck('tools.id')->toArray();
+        $selectedIds = $user->selectedTools()->allRelatedIds()->toArray();
 
         return view('preferences.edit', compact('families', 'selectedIds'));
     }

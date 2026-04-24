@@ -25,9 +25,9 @@ class DashboardController extends Controller
                         $q->where('is_public', true);
                     }
                     // Filtre de sélection personnelle (si l'utilisateur a des préférences)
-                    if ($user->selectedTools()->exists()) {
-                        $selectedIds = $user->selectedTools()->pluck('tools.id');
-                        $q->whereIn('tools.id', $selectedIds);
+                    $selectedIds = $user->selectedTools()->allRelatedIds();
+                    if ($selectedIds->isNotEmpty()) {
+                        $q->whereIn('id', $selectedIds);
                     }
                 }
             }])
