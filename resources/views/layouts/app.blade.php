@@ -110,6 +110,17 @@
                 Convertisseur d'images
             </a>
 
+            <a href="{{ route('tools.qr-code') }}"
+               class="sidebar__link {{ request()->routeIs('tools.qr-code*') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3"/>
+                    <rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/>
+                    <rect x="18" y="18" width="3" height="3"/>
+                </svg>
+                Générateur de QR Code
+            </a>
+
             @if(auth()->user()->isAdmin())
                 <hr class="sidebar__divider">
                 <span class="sidebar__section-title">Administration</span>

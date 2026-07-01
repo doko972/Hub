@@ -16,6 +16,7 @@ import { initToasts }         from './components/toast.js';
 import { initSortable }           from './components/sortable.js';
 import { initBackgroundRemover }  from './components/backgroundRemover.js';
 import { initImageConverter }     from './components/imageconverter.js';
+import { initQrCode }             from './components/qrcode.js';
 import { initCredentials }        from './components/credentials.js';
 import { initChatbot }            from './components/chatbot.js';
 
@@ -31,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initSortable();
     initBackgroundRemover();
     initImageConverter();
+    initQrCode();
     initCredentials();
     initChatbot();
 });

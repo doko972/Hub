@@ -1,0 +1,331 @@
+// =============================================
+// QR CODE TOOL
+// =============================================
+
+.qr-tool {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-xl;
+
+    @media (max-width: $bp-md) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ── Onglets principaux ──
+.qr-tabs {
+    display: flex;
+    border-bottom: 2px solid $color-border;
+    margin-bottom: $spacing-lg;
+    grid-column: 1 / -1;
+}
+
+.qr-tab {
+    flex: 1;
+    padding: $spacing-sm $spacing-md;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text-muted;
+    transition: color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+        color: $color-text;
+    }
+
+    &.is-active {
+        color: $color-primary;
+        border-bottom-color: $color-primary;
+    }
+}
+
+// ── Panneaux ──
+.qr-panel      { display: none; &.is-active { display: block; } }
+
+// ── Sous-onglets ──
+.qr-subtabs {
+    display: flex;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+}
+
+.qr-subtab {
+    flex: 1;
+    padding: $spacing-xs $spacing-sm;
+    background: $color-bg;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    color: $color-text-muted;
+    transition: background $transition-fast, color $transition-fast;
+
+    &.is-active {
+        background: $color-primary-light;
+        color: $color-primary;
+    }
+}
+
+.qr-subpanel   { display: none; &.is-active { display: block; } }
+
+// ── Champs de formulaire ──
+.qr-field      { margin-bottom: $spacing-md; }
+
+.qr-label {
+    display: block;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+    margin-bottom: $spacing-xs;
+}
+
+.qr-input,
+.qr-select,
+.qr-textarea {
+    width: 100%;
+    padding: 0.65rem $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    font-size: $font-size-sm;
+    background: $color-surface;
+    color: $color-text;
+    box-sizing: border-box;
+    transition: border-color $transition-fast, box-shadow $transition-fast;
+    outline: none;
+    font-family: $font-family;
+
+    &:focus {
+        border-color: $color-primary;
+        box-shadow: 0 0 0 3px rgba(54, 42, 215, 0.15);
+    }
+}
+
+.qr-textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.qr-hint {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+}
+
+.qr-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-md;
+}
+
+// ── Mot de passe avec bouton toggle ──
+.qr-pw-wrap {
+    position: relative;
+
+    .qr-input { padding-right: 2.75rem; }
+}
+
+.qr-pw-toggle {
+    position: absolute;
+    right: $spacing-xs;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: $spacing-xs $spacing-sm;
+    color: $color-text-muted;
+}
+
+// ── Lignes de contacts (Favoris) ──
+.qr-contact-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    gap: $spacing-sm;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    padding: $spacing-sm;
+
+    .qr-input { padding: $spacing-xs 0.7rem; }
+}
+
+.qr-blf-wrap {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+    color: $color-text;
+    white-space: nowrap;
+    justify-content: center;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: $color-primary;
+        cursor: pointer;
+    }
+}
+
+.qr-btn-remove {
+    background: #FEF2F2;
+    color: $color-danger;
+    border: none;
+    border-radius: $radius-sm;
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+    transition: background $transition-fast;
+
+    &:hover { background: #FEE2E2; }
+}
+
+.qr-btn-add {
+    width: 100%;
+    padding: 0.65rem;
+    background: $color-primary-light;
+    color: $color-primary;
+    border: 1px dashed #C4B5FD;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    margin-top: $spacing-xs;
+    transition: background $transition-fast;
+
+    &:hover { background: #DDD6FE; }
+}
+
+// ── Bouton vider ──
+.qr-btn-clear {
+    width: 100%;
+    padding: 0.65rem;
+    background: $color-bg;
+    border: none;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    color: $color-text;
+    margin-top: $spacing-md;
+    transition: background $transition-fast;
+
+    &:hover { background: $color-border; }
+}
+
+// ── Panneau de prévisualisation ──
+.qr-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-lg;
+}
+
+.qr-canvas-box {
+    background: $color-bg;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $spacing-xl;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 220px;
+}
+
+.qr-placeholder {
+    text-align: center;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+
+    svg {
+        display: block;
+        margin: 0 auto $spacing-md;
+        opacity: 0.3;
+    }
+}
+
+canvas.qr-canvas {
+    border-radius: $radius-sm;
+    display: none;
+}
+
+.qr-warning {
+    display: none;
+    width: 100%;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+    font-size: $font-size-xs;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-sm;
+    margin: 0;
+}
+
+// ── Boutons d'action ──
+.qr-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    width: 100%;
+}
+
+.qr-btn-download,
+.qr-btn-qr {
+    flex: 1;
+    min-width: 45%;
+    padding: 0.65rem;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: linear-gradient(135deg, $color-primary, $color-info);
+    color: #fff;
+    transition: opacity $transition-fast;
+
+    &:hover    { opacity: 0.88; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.qr-btn-copy {
+    flex-basis: 100%;
+    padding: 0.65rem;
+    border-radius: $radius-sm;
+    font-size: $font-size-xs;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: $color-bg;
+    color: $color-text;
+    transition: background $transition-fast;
+
+    &:hover    { background: $color-border; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Aperçu des données ──
+.qr-data-box {
+    width: 100%;
+    background: $color-bg;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    max-height: 160px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 0;
+}

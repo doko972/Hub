@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de configuration Softphone SIP</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: #f9fafb; color: #111827; }
+
+    /* ── Layout ── */
+    .sp-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      padding: 2rem;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 720px) {
+      .sp-wrapper { grid-template-columns: 1fr; }
+    }
+
+    h1 {
+      grid-column: 1 / -1;
+      font-size: 1.4rem;
+      margin: 0 0 .25rem;
+    }
+
+    .sp-subtitle {
+      grid-column: 1 / -1;
+      color: #6b7280;
+      font-size: .9rem;
+      margin: 0 0 1rem;
+    }
+
+    /* ── Tabs ── */
+    .sp-tabs {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+      margin-bottom: 1.5rem;
+      grid-column: 1 / -1;
+    }
+
+    .sp-tab {
+      flex: 1;
+      padding: .75rem 1rem;
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 500;
+      color: #6b7280;
+      transition: color .2s, border-color .2s;
+    }
+
+    .sp-tab.active {
+      color: #7c3aed;
+      border-bottom-color: #7c3aed;
+    }
+
+    /* ── Inputs ── */
+    .sp-label {
+      display: block;
+      font-size: .85rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: .4rem;
+    }
+
+    .sp-input,
+    .sp-select {
+      width: 100%;
+      padding: .65rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: .6rem;
+      font-size: .9rem;
+      box-sizing: border-box;
+      transition: border-color .2s, box-shadow .2s;
+      outline: none;
+      background: #fff;
+    }
+
+    .sp-input:focus,
+    .sp-select:focus {
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+    }
+
+    .sp-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .sp-field { margin-bottom: 1rem; }
+    .sp-hint { font-size: .75rem; color: #9ca3af; margin-top: .3rem; }
+
+    /* ── Panels ── */
+    .sp-panel { display: none; }
+    .sp-panel.active { display: block; }
+
+    /* ── Sub-tabs (QR libre) ── */
+    .sp-subtabs {
+      display: flex;
+      gap: .4rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .sp-subtab {
+      flex: 1;
+      padding: .5rem .75rem;
+      background: #f3f4f6;
+      border: none;
+      border-radius: .6rem;
+      cursor: pointer;
+      font-size: .8rem;
+      font-weight: 500;
+      color: #6b7280;
+      transition: background .2s, color .2s;
+    }
+
+    .sp-subtab.active {
+      background: #ede9fe;
+      color: #7c3aed;
+    }
+
+    .sp-subpanel { display: none; }
+    .sp-subpanel.active { display: block; }
+
+    .sp-textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: inherit;
+    }
+
+    /* ── Password toggle ── */
+    .sp-pw-wrap { position: relative; }
+    .sp-pw-wrap .sp-input { padding-right: 2.75rem; }
+    .sp-pw-toggle {
+      position: absolute;
+      right: .4rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: .3rem .5rem;
+      color: #6b7280;
+    }
+
+    /* ── Contacts list ── */
+    .sp-contact-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      gap: .5rem;
+      align-items: center;
+      margin-bottom: .6rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: .6rem;
+      padding: .6rem;
+    }
+
+    .sp-contact-row .sp-input { padding: .5rem .7rem; }
+
+    .sp-blf-wrap {
+      display: flex;
+      align-items: center;
+      gap: .35rem;
+      font-size: .75rem;
+      color: #374151;
+      white-space: nowrap;
+      justify-content: center;
+    }
+
+    .sp-blf-wrap input[type="checkbox"] {
+      width: 1.05rem;
+      height: 1.05rem;
+      accent-color: #7c3aed;
+      cursor: pointer;
+    }
+
+    .sp-btn-remove {
+      background: #fef2f2;
+      color: #dc2626;
+      border: none;
+      border-radius: .5rem;
+      width: 2rem;
+      height: 2rem;
+      cursor: pointer;
+      font-size: 1rem;
+      line-height: 1;
+      transition: background .2s;
+    }
+
+    .sp-btn-remove:hover { background: #fee2e2; }
+
+    .sp-btn-add {
+      width: 100%;
+      padding: .65rem;
+      background: #ede9fe;
+      color: #7c3aed;
+      border: 1px dashed #c4b5fd;
+      border-radius: .6rem;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 600;
+      margin-top: .3rem;
+      transition: background .2s;
+    }
+
+    .sp-btn-add:hover { background: #ddd6fe; }
+
+    /* ── Buttons ── */
+    .sp-btn-clear {
+      width: 100%;
+      padding: .65rem;
+      background: #f3f4f6;
+      border: none;
+      border-radius: .6rem;
+      cursor: pointer;
+      font-size: .9rem;
+      font-weight: 500;
+      color: #374151;
+      margin-top: 1rem;
+      transition: background .2s;
+    }
+
+    .sp-btn-clear:hover { background: #e5e7eb; }
+
+    /* ── Preview ── */
+    .sp-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    .sp-canvas-box {
+      background: #f9fafb;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 220px;
+    }
+
+    .sp-placeholder {
+      text-align: center;
+      color: #9ca3af;
+      font-size: .9rem;
+    }
+
+    .sp-placeholder svg {
+      display: block;
+      margin: 0 auto 1rem;
+      opacity: .3;
+    }
+
+    canvas.sp-canvas { border-radius: .5rem; display: none; }
+
+    .sp-warning {
+      display: none;
+      width: 100%;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: .8rem;
+      padding: .6rem .8rem;
+      border-radius: .6rem;
+    }
+
+    /* ── Actions ── */
+    .sp-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .6rem;
+      width: 100%;
+    }
+
+    .sp-btn-download,
+    .sp-btn-qr,
+    .sp-btn-copy {
+      flex: 1;
+      min-width: 45%;
+      padding: .65rem;
+      border-radius: .6rem;
+      font-size: .82rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: background .2s, opacity .2s;
+    }
+
+    .sp-btn-download,
+    .sp-btn-qr {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      color: #fff;
+    }
+
+    .sp-btn-download:hover,
+    .sp-btn-qr:hover { opacity: .88; }
+
+    .sp-btn-copy {
+      background: #f3f4f6;
+      color: #374151;
+      flex-basis: 100%;
+    }
+
+    .sp-btn-copy:hover { background: #e5e7eb; }
+
+    .sp-btn-download:disabled,
+    .sp-btn-qr:disabled,
+    .sp-btn-copy:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    /* ── Data preview ── */
+    .sp-data-box {
+      width: 100%;
+      background: #f3f4f6;
+      border-radius: .6rem;
+      padding: .75rem 1rem;
+      font-size: .75rem;
+      color: #4b5563;
+      max-height: 160px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="sp-wrapper">
+
+  <h1>Générateur de configuration Softphone</h1>
+  <p class="sp-subtitle">Remplissez le formulaire, puis téléchargez le JSON ou le QR code prêt à scanner.</p>
+
+  <!-- Tabs -->
+  <div class="sp-tabs">
+    <button class="sp-tab active" data-tab="sip">📞 Configuration SIP</button>
+    <button class="sp-tab" data-tab="favoris">⭐ Favoris</button>
+    <button class="sp-tab" data-tab="qr">🔲 QR Code libre</button>
+  </div>
+
+  <!-- Left : inputs -->
+  <div class="sp-inputs">
+
+    <!-- SIP config -->
+    <div class="sp-panel active" id="panel-sip">
+      <div class="sp-grid-2">
+        <div class="sp-field">
+          <label class="sp-label" for="sip-username">Identifiant (username)</label>
+          <input class="sp-input" id="sip-username" type="text" placeholder="1002" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="sip-password">Mot de passe</label>
+          <div class="sp-pw-wrap">
+            <input class="sp-input" id="sip-password" type="password" placeholder="motdepasse" />
+            <button type="button" class="sp-pw-toggle" id="btn-toggle-pw" title="Afficher / masquer">👁</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label" for="sip-domain">Domaine / IP du serveur</label>
+        <input class="sp-input" id="sip-domain" type="text" placeholder="51.91.145.39" />
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label" for="sip-display">Nom affiché (display)</label>
+        <input class="sp-input" id="sip-display" type="text" placeholder="Jean Dupont" />
+      </div>
+
+      <div class="sp-grid-2">
+        <div class="sp-field">
+          <label class="sp-label" for="sip-transport">Transport</label>
+          <select class="sp-select" id="sip-transport">
+            <option value="udp">UDP</option>
+            <option value="tcp">TCP</option>
+            <option value="tls">TLS</option>
+          </select>
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="sip-port">Port</label>
+          <input class="sp-input" id="sip-port" type="number" min="1" max="65535" placeholder="5060" />
+        </div>
+      </div>
+
+      <button class="sp-btn-clear" id="btn-clear-sip">Vider les champs</button>
+    </div>
+
+    <!-- Favoris -->
+    <div class="sp-panel" id="panel-favoris">
+      <label class="sp-label">Contacts</label>
+      <div id="contacts-list"></div>
+      <button class="sp-btn-add" id="btn-add-contact">＋ Ajouter un contact</button>
+      <p class="sp-hint">BLF (Busy Lamp Field) affiche l'état de la ligne en temps réel sur le softphone.</p>
+
+      <button class="sp-btn-clear" id="btn-clear-favoris">Vider les contacts</button>
+    </div>
+
+    <!-- QR libre -->
+    <div class="sp-panel" id="panel-qr">
+      <div class="sp-subtabs">
+        <button class="sp-subtab active" data-subtab="url">🔗 URL</button>
+        <button class="sp-subtab" data-subtab="text">💬 Texte</button>
+        <button class="sp-subtab" data-subtab="contact">👤 Contact</button>
+      </div>
+
+      <div class="sp-subpanel active" id="subpanel-url">
+        <div class="sp-field">
+          <label class="sp-label" for="qr-url">URL du site</label>
+          <input class="sp-input" id="qr-url" type="text" placeholder="example.com ou https://example.com" />
+          <p class="sp-hint">Le protocole https:// sera ajouté automatiquement si absent.</p>
+        </div>
+      </div>
+
+      <div class="sp-subpanel" id="subpanel-text">
+        <div class="sp-field">
+          <label class="sp-label" for="qr-text">Contenu textuel</label>
+          <textarea class="sp-input sp-textarea" id="qr-text" placeholder="Saisissez n'importe quel texte…"></textarea>
+        </div>
+      </div>
+
+      <div class="sp-subpanel" id="subpanel-contact">
+        <div class="sp-grid-2">
+          <div class="sp-field">
+            <label class="sp-label" for="qr-c-first">Prénom</label>
+            <input class="sp-input" id="qr-c-first" type="text" placeholder="Jean" />
+          </div>
+          <div class="sp-field">
+            <label class="sp-label" for="qr-c-last">Nom</label>
+            <input class="sp-input" id="qr-c-last" type="text" placeholder="Dupont" />
+          </div>
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="qr-c-phone">Téléphone</label>
+          <input class="sp-input" id="qr-c-phone" type="tel" placeholder="+33 6 12 34 56 78" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="qr-c-email">Email</label>
+          <input class="sp-input" id="qr-c-email" type="email" placeholder="jean.dupont@exemple.fr" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="qr-c-org">Organisation</label>
+          <input class="sp-input" id="qr-c-org" type="text" placeholder="Nom de l'entreprise" />
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="qr-c-url">Site web</label>
+          <input class="sp-input" id="qr-c-url" type="url" placeholder="https://exemple.fr" />
+        </div>
+      </div>
+
+      <button class="sp-btn-clear" id="btn-clear-qr">Vider les champs</button>
+    </div>
+
+  </div>
+
+  <!-- Right : preview -->
+  <div class="sp-preview">
+    <div class="sp-canvas-box">
+      <div class="sp-placeholder" id="sp-placeholder">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+          <rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/>
+          <rect x="18" y="18" width="3" height="3"/>
+        </svg>
+        Remplissez le formulaire pour prévisualiser les données
+      </div>
+      <canvas class="sp-canvas" id="sp-canvas"></canvas>
+    </div>
+
+    <p class="sp-warning" id="sp-warning"></p>
+
+    <div class="sp-actions" id="sp-actions" style="display:none">
+      <button class="sp-btn-download" id="btn-download-json">⬇ Télécharger le JSON</button>
+      <button class="sp-btn-qr" id="btn-download-qr">📱 Télécharger le QR code</button>
+      <button class="sp-btn-copy" id="btn-copy">📋 Copier le JSON</button>
+    </div>
+
+    <pre class="sp-data-box" id="sp-data-box" style="display:none"></pre>
+  </div>
+
+</div>
+
+<script>
+  const tabs        = document.querySelectorAll('.sp-tab');
+  const panels       = document.querySelectorAll('.sp-panel');
+  const canvas        = document.getElementById('sp-canvas');
+  const placeholder   = document.getElementById('sp-placeholder');
+  const actions        = document.getElementById('sp-actions');
+  const dataBox        = document.getElementById('sp-data-box');
+  const warningBox     = document.getElementById('sp-warning');
+  const btnDownloadJson= document.getElementById('btn-download-json');
+  const btnDownloadQr  = document.getElementById('btn-download-qr');
+  const btnCopy        = document.getElementById('btn-copy');
+  const contactsList   = document.getElementById('contacts-list');
+  const btnAddContact  = document.getElementById('btn-add-contact');
+
+  let activeTab = 'sip';
+  let qr = null;
+  let contactRowId = 0;
+
+  // ── Tab switching ──
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      activeTab = tab.dataset.tab;
+      document.getElementById('panel-' + activeTab).classList.add('active');
+      updatePreview();
+    });
+  });
+
+  // ── SIP: show/hide password ──
+  document.getElementById('btn-toggle-pw').addEventListener('click', () => {
+    const pw = document.getElementById('sip-password');
+    pw.type = pw.type === 'password' ? 'text' : 'password';
+  });
+
+  // ── SIP: live update ──
+  ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port']
+    .forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
+    });
+
+  document.getElementById('btn-clear-sip').addEventListener('click', () => {
+    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('sip-transport').value = 'udp';
+    updatePreview();
+  });
+
+  // ── Favoris: contact rows ──
+  function addContactRow(name = '', phone = '', blf = false) {
+    const id = 'contact-' + (contactRowId++);
+    const row = document.createElement('div');
+    row.className = 'sp-contact-row';
+    row.dataset.id = id;
+
+    const nameInput = document.createElement('input');
+    nameInput.className = 'sp-input';
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Nom (ex: Jean Dupont)';
+    nameInput.value = name;
+    nameInput.dataset.field = 'name';
+
+    const phoneInput = document.createElement('input');
+    phoneInput.className = 'sp-input';
+    phoneInput.type = 'text';
+    phoneInput.placeholder = 'Numéro (ex: 1002)';
+    phoneInput.value = phone;
+    phoneInput.dataset.field = 'phone';
+
+    const blfLabel = document.createElement('label');
+    blfLabel.className = 'sp-blf-wrap';
+    const blfInput = document.createElement('input');
+    blfInput.type = 'checkbox';
+    blfInput.dataset.field = 'blf';
+    blfInput.checked = blf;
+    blfLabel.appendChild(blfInput);
+    blfLabel.appendChild(document.createTextNode(' BLF'));
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'sp-btn-remove';
+    removeBtn.title = 'Supprimer';
+    removeBtn.textContent = '✕';
+
+    row.append(nameInput, phoneInput, blfLabel, removeBtn);
+
+    row.querySelectorAll('input').forEach(el => {
+      el.addEventListener('input', updatePreview);
+      el.addEventListener('change', updatePreview);
+    });
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      updatePreview();
+    });
+    contactsList.appendChild(row);
+  }
+
+  btnAddContact.addEventListener('click', () => {
+    addContactRow();
+    updatePreview();
+  });
+
+  document.getElementById('btn-clear-favoris').addEventListener('click', () => {
+    contactsList.innerHTML = '';
+    addContactRow();
+    updatePreview();
+  });
+
+  // Start with two example-style empty rows
+  addContactRow();
+  addContactRow();
+
+  // ── QR libre: sub-tab switching ──
+  let qrSubTab = 'url';
+  const subtabs   = document.querySelectorAll('.sp-subtab');
+  const subpanels = document.querySelectorAll('.sp-subpanel');
+
+  subtabs.forEach(sub => {
+    sub.addEventListener('click', () => {
+      subtabs.forEach(s => s.classList.remove('active'));
+      subpanels.forEach(p => p.classList.remove('active'));
+      sub.classList.add('active');
+      qrSubTab = sub.dataset.subtab;
+      document.getElementById('subpanel-' + qrSubTab).classList.add('active');
+      updatePreview();
+    });
+  });
+
+  document.querySelectorAll('#panel-qr .sp-input, #panel-qr .sp-textarea').forEach(el => {
+    el.addEventListener('input', updatePreview);
+    el.addEventListener('change', updatePreview);
+  });
+
+  document.getElementById('btn-clear-qr').addEventListener('click', () => {
+    document.querySelectorAll('#panel-qr .sp-input, #panel-qr .sp-textarea').forEach(el => el.value = '');
+    updatePreview();
+  });
+
+  // ── Build JSON data ──
+  function buildSipData() {
+    const username = document.getElementById('sip-username').value.trim();
+    const password = document.getElementById('sip-password').value;
+    const domain   = document.getElementById('sip-domain').value.trim();
+    const display  = document.getElementById('sip-display').value.trim();
+    const transport = document.getElementById('sip-transport').value;
+    const portRaw  = document.getElementById('sip-port').value.trim();
+
+    if (!username && !password && !domain && !display && !portRaw) return null;
+
+    return {
+      username,
+      password,
+      domain,
+      display,
+      transport,
+      port: portRaw ? parseInt(portRaw, 10) : 5060
+    };
+  }
+
+  function buildFavData() {
+    const contacts = [];
+    contactsList.querySelectorAll('.sp-contact-row').forEach(row => {
+      const name  = row.querySelector('[data-field="name"]').value.trim();
+      const phone = row.querySelector('[data-field="phone"]').value.trim();
+      const blf   = row.querySelector('[data-field="blf"]').checked;
+      if (!name && !phone) return;
+      contacts.push({ name, phone, blf });
+    });
+    if (!contacts.length) return null;
+    return { contacts };
+  }
+
+  function buildGenericQrData() {
+    if (qrSubTab === 'url') {
+      let url = document.getElementById('qr-url').value.trim();
+      if (!url) return null;
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+      return url;
+    }
+
+    if (qrSubTab === 'text') {
+      const text = document.getElementById('qr-text').value.trim();
+      return text || null;
+    }
+
+    if (qrSubTab === 'contact') {
+      const f = id => document.getElementById(id).value.trim();
+      const first = f('qr-c-first'), last = f('qr-c-last'),
+            phone = f('qr-c-phone'), email = f('qr-c-email'),
+            org   = f('qr-c-org'),   url   = f('qr-c-url');
+      if (!first && !last && !phone && !email) return null;
+      return `BEGIN:VCARD\nVERSION:3.0\nFN:${first} ${last}\nN:${last};${first};;;\nORG:${org}\nTEL:${phone}\nEMAIL:${email}\nURL:${url}\nEND:VCARD`;
+    }
+
+    return null;
+  }
+
+  // ── Unified payload: what to preview, encode in the QR, download & copy ──
+  function buildPayload() {
+    if (activeTab === 'sip') {
+      const data = buildSipData();
+      if (!data) return null;
+      return {
+        preview: JSON.stringify(data, null, 2),
+        qrValue: JSON.stringify(data),
+        downloadName: 'sip-config.json',
+        downloadMime: 'application/json',
+        downloadContent: JSON.stringify(data, null, 2),
+        downloadLabel: '⬇ Télécharger le JSON',
+        copyLabel: '📋 Copier le JSON'
+      };
+    }
+
+    if (activeTab === 'favoris') {
+      const data = buildFavData();
+      if (!data) return null;
+      return {
+        preview: JSON.stringify(data, null, 2),
+        qrValue: JSON.stringify(data),
+        downloadName: 'favoris.json',
+        downloadMime: 'application/json',
+        downloadContent: JSON.stringify(data, null, 2),
+        downloadLabel: '⬇ Télécharger le JSON',
+        copyLabel: '📋 Copier le JSON'
+      };
+    }
+
+    // activeTab === 'qr'
+    const value = buildGenericQrData();
+    if (!value) return null;
+
+    const names = { url: 'qrcode-url.txt', text: 'qrcode-texte.txt', contact: 'contact.vcf' };
+    const mimes = { url: 'text/plain', text: 'text/plain', contact: 'text/vcard' };
+
+    return {
+      preview: value,
+      qrValue: value,
+      downloadName: names[qrSubTab],
+      downloadMime: mimes[qrSubTab],
+      downloadContent: value,
+      downloadLabel: qrSubTab === 'contact' ? '⬇ Télécharger le .vcf' : '⬇ Télécharger le .txt',
+      copyLabel: '📋 Copier'
+    };
+  }
+
+  // ── Preview + QR ──
+  function updatePreview() {
+    const payload = buildPayload();
+
+    if (!payload) {
+      canvas.style.display = 'none';
+      placeholder.style.display = 'block';
+      actions.style.display = 'none';
+      dataBox.style.display = 'none';
+      warningBox.style.display = 'none';
+      return;
+    }
+
+    dataBox.style.display = 'block';
+    dataBox.textContent = payload.preview;
+    actions.style.display = 'flex';
+    placeholder.style.display = 'none';
+    btnDownloadJson.textContent = payload.downloadLabel;
+    btnCopy.textContent = payload.copyLabel;
+
+    const byteLength = new Blob([payload.qrValue]).size;
+    const TOO_BIG = 1800; // conservative threshold for a comfortably-scannable QR
+
+    if (byteLength > TOO_BIG) {
+      warningBox.style.display = 'block';
+      warningBox.textContent = `⚠ Les données sont volumineuses (${byteLength} octets). Le QR code risque d'être difficile à scanner : préférez le téléchargement du fichier.`;
+      canvas.style.display = 'none';
+      btnDownloadQr.disabled = true;
+      qr = null;
+    } else {
+      warningBox.style.display = 'none';
+      btnDownloadQr.disabled = false;
+      try {
+        if (!qr) qr = new QRious({ element: canvas, size: 280, level: 'M' });
+        qr.value = payload.qrValue;
+        canvas.style.display = 'block';
+      } catch (e) {
+        canvas.style.display = 'none';
+        warningBox.style.display = 'block';
+        warningBox.textContent = '⚠ Impossible de générer le QR code pour ces données. Téléchargez le fichier à la place.';
+        btnDownloadQr.disabled = true;
+      }
+    }
+  }
+
+  // ── Download file (JSON / TXT / VCF depending on tab) ──
+  btnDownloadJson.addEventListener('click', () => {
+    const payload = buildPayload();
+    if (!payload) return;
+    const blob = new Blob([payload.downloadContent], { type: payload.downloadMime });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.download = payload.downloadName;
+    link.href = url;
+    link.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // ── Download QR PNG ──
+  btnDownloadQr.addEventListener('click', () => {
+    if (!qr || canvas.style.display === 'none') return;
+    const payload = buildPayload();
+    if (!payload) return;
+    const link = document.createElement('a');
+    link.download = payload.downloadName.replace(/\.(json|txt|vcf)$/, '') + '-qrcode.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+
+  // ── Copy to clipboard ──
+  btnCopy.addEventListener('click', () => {
+    const payload = buildPayload();
+    if (!payload) return;
+    navigator.clipboard.writeText(payload.preview).then(() => {
+      const label = payload.copyLabel;
+      btnCopy.textContent = '✅ Copié !';
+      setTimeout(() => btnCopy.textContent = label, 2000);
+    });
+  });
+
+  updatePreview();
+</script>
+</body>
+</html>

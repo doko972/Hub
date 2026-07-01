@@ -19,6 +19,7 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\SharedConversationController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
 use App\Http\Controllers\Tools\ImageConverterController;
+use App\Http\Controllers\Tools\QrCodeController;
 
 // ---- Authentification ----
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
@@ -58,6 +59,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tools/background-remover',  [BackgroundRemoverController::class, 'index'])->name('tools.background-remover');
     Route::post('/tools/background-remover', [BackgroundRemoverController::class, 'remove'])->name('tools.background-remover.remove');
     Route::get('/tools/image-converter',     [ImageConverterController::class, 'index'])->name('tools.image-converter');
+    Route::get('/tools/qr-code',             [QrCodeController::class, 'index'])->name('tools.qr-code');
 
     // Chatbot / Cortex IA
     Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');
