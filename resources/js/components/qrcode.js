@@ -56,15 +56,20 @@ export function initQrCode() {
         pw.type  = pw.type === 'password' ? 'text' : 'password';
     });
 
+    document.getElementById('qr-toggle-admin-pw').addEventListener('click', () => {
+        const pw = document.getElementById('sip-admin-password');
+        pw.type  = pw.type === 'password' ? 'text' : 'password';
+    });
+
     // ── SIP: mise à jour en temps réel ──
-    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port'].forEach(id => {
+    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port', 'sip-admin-password'].forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', updatePreview);
     });
 
     document.getElementById('qr-clear-sip').addEventListener('click', () => {
-        ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port'].forEach(id => {
+        ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port', 'sip-admin-password'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('sip-transport').value = 'udp';
@@ -143,15 +148,19 @@ export function initQrCode() {
 
     // ── Construction des données ──
     function buildSipData() {
-        const username  = document.getElementById('sip-username').value.trim();
-        const password  = document.getElementById('sip-password').value;
-        const domain    = document.getElementById('sip-domain').value.trim();
-        const display   = document.getElementById('sip-display').value.trim();
-        const transport = document.getElementById('sip-transport').value;
-        const portRaw   = document.getElementById('sip-port').value.trim();
+        const username       = document.getElementById('sip-username').value.trim();
+        const password       = document.getElementById('sip-password').value;
+        const domain         = document.getElementById('sip-domain').value.trim();
+        const display        = document.getElementById('sip-display').value.trim();
+        const transport      = document.getElementById('sip-transport').value;
+        const portRaw        = document.getElementById('sip-port').value.trim();
+        const admin_password = document.getElementById('sip-admin-password').value;
 
-        if (!username && !password && !domain && !display && !portRaw) return null;
-        return { username, password, domain, display, transport, port: portRaw ? parseInt(portRaw, 10) : 5060 };
+        if (!username && !password && !domain && !display && !portRaw && !admin_password) return null;
+
+        const data = { username, password, domain, display, transport, port: portRaw ? parseInt(portRaw, 10) : 5060 };
+        if (admin_password) data.admin_password = admin_password;
+        return data;
     }
 
     function buildFavData() {

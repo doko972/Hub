@@ -61,6 +61,14 @@
                     <input class="qr-input" id="sip-port" type="number" min="1" max="65535" placeholder="5060">
                 </div>
             </div>
+            <div class="qr-field">
+                    <label class="qr-label" for="sip-admin-password">Mot de passe admin</label>
+                    <div class="qr-pw-wrap">
+                        <input class="qr-input" id="sip-admin-password" type="password" placeholder="MonMotDePasseAdmin2024">
+                        <button type="button" class="qr-pw-toggle" id="qr-toggle-admin-pw" title="Afficher / masquer">👁</button>
+                    </div>
+                </div>
+
             <button class="qr-btn-clear" id="qr-clear-sip">Vider les champs</button>
         </div>
 
