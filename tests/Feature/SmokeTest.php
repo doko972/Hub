@@ -23,6 +23,7 @@ class SmokeTest extends TestCase
             'profil'            => ['/profile'],
             'préférences'       => ['/preferences'],
             'thème'             => ['/preferences/theme'],
+            'messagerie'        => ['/messages'],
             'outil QR code'     => ['/tools/qr-code'],
             'convertisseur'     => ['/tools/image-converter'],
             'suppression fond'  => ['/tools/background-remover'],

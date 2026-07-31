@@ -134,6 +134,21 @@
         }
     }
 
+    // Pastille de compteur (messages non lus)
+    &__badge {
+        margin-left: auto;
+        min-width: 18px;
+        padding: 0 5px;
+        border-radius: $radius-full;
+        background: $color-danger;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 18px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
     // Séparateur
     &__divider {
         border: none;
@@ -167,7 +182,7 @@
 // ---- Sections repliées ----
 // La classe vit sur <html> : posée dès le <head> par partials/sidebar-boot,
 // elle s'applique avant le rendu de la sidebar — donc sans clignotement.
-@each $section in (tools, admin) {
+@each $section in (tools, admin, presence) {
     html.is-sidebar-collapsed-#{$section} {
         .sidebar__section[data-sidebar-section='#{$section}'] {
             .sidebar__section-body {

@@ -3,8 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PreferencesController;
+use App\Http\Controllers\PresenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\Admin\ActivityLogController;
@@ -51,6 +53,30 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
+
+    // ---- Messagerie interne ----
+    // Les routes statiques précèdent /{discussion}, sinon « unread » ou
+    // « groups » seraient interprétés comme des identifiants de fil.
+    Route::prefix('messages')->name('messages.')->group(function () {
+        Route::get('/',        [DiscussionController::class, 'index'])->name('index');
+        Route::get('/unread',  [DiscussionController::class, 'unread'])->name('unread');
+        Route::post('/groups', [DiscussionController::class, 'storeGroup'])->name('groups.store');
+        Route::post('/direct/{user}', [DiscussionController::class, 'openDirect'])->name('direct');
+
+        Route::get('/{discussion}',              [DiscussionController::class, 'index'])->name('show');
+        Route::get('/{discussion}/poll',         [DiscussionController::class, 'poll'])->name('poll');
+        Route::post('/{discussion}/leave',       [DiscussionController::class, 'leave'])->name('leave');
+        Route::post('/{discussion}/participants',[DiscussionController::class, 'addParticipants'])->name('participants.add');
+
+        Route::post('/{discussion}', [DiscussionController::class, 'send'])
+            ->middleware('throttle:60,1')
+            ->name('send');
+    });
+
+    // Présence (sondage de la sidebar : ~2 requêtes/min/utilisateur)
+    Route::get('/presence', [PresenceController::class, 'index'])
+        ->middleware('throttle:60,1')
+        ->name('presence.index');
 
     // Credentials (identifiants par outil)
     Route::get('/credentials/{tool}',    [CredentialController::class, 'show'])->name('credentials.show');

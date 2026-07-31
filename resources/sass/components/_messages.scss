@@ -1,0 +1,440 @@
+// =============================================
+// MESSAGERIE INTERNE
+// =============================================
+
+.messenger {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: $spacing-md;
+    // Occupe la hauteur restante sous l'en-tête de page, pour que seul le fil
+    // défile et non la page entière.
+    height: calc(100vh - #{$navbar-height} - 150px);
+    min-height: 420px;
+
+    @media (max-width: $bp-md) {
+        grid-template-columns: 1fr;
+        height: auto;
+    }
+
+    &__list {
+        background: $color-surface;
+        border: 1px solid $color-border;
+        border-radius: $radius-md;
+        overflow-y: auto;
+        padding: $spacing-xs;
+
+        @media (max-width: $bp-md) {
+            max-height: 260px;
+        }
+    }
+
+    &__thread {
+        display: flex;
+        flex-direction: column;
+        background: $color-surface;
+        border: 1px solid $color-border;
+        border-radius: $radius-md;
+        overflow: hidden;
+        min-height: 0;
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+        padding: $spacing-sm $spacing-md;
+        border-bottom: 1px solid $color-border;
+
+        h2 {
+            font-size: $font-size-base;
+            font-weight: 600;
+            color: $color-text;
+        }
+
+        p {
+            font-size: $font-size-xs;
+            color: $color-text-muted;
+            margin: 0;
+        }
+    }
+
+    &__messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: $spacing-md;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-sm;
+        min-height: 0;
+    }
+
+    &__composer {
+        display: flex;
+        align-items: flex-end;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-md;
+        border-top: 1px solid $color-border;
+
+        textarea {
+            flex: 1;
+            resize: none;
+            min-height: 38px;
+            max-height: 140px;
+            padding: $spacing-sm;
+            border: 1px solid $color-border;
+            border-radius: $radius-sm;
+            background: $color-bg;
+            color: $color-text;
+            font: inherit;
+            font-size: $font-size-sm;
+
+            &:focus {
+                outline: 2px solid $color-primary;
+                outline-offset: -1px;
+            }
+        }
+    }
+
+    &__placeholder,
+    &__empty {
+        margin: auto;
+        padding: $spacing-xl;
+        text-align: center;
+        color: $color-text-muted;
+        font-size: $font-size-sm;
+
+        svg {
+            display: block;
+            margin: 0 auto $spacing-sm;
+            opacity: 0.35;
+        }
+    }
+}
+
+// ---- Un fil dans la colonne de gauche ----
+.thread {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm;
+    border-radius: $radius-sm;
+    color: $color-text;
+    text-decoration: none;
+    transition: background $transition-fast;
+
+    &:hover {
+        background: $color-bg;
+    }
+
+    &.is-current {
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+    }
+
+    &__avatar {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        border-radius: $radius-full;
+        background: color-mix(in srgb, var(--primary) 18%, transparent);
+        color: $color-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: $radius-full;
+            object-fit: cover;
+        }
+    }
+
+    &__dot {
+        position: absolute;
+        right: -1px;
+        bottom: -1px;
+        width: 10px;
+        height: 10px;
+        border-radius: $radius-full;
+        background: #22c55e;
+        box-shadow: 0 0 0 2px $color-surface;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        flex: 1;
+    }
+
+    &__title {
+        font-size: $font-size-sm;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__preview {
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &.has-unread &__title {
+        font-weight: 700;
+    }
+
+    &__badge {
+        flex-shrink: 0;
+        min-width: 20px;
+        padding: 0 6px;
+        border-radius: $radius-full;
+        background: $color-danger;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        line-height: 20px;
+        text-align: center;
+    }
+}
+
+// ---- Bulles de message ----
+.bubble {
+    display: flex;
+    gap: $spacing-sm;
+    max-width: 78%;
+
+    &.is-mine {
+        margin-left: auto;
+        flex-direction: row-reverse;
+    }
+
+    &__avatar {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        border-radius: $radius-full;
+        background: color-mix(in srgb, var(--primary) 18%, transparent);
+        color: $color-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        align-self: flex-end;
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: $radius-full;
+            object-fit: cover;
+        }
+    }
+
+    &__content {
+        background: $color-bg;
+        border: 1px solid $color-border;
+        border-radius: $radius-md;
+        padding: $spacing-sm $spacing-md;
+        min-width: 0;
+    }
+
+    &.is-mine &__content {
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+        border-color: color-mix(in srgb, var(--primary) 25%, transparent);
+    }
+
+    &__author {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: $color-primary;
+        margin-bottom: 2px;
+    }
+
+    &__body {
+        margin: 0;
+        font-size: $font-size-sm;
+        color: $color-text;
+        // Préserve les retours à la ligne saisis, sans laisser un mot très long
+        // déborder de la bulle.
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+
+    &__time {
+        display: block;
+        margin-top: 3px;
+        font-size: 10px;
+        color: $color-text-muted;
+    }
+}
+
+// ---- Modale « Nouvelle discussion » ----
+.new-discussion {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: var(--overlay, rgba(0, 0, 0, 0.5));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md;
+
+    &[hidden] {
+        display: none;
+    }
+
+    &__panel {
+        position: relative;
+        width: min(460px, 100%);
+        max-height: 80vh;
+        overflow-y: auto;
+        background: $color-surface;
+        border-radius: $radius-lg;
+        box-shadow: $shadow-lg;
+        padding: $spacing-lg;
+
+        h2 {
+            font-size: $font-size-lg;
+            font-weight: 600;
+            margin-bottom: $spacing-md;
+            color: $color-text;
+        }
+    }
+
+    &__close {
+        position: absolute;
+        top: $spacing-sm;
+        right: $spacing-md;
+        background: none;
+        border: 0;
+        font-size: 24px;
+        line-height: 1;
+        cursor: pointer;
+        color: $color-text-muted;
+
+        &:hover { color: $color-text; }
+    }
+
+    &__tabs {
+        display: flex;
+        gap: $spacing-xs;
+        margin-bottom: $spacing-md;
+
+        button {
+            flex: 1;
+            padding: 6px $spacing-sm;
+            border: 1px solid $color-border;
+            border-radius: $radius-sm;
+            background: none;
+            color: $color-text-muted;
+            font: inherit;
+            font-size: $font-size-sm;
+            cursor: pointer;
+
+            &.is-active {
+                background: color-mix(in srgb, var(--primary) 14%, transparent);
+                border-color: $color-primary;
+                color: $color-primary;
+                font-weight: 600;
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-sm;
+        margin-top: $spacing-md;
+    }
+}
+
+.contact-list {
+    list-style: none;
+    margin: 0 0 $spacing-sm;
+    padding: 0;
+    max-height: 320px;
+    overflow-y: auto;
+
+    &__empty {
+        padding: $spacing-md;
+        color: $color-text-muted;
+        font-size: $font-size-sm;
+        font-style: italic;
+    }
+
+    form { margin: 0; }
+}
+
+.contact {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    width: 100%;
+    padding: 6px $spacing-sm;
+    border: 0;
+    border-radius: $radius-sm;
+    background: none;
+    color: $color-text;
+    font: inherit;
+    font-size: $font-size-sm;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+        background: $color-bg;
+    }
+
+    &__avatar {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        border-radius: $radius-full;
+        background: color-mix(in srgb, var(--primary) 18%, transparent);
+        color: $color-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: $radius-full;
+            object-fit: cover;
+        }
+    }
+
+    &__dot {
+        position: absolute;
+        right: -1px;
+        bottom: -1px;
+        width: 9px;
+        height: 9px;
+        border-radius: $radius-full;
+        background: #22c55e;
+        box-shadow: 0 0 0 2px $color-surface;
+    }
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

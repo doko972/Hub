@@ -27,6 +27,7 @@ class User extends Authenticatable
         'google_access_token',
         'google_refresh_token',
         'google_token_expires_at',
+        'last_seen_at',
     ];
 
     protected $hidden = [
@@ -44,6 +45,7 @@ class User extends Authenticatable
             'is_active'               => 'boolean',
             'is_admin'                => 'boolean',
             'google_token_expires_at' => 'datetime',
+            'last_seen_at'            => 'datetime',
             // Chiffrés au repos (AES-256 via APP_KEY) : un dump de la base ne
             // doit pas donner accès aux agendas Google des utilisateurs.
             'google_access_token'     => 'encrypted',
@@ -73,6 +75,18 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    // ---- Présence ----
+
+    /**
+     * Considéré connecté si une activité a été enregistrée récemment
+     * (voir config/presence.php).
+     */
+    public function isOnline(): bool
+    {
+        return $this->last_seen_at !== null
+            && $this->last_seen_at->gt(now()->subMinutes((int) config('presence.online_within_minutes', 5)));
     }
 
     // ---- Thème d'interface ----
@@ -131,6 +145,14 @@ class User extends Authenticatable
     public function memories()
     {
         return $this->hasMany(UserMemory::class);
+    }
+
+    // ---- Messagerie interne ----
+    public function discussions()
+    {
+        return $this->belongsToMany(Discussion::class)
+            ->withPivot('last_read_at')
+            ->withTimestamps();
     }
 
     // ---- Relations dashboard ----

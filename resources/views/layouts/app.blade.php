@@ -81,6 +81,19 @@
                 Thème
             </a>
 
+            <a href="{{ route('messages.index') }}"
+               class="sidebar__link {{ request()->routeIs('messages.*') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                </svg>
+                Messagerie
+                @php $unreadTotal = \App\Services\Unread::totalFor(auth()->id()); @endphp
+                <span class="sidebar__badge"
+                      data-unread-badge
+                      data-unread-url="{{ route('messages.unread') }}"
+                      @if(!$unreadTotal) hidden @endif>{{ $unreadTotal > 99 ? '99+' : $unreadTotal }}</span>
+            </a>
+
             <a href="{{ route('profile.edit') }}"
                class="sidebar__link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -211,6 +224,8 @@
                     </div>
                 </div>
             @endif
+
+            @include('partials.sidebar-presence')
         </nav>
 
         <div class="sidebar__footer">

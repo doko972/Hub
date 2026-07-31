@@ -260,3 +260,6 @@ php artisan migrate:fresh --seed
 Déploiement : 
 APP_DEBUG=false
 APP_ENV=production
+
+
+git checkout -- public/build

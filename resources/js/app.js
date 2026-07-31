@@ -31,6 +31,8 @@ import { initQrCode }             from './components/qrcode.js';
 import { initCredentials }        from './components/credentials.js';
 import { initChatbot }            from './components/chatbot.js';
 import { initSidebarAccordion }   from './components/sidebarAccordion.js';
+import { initPresence }           from './components/presence.js';
+import { initMessages }           from './components/messages.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -48,4 +50,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initCredentials();
     initChatbot();
     initSidebarAccordion();
+    initPresence();
+    initMessages();
 });

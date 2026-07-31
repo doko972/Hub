@@ -23,6 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         // CSP à nonce : uniquement sur les réponses HTML (groupe web).
         $middleware->web(append: [
             \App\Http\Middleware\ContentSecurityPolicy::class,
+            \App\Http\Middleware\TrackLastSeen::class,
+        ]);
+
+        // Les requêtes de l'application de bureau (jeton Sanctum) comptent
+        // aussi comme une présence.
+        $middleware->api(append: [
+            \App\Http\Middleware\TrackLastSeen::class,
         ]);
 
         $middleware->alias([
