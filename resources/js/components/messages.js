@@ -64,12 +64,44 @@ function buildBubble(message) {
     time.className = 'bubble__time';
     time.textContent = message.sent_at;
 
+    if (message.edited) {
+        const edited = document.createElement('em');
+        edited.className = 'bubble__edited';
+        edited.textContent = ' · modifié';
+        time.appendChild(edited);
+    }
+
     const reactions = document.createElement('div');
     reactions.className = 'reactions';
     reactions.dataset.reactions = '';
 
     content.append(time, reactions);
     bubble.appendChild(content);
+
+    if (message.is_mine) {
+        const actions = document.createElement('div');
+        actions.className = 'bubble__actions';
+
+        if (message.body) {
+            const edit = document.createElement('button');
+            edit.type = 'button';
+            edit.dataset.editTrigger = '';
+            edit.title = 'Modifier';
+            edit.setAttribute('aria-label', 'Modifier');
+            edit.textContent = '✏️';
+            actions.appendChild(edit);
+        }
+
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.dataset.deleteTrigger = '';
+        remove.title = 'Supprimer';
+        remove.setAttribute('aria-label', 'Supprimer');
+        remove.textContent = '🗑';
+        actions.appendChild(remove);
+
+        bubble.appendChild(actions);
+    }
 
     const react = document.createElement('button');
     react.type = 'button';
@@ -255,6 +287,135 @@ function initThread() {
         if (stick) container.scrollTop = container.scrollHeight;
     }
 
+    // ---- Modification et suppression de ses propres messages ----
+    const messageUrlTemplate = container.dataset.messageUrl;
+
+    function messageUrl(id) {
+        return messageUrlTemplate.replace('__ID__', id);
+    }
+
+    function replaceBubble(id, payload) {
+        const ancienne = container.querySelector(`[data-message-id="${id}"]`);
+        if (ancienne) ancienne.replaceWith(buildBubble(payload));
+    }
+
+    function removeBubble(id) {
+        container.querySelector(`[data-message-id="${id}"]`)?.remove();
+    }
+
+    container.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-edit-trigger]');
+        if (!trigger) return;
+
+        const bubble = trigger.closest('[data-message-id]');
+        const corps  = bubble.querySelector('.bubble__body');
+        if (!corps || bubble.querySelector('.bubble__edit')) return;
+
+        const original = corps.textContent;
+
+        // Édition en place : le champ remplace le texte, la bulle reste à sa
+        // position dans le fil.
+        const form = document.createElement('form');
+        form.className = 'bubble__edit';
+
+        const champ = document.createElement('textarea');
+        champ.value = original;
+        champ.rows = 2;
+        champ.maxLength = 5000;
+
+        const actions = document.createElement('div');
+        actions.className = 'bubble__edit-actions';
+
+        const valider = document.createElement('button');
+        valider.type = 'submit';
+        valider.textContent = 'Enregistrer';
+
+        const annuler = document.createElement('button');
+        annuler.type = 'button';
+        annuler.textContent = 'Annuler';
+
+        actions.append(annuler, valider);
+        form.append(champ, actions);
+        corps.replaceWith(form);
+        champ.focus();
+        champ.setSelectionRange(champ.value.length, champ.value.length);
+
+        function restore(texte) {
+            const p = document.createElement('p');
+            p.className = 'bubble__body';
+            p.textContent = texte;
+            form.replaceWith(p);
+        }
+
+        annuler.addEventListener('click', () => restore(original));
+
+        // Échap annule, Entrée valide — mêmes réflexes que le composeur.
+        champ.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') restore(original);
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                form.requestSubmit();
+            }
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const nouveau = champ.value.trim();
+            if (!nouveau || nouveau === original) return restore(original);
+
+            valider.disabled = true;
+
+            try {
+                const response = await fetch(messageUrl(bubble.dataset.messageId), {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                    },
+                    body: JSON.stringify({ body: nouveau }),
+                });
+
+                if (!response.ok) throw new Error();
+
+                replaceBubble(bubble.dataset.messageId, (await response.json()).message);
+            } catch {
+                restore(original);
+                showToast('La modification a échoué.', 'error');
+            }
+        });
+    });
+
+    container.addEventListener('click', async (event) => {
+        const trigger = event.target.closest('[data-delete-trigger]');
+        if (!trigger) return;
+
+        if (!window.confirm('Supprimer ce message ? Les pièces jointes seront également effacées.')) return;
+
+        const bubble = trigger.closest('[data-message-id]');
+        trigger.disabled = true;
+
+        try {
+            const response = await fetch(messageUrl(bubble.dataset.messageId), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+            });
+
+            if (!response.ok) throw new Error();
+
+            removeBubble(bubble.dataset.messageId);
+        } catch {
+            trigger.disabled = false;
+            showToast('La suppression a échoué.', 'error');
+        }
+    });
+
     // ---- Réactions ----
     const reactionUrlTemplate = container.dataset.reactionUrl;
 
@@ -354,6 +515,19 @@ function initThread() {
                 const data = await response.json();
                 append(data.messages);
                 applyReactions(data.reactions);
+
+                // Modifications et suppressions faites par d'autres : elles ne
+                // peuvent pas arriver par la liste des nouveaux messages.
+                Object.entries(data.edited ?? {}).forEach(([id, payload]) => {
+                    const bulle = container.querySelector(`[data-message-id="${id}"]`);
+
+                    // On ne réécrit pas une bulle en cours d'édition chez soi.
+                    if (bulle && !bulle.querySelector('.bubble__edit')) {
+                        replaceBubble(id, payload);
+                    }
+                });
+
+                (data.deleted ?? []).forEach(removeBubble);
             }
         } catch {
             // Coupure réseau : on retentera au tour suivant.

@@ -51,7 +51,12 @@
             </div>
         @endif
 
-        <span class="bubble__time">{{ $message->created_at->locale('fr')->isoFormat('D MMM à HH:mm') }}</span>
+        <span class="bubble__time">
+            {{ $message->created_at->locale('fr')->isoFormat('D MMM à HH:mm') }}
+            @if($message->edited_at)
+                <em class="bubble__edited">· modifié</em>
+            @endif
+        </span>
 
         {{-- Réactions posées. Le conteneur existe toujours : le JS y écrit
              sans avoir à créer de structure. --}}
@@ -66,6 +71,15 @@
             @endforeach
         </div>
     </div>
+
+    @if($mine)
+        <div class="bubble__actions">
+            @if(filled($message->body))
+                <button type="button" data-edit-trigger aria-label="Modifier" title="Modifier">✏️</button>
+            @endif
+            <button type="button" data-delete-trigger aria-label="Supprimer" title="Supprimer">🗑</button>
+        </div>
+    @endif
 
     <button type="button" class="bubble__react" data-react-trigger aria-label="Réagir">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">

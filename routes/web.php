@@ -70,6 +70,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{discussion}/leave',       [DiscussionController::class, 'leave'])->name('leave');
         Route::post('/{discussion}/participants',[DiscussionController::class, 'addParticipants'])->name('participants.add');
 
+        Route::patch('/{discussion}/messages/{message}', [DiscussionController::class, 'updateMessage'])
+            ->middleware('throttle:60,1')
+            ->name('messages.update');
+
+        Route::delete('/{discussion}/messages/{message}', [DiscussionController::class, 'destroyMessage'])
+            ->middleware('throttle:60,1')
+            ->name('messages.destroy');
+
         Route::post('/{discussion}/messages/{message}/reactions', [DiscussionController::class, 'toggleReaction'])
             ->middleware('throttle:120,1')
             ->name('reactions.toggle');

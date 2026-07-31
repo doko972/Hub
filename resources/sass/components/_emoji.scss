@@ -144,9 +144,90 @@
     }
 }
 
-// Bouton « réagir », révélé au survol de la bulle
+// Boutons révélés au survol de la bulle
 .bubble {
     position: relative;
+
+    // Modifier / supprimer, sur ses propres messages
+    &__actions {
+        position: absolute;
+        top: -6px;
+        right: 22px;
+        display: flex;
+        gap: 2px;
+        opacity: 0;
+        transition: opacity $transition-fast;
+
+        button {
+            width: 24px;
+            height: 24px;
+            border: 1px solid $color-border;
+            border-radius: $radius-full;
+            background: $color-surface;
+            font-size: 11px;
+            line-height: 1;
+            cursor: pointer;
+
+            &:hover { border-color: $color-primary; }
+            &:disabled { opacity: 0.5; cursor: wait; }
+        }
+    }
+
+    &.is-mine &__actions {
+        right: auto;
+        left: 22px;
+    }
+
+    &:hover &__actions,
+    &__actions:focus-within {
+        opacity: 1;
+    }
+
+    // Édition en place
+    &__edit {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+
+        textarea {
+            width: 100%;
+            min-width: 220px;
+            resize: vertical;
+            padding: $spacing-xs $spacing-sm;
+            border: 1px solid $color-primary;
+            border-radius: $radius-sm;
+            background: $color-bg;
+            color: $color-text;
+            font: inherit;
+            font-size: $font-size-sm;
+        }
+    }
+
+    &__edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-xs;
+
+        button {
+            padding: 2px $spacing-sm;
+            border: 1px solid $color-border;
+            border-radius: $radius-sm;
+            background: $color-surface;
+            font-size: $font-size-xs;
+            cursor: pointer;
+
+            &[type='submit'] {
+                background: $color-primary;
+                border-color: $color-primary;
+                color: var(--on-primary, #fff);
+            }
+        }
+    }
+
+    &__edited {
+        font-style: normal;
+        opacity: 0.75;
+    }
 
     &__react {
         position: absolute;

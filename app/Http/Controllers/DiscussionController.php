@@ -170,6 +170,53 @@ class DiscussionController extends Controller
     }
 
     /**
+     * Modifie le texte d'un de ses messages.
+     */
+    public function updateMessage(Request $request, Discussion $discussion, DiscussionMessage $message): JsonResponse
+    {
+        $this->ensureBelongsTo($message, $discussion);
+        $this->authorize('update', $message);
+
+        // Un message réduit à une pièce jointe n'a pas de texte à modifier ;
+        // en revanche on ne doit pas pouvoir vider un message qui n'a que ça.
+        $validated = $request->validate([
+            'body' => [
+                $message->attachments()->exists() ? 'nullable' : 'required',
+                'string',
+                'max:5000',
+            ],
+        ], [
+            'body.required' => 'Le message ne peut pas être vide.',
+        ]);
+
+        $message->update([
+            'body'      => $validated['body'] ?? '',
+            'edited_at' => now(),
+        ]);
+
+        $message->load(['author', 'attachments', 'reactions']);
+
+        return response()->json(['message' => $message->toPayload($request->user()->id)]);
+    }
+
+    /**
+     * Supprime un de ses messages.
+     *
+     * Suppression douce : le sondage doit pouvoir annoncer la disparition aux
+     * autres participants, ce qu'une ligne effacée ne permettrait plus. Les
+     * pièces jointes, elles, sont réellement retirées du disque.
+     */
+    public function destroyMessage(Request $request, Discussion $discussion, DiscussionMessage $message): JsonResponse
+    {
+        $this->ensureBelongsTo($message, $discussion);
+        $this->authorize('delete', $message);
+
+        $message->delete();
+
+        return response()->json(['deleted' => $message->id]);
+    }
+
+    /**
      * Recherche de GIF, relayée par le serveur pour garder la clé côté serveur.
      */
     public function searchGifs(Request $request, GifSearch $gifs): JsonResponse
@@ -392,6 +439,7 @@ class DiscussionController extends Controller
                 // Les réactions portent sur des messages déjà affichés : elles
                 // ne peuvent pas transiter par la liste des nouveaux messages.
                 'reactions' => $this->reactionsFor($discussion, $request->user()->id),
+                ...$this->revisionsFor($discussion, $request->user()->id),
             ])
             ->header('Cache-Control', 'no-store, private');
     }
@@ -500,6 +548,45 @@ class DiscussionController extends Controller
             ->get()
             ->mapWithKeys(fn (DiscussionMessage $m) => [$m->id => $m->reactionSummary($userId)])
             ->all();
+    }
+
+    /**
+     * Refuse un message qui n'appartient pas au fil de l'URL.
+     *
+     * Sans ce contrôle, les identifiants imbriqués pourraient être mélangés
+     * pour agir sur le message d'une autre conversation.
+     */
+    private function ensureBelongsTo(DiscussionMessage $message, Discussion $discussion): void
+    {
+        abort_if($message->discussion_id !== $discussion->id, 404);
+    }
+
+    /**
+     * Messages modifiés et supprimés du fil, pour que le sondage puisse les
+     * répercuter chez les autres participants : ni les uns ni les autres
+     * n'apparaissent dans la liste des nouveaux messages.
+     *
+     * @return array{edited: array<int, array>, deleted: array<int, int>}
+     */
+    private function revisionsFor(Discussion $discussion, int $userId): array
+    {
+        $edited = $discussion->messages()
+            ->whereNotNull('edited_at')
+            ->with(['author:id,name,avatar_path', 'attachments', 'reactions'])
+            ->latest('edited_at')
+            ->limit(self::HISTORY_LIMIT)
+            ->get()
+            ->mapWithKeys(fn (DiscussionMessage $m) => [$m->id => $m->toPayload($userId)])
+            ->all();
+
+        $deleted = $discussion->messages()
+            ->onlyTrashed()
+            ->latest('deleted_at')
+            ->limit(self::HISTORY_LIMIT)
+            ->pluck('id')
+            ->all();
+
+        return ['edited' => $edited, 'deleted' => $deleted];
     }
 
     private function markAsRead(Discussion $discussion, int $userId): void

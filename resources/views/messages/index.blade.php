@@ -113,6 +113,7 @@
                  data-poll-interval="{{ (int) config('messaging.thread_poll_seconds', 5) }}"
                  {{-- __ID__ est remplacé côté client par l'identifiant du message --}}
                  data-reaction-url="{{ route('messages.reactions.toggle', [$discussion, '__ID__']) }}"
+                 data-message-url="{{ route('messages.messages.update', [$discussion, '__ID__']) }}"
                  aria-live="polite">
                 @foreach($messages as $message)
                     @include('messages.partials.bubble', ['message' => $message])
