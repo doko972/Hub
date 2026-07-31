@@ -73,11 +73,12 @@ return [
         'email' => env('CONTACT_EMAIL'),
     ],
 
-    // Recherche de GIF dans la messagerie (https://developers.google.com/tenor).
+    // Recherche de GIF dans la messagerie (https://developers.giphy.com).
     // Sans clé, l'onglet GIF n'apparaît pas : le reste fonctionne normalement.
-    'tenor' => [
-        'api_key'    => env('TENOR_API_KEY'),
-        // Identifie l'application auprès de Tenor ; sans conséquence fonctionnelle.
-        'client_key' => env('TENOR_CLIENT_KEY', 'hub'),
+    //
+    // Giphy plutôt que Tenor : ce dernier a cessé d'accepter de nouveaux
+    // clients en janvier 2026 avant d'être arrêté.
+    'giphy' => [
+        'api_key' => env('GIPHY_API_KEY'),
     ],
 ];

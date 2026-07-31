@@ -128,19 +128,19 @@
                 <ul class="composer-files" data-file-list hidden></ul>
 
                 {{-- Panneau GIF, alimenté par la recherche relayée --}}
-                @if(\App\Services\TenorGifs::isConfigured())
+                @if(\App\Services\GifSearch::isConfigured())
                     <div class="gif-panel" data-gif-panel
                          data-search-url="{{ route('messages.gifs.search') }}"
                          data-send-url="{{ route('messages.gif.send', $discussion) }}" hidden>
                         <input type="search" class="gif-panel__search" data-gif-search
                                placeholder="Rechercher un GIF…" aria-label="Rechercher un GIF">
                         <div class="gif-panel__results" data-gif-results></div>
-                        <p class="gif-panel__credit">GIF fournis par Tenor</p>
+                        <p class="gif-panel__credit">GIF fournis par GIPHY</p>
                     </div>
                 @endif
 
                 <div class="composer-row">
-                    @if(\App\Services\TenorGifs::isConfigured())
+                    @if(\App\Services\GifSearch::isConfigured())
                         <button type="button" class="composer-btn" data-gif-toggle title="Envoyer un GIF">GIF</button>
                     @endif
 

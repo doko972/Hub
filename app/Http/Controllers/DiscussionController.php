@@ -7,7 +7,7 @@ use App\Models\Discussion;
 use App\Models\DiscussionAttachment;
 use App\Models\DiscussionMessage;
 use App\Models\User;
-use App\Services\TenorGifs;
+use App\Services\GifSearch;
 use App\Services\Unread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -172,14 +172,14 @@ class DiscussionController extends Controller
     /**
      * Recherche de GIF, relayée par le serveur pour garder la clé côté serveur.
      */
-    public function searchGifs(Request $request, TenorGifs $tenor): JsonResponse
+    public function searchGifs(Request $request, GifSearch $gifs): JsonResponse
     {
         $validated = $request->validate([
             'q' => ['required', 'string', 'max:80'],
         ]);
 
         return response()
-            ->json(['gifs' => $tenor->search($validated['q'])])
+            ->json(['gifs' => $gifs->search($validated['q'])])
             ->header('Cache-Control', 'no-store, private');
     }
 
@@ -187,7 +187,7 @@ class DiscussionController extends Controller
      * Rapatrie le GIF choisi et le publie comme pièce jointe.
      *
      * Le fichier est copié chez nous plutôt que référencé : le message reste
-     * lisible si Tenor change d'URL, et l'affichage n'expose aucun participant
+     * lisible si Giphy change d'URL, et l'affichage n'expose aucun participant
      * à un tiers.
      */
     public function sendGif(Request $request, Discussion $discussion): JsonResponse
@@ -202,7 +202,7 @@ class DiscussionController extends Controller
 
         // Liste blanche d'hôtes : sans elle, cette route ferait télécharger au
         // serveur n'importe quelle URL fournie par le client (SSRF).
-        if (!TenorGifs::isAllowedUrl($validated['url'])) {
+        if (!GifSearch::isAllowedUrl($validated['url'])) {
             return response()->json(['message' => 'Source de GIF non autorisée.'], 422);
         }
 
@@ -220,7 +220,7 @@ class DiscussionController extends Controller
 
         $contenu = $response->body();
 
-        if (strlen($contenu) > TenorGifs::MAX_BYTES) {
+        if (strlen($contenu) > GifSearch::MAX_BYTES) {
             return response()->json(['message' => 'Ce GIF est trop volumineux.'], 422);
         }
 
