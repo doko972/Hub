@@ -86,7 +86,7 @@ class User extends Authenticatable
     public function isOnline(): bool
     {
         return $this->last_seen_at !== null
-            && $this->last_seen_at->gt(now()->subMinutes((int) config('presence.online_within_minutes', 5)));
+            && $this->last_seen_at->gt(now()->subMinutes((int) config('presence.online_within_minutes')));
     }
 
     // ---- Thème d'interface ----

@@ -18,7 +18,7 @@ class Presence
      */
     public static function roster(?int $currentUserId = null): Collection
     {
-        $onlineSince = now()->subMinutes((int) config('presence.online_within_minutes', 5));
+        $onlineSince = now()->subMinutes((int) config('presence.online_within_minutes'));
         $recentSince = now()->subHours((int) config('presence.recent_within_hours', 24));
 
         return User::query()
@@ -49,7 +49,7 @@ class Presence
     {
         return User::query()
             ->where('is_active', true)
-            ->where('last_seen_at', '>=', now()->subMinutes((int) config('presence.online_within_minutes', 5)))
+            ->where('last_seen_at', '>=', now()->subMinutes((int) config('presence.online_within_minutes')))
             ->count();
     }
 }
