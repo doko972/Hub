@@ -266,3 +266,5 @@ git checkout -- public/build
 php artisan migrate --force
 
 
+https://developers.giphy.com/
+Api key developpers GIF

@@ -602,20 +602,25 @@ function initUnreadBadge() {
 
     const interval = (parseInt(badge.dataset.unreadInterval, 10) || 20) * 1000;
 
-    // Dernier message déjà signalé. Amorcé au premier appel sans rien afficher :
-    // à l'ouverture du Hub, les messages en attente relèvent de la pastille, pas
-    // d'une notification. Seul ce qui arrive pendant la session mérite un toast.
-    let lastNotifiedId = null;
+    // Dernier message déjà signalé. À l'ouverture du Hub, les messages en
+    // attente relèvent de la pastille, pas d'une notification : seul ce qui
+    // arrive pendant la session mérite un toast.
+    let lastNotifiedId = 0;
+    let primed         = false;
 
     function maybeNotify(latest) {
-        if (!latest) return;
-
-        if (lastNotifiedId === null) {
-            lastNotifiedId = latest.id;
+        // L'amorçage doit avoir lieu au premier sondage abouti, y compris
+        // lorsque rien n'est en attente. Sans ce drapeau distinct, une boîte
+        // vide au chargement laissait « lastNotifiedId » à sa valeur initiale,
+        // et le tout premier message reçu était pris pour l'amorce — donc
+        // jamais signalé.
+        if (!primed) {
+            primed = true;
+            lastNotifiedId = latest?.id ?? 0;
             return;
         }
 
-        if (latest.id <= lastNotifiedId) return;
+        if (!latest || latest.id <= lastNotifiedId) return;
 
         lastNotifiedId = latest.id;
 
