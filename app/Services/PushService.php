@@ -3,18 +3,33 @@
 namespace App\Services;
 
 use App\Models\PushSubscription;
+use Illuminate\Support\Facades\Log;
 use Minishlink\WebPush\Subscription;
 use Minishlink\WebPush\WebPush;
 
 class PushService
 {
-    private WebPush $webPush;
+    private ?WebPush $webPush = null;
 
-    public function __construct()
+    /**
+     * Les notifications ne sont possibles qu'avec une paire de clés VAPID.
+     * Sans elles, l'application doit continuer à fonctionner normalement :
+     * on se contente de ne rien envoyer (voir « php artisan push:vapid-keys »).
+     */
+    public static function isConfigured(): bool
     {
-        $this->webPush = new WebPush([
+        return filled(config('services.webpush.public_key'))
+            && filled(config('services.webpush.private_key'));
+    }
+
+    /**
+     * Construction paresseuse : instancier WebPush sans clés lève une exception.
+     */
+    private function client(): WebPush
+    {
+        return $this->webPush ??= new WebPush([
             'VAPID' => [
-                'subject'    => config('services.webpush.subject'),
+                'subject'    => config('services.webpush.subject') ?: config('app.url'),
                 'publicKey'  => config('services.webpush.public_key'),
                 'privateKey' => config('services.webpush.private_key'),
             ],
@@ -22,45 +37,81 @@ class PushService
     }
 
     /**
-     * Envoyer une notification push à un abonnement.
+     * Envoie une notification à tous les appareils d'un utilisateur.
+     *
+     * Les envois sont mis en file puis vidés d'un bloc : la librairie les
+     * effectue alors en parallèle, au lieu d'un aller-retour HTTP par appareil.
      */
-    public function send(PushSubscription $sub, string $title, string $body, string $url = '/chat'): bool
+    public function sendToUser(int $userId, string $title, string $body, string $url = '/', array $options = []): void
     {
-        $subscription = Subscription::create([
+        if (!self::isConfigured()) {
+            return;
+        }
+
+        $subscriptions = PushSubscription::where('user_id', $userId)->get();
+
+        if ($subscriptions->isEmpty()) {
+            return;
+        }
+
+        $payload = json_encode(array_merge([
+            'title' => $title,
+            'body'  => $body,
+            'url'   => $url,
+            'icon'  => '/icon-192x192.png',
+            'badge' => '/icon-192x192.png',
+        ], $options));
+
+        try {
+            $client = $this->client();
+
+            foreach ($subscriptions as $sub) {
+                $client->queueNotification($this->toSubscription($sub), $payload);
+            }
+
+            foreach ($client->flush() as $report) {
+                $this->handleReport($report, $subscriptions);
+            }
+        } catch (\Throwable $e) {
+            // Une notification perdue ne doit jamais faire échouer l'action qui
+            // l'a déclenchée (l'envoi d'un message, par exemple).
+            Log::warning('Envoi de notification push échoué', ['exception' => $e]);
+        }
+    }
+
+    private function toSubscription(PushSubscription $sub): Subscription
+    {
+        return Subscription::create([
             'endpoint'        => $sub->endpoint,
             'publicKey'       => $sub->public_key,
             'authToken'       => $sub->auth_token,
             'contentEncoding' => 'aesgcm',
         ]);
-
-        $payload = json_encode([
-            'title' => $title,
-            'body'  => $body,
-            'url'   => $url,
-            'icon'  => '/images/logo-192.png',
-        ]);
-
-        $report = $this->webPush->sendOneNotification($subscription, $payload);
-
-        return $report->isSuccess();
     }
 
     /**
-     * Envoyer une notification à tous les abonnements d'un utilisateur.
+     * Purge les abonnements que le service de push déclare périmés.
+     *
+     * Sans cela, un navigateur désinstallé laisse un abonnement mort en base,
+     * réessayé à chaque message.
      */
-    public function sendToUser(int $userId, string $title, string $body, string $url = '/chat'): void
+    private function handleReport($report, $subscriptions): void
     {
-        $subscriptions = PushSubscription::where('user_id', $userId)->get();
-
-        foreach ($subscriptions as $sub) {
-            try {
-                $this->send($sub, $title, $body, $url);
-            } catch (\Exception $e) {
-                // Abonnement expiré ou invalide — on le supprime
-                if (str_contains($e->getMessage(), '410') || str_contains($e->getMessage(), '404')) {
-                    $sub->delete();
-                }
-            }
+        if ($report->isSuccess()) {
+            return;
         }
+
+        if ($report->isSubscriptionExpired()) {
+            $endpoint = $report->getEndpoint();
+
+            $subscriptions->firstWhere('endpoint', $endpoint)?->delete();
+
+            return;
+        }
+
+        Log::info('Notification push refusée par le service', [
+            'endpoint' => $report->getEndpoint(),
+            'reason'   => $report->getReason(),
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\NotifyNewDiscussionMessage;
 use App\Models\Discussion;
 use App\Models\User;
 use App\Services\Unread;
@@ -127,6 +128,12 @@ class DiscussionController extends Controller
 
         $discussion->update(['last_message_at' => $message->created_at]);
         $this->markAsRead($discussion, $request->user()->id);
+
+        // afterResponse() plutôt qu'une vraie mise en file : les notifications
+        // partent une fois la réponse envoyée, sans imposer de « queue:work »
+        // en production. Le jour où un worker tournera, retirer l'appel suffit
+        // à basculer sur la file.
+        NotifyNewDiscussionMessage::dispatch($message->id)->afterResponse();
 
         $message->setRelation('author', $request->user());
 

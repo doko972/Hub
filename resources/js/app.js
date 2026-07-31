@@ -33,6 +33,7 @@ import { initChatbot }            from './components/chatbot.js';
 import { initSidebarAccordion }   from './components/sidebarAccordion.js';
 import { initPresence }           from './components/presence.js';
 import { initMessages }           from './components/messages.js';
+import { initPushNotifications }  from './components/pushNotifications.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -52,4 +53,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initSidebarAccordion();
     initPresence();
     initMessages();
+    initPushNotifications();
 });

@@ -8,7 +8,7 @@ use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\UpdateController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\ImageController;
-use App\Http\Controllers\Api\PushSubscriptionController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Api\SystemPromptController;
 use Illuminate\Support\Facades\Route;
 

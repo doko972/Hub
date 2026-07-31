@@ -263,3 +263,6 @@ APP_ENV=production
 
 
 git checkout -- public/build
+php artisan migrate --force
+
+

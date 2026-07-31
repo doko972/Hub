@@ -7,6 +7,7 @@ use App\Http\Controllers\DiscussionController;
 use App\Http\Controllers\ForgotPasswordController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\PresenceController;
+use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ResetPasswordController;
 use App\Http\Controllers\Admin\ActivityLogController;
@@ -71,6 +72,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/{discussion}', [DiscussionController::class, 'send'])
             ->middleware('throttle:60,1')
             ->name('send');
+    });
+
+    // Notifications push — mêmes actions que /api/push/*, mais authentifiées
+    // par session : les pages du Hub n'ont pas de jeton Sanctum.
+    Route::prefix('push')->name('push.')->group(function () {
+        Route::get('/vapid-key',   [PushSubscriptionController::class, 'vapidKey'])->name('vapid');
+        Route::post('/subscribe',  [PushSubscriptionController::class, 'subscribe'])->name('subscribe');
+        Route::post('/unsubscribe',[PushSubscriptionController::class, 'unsubscribe'])->name('unsubscribe');
     });
 
     // Présence (sondage de la sidebar : ~2 requêtes/min/utilisateur)

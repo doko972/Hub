@@ -4,7 +4,7 @@
     "name": "_commonjsHelpers"
   },
   "resources/js/app.js": {
-    "file": "assets/app-B2ck8nFX.js",
+    "file": "assets/app-qamJV0Ak.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -12,7 +12,7 @@
       "__commonjsHelpers-BLfXAjvB.js"
     ],
     "css": [
-      "assets/app-DFivefCi.css"
+      "assets/app-DjY-xA8a.css"
     ]
   },
   "resources/js/chat.js": {

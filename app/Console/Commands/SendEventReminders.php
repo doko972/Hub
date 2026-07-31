@@ -44,10 +44,13 @@ class SendEventReminders extends Command
                     $body .= " · 📍 {$reminder->event_location}";
                 }
 
+                // URL explicite : le service ne suppose plus que toute
+                // notification renvoie vers le chat.
                 $push->sendToUser(
                     $reminder->user_id,
                     "🔔 {$reminder->event_title}",
-                    $body
+                    $body,
+                    '/chat'
                 );
 
                 $reminder->update(['sent_at' => now()]);

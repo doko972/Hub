@@ -89,22 +89,63 @@ self.addEventListener('push', (event) => {
     let data = {};
     try { data = event.data.json(); } catch { data = { title: 'Hub', body: event.data.text() }; }
 
-    event.waitUntil(
-        self.registration.showNotification(data.title || 'Hub', {
-            body:    data.body    || '',
-            icon:    data.icon    || '/icon-192x192.png',
-            badge:   data.badge   || '/icon-192x192.png',
-            data:    data.url     || '/dashboard',
-            vibrate: [100, 50, 100],
-        })
-    );
+    const url = data.url || '/';
+
+    event.waitUntil((async () => {
+        // Ne pas notifier quelqu'un qui a déjà la page sous les yeux : il voit
+        // le message arriver. Le serveur ne peut pas le savoir, le service
+        // worker si.
+        const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+        const dejaOuvert = windows.some((client) => {
+            try {
+                return client.focused && new URL(client.url).pathname === url;
+            } catch {
+                return false;
+            }
+        });
+
+        if (dejaOuvert) return;
+
+        await self.registration.showNotification(data.title || 'Hub', {
+            body:     data.body  || '',
+            icon:     data.icon  || '/icon-192x192.png',
+            badge:    data.badge || '/icon-192x192.png',
+            // tag regroupe les notifications d'un même fil, renotify permet
+            // quand même de resignaler l'arrivée d'un nouveau message.
+            tag:      data.tag,
+            renotify: Boolean(data.renotify && data.tag),
+            data:     url,
+            vibrate:  [100, 50, 100],
+        });
+    })());
 });
 
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    event.waitUntil(
-        clients.openWindow(event.notification.data || '/dashboard')
-    );
+
+    const url = event.notification.data || '/';
+
+    event.waitUntil((async () => {
+        const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+
+        // Réutiliser un onglet déjà ouvert sur le Hub plutôt que d'en empiler
+        // un nouveau à chaque notification.
+        for (const client of windows) {
+            try {
+                if (new URL(client.url).origin === self.location.origin) {
+                    await client.focus();
+                    if (new URL(client.url).pathname !== url && 'navigate' in client) {
+                        await client.navigate(url);
+                    }
+                    return;
+                }
+            } catch {
+                // URL inexploitable : on passe au client suivant.
+            }
+        }
+
+        await self.clients.openWindow(url);
+    })());
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────────

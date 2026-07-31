@@ -2,6 +2,22 @@
 // MESSAGERIE INTERNE
 // =============================================
 
+.page-header__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+}
+
+.push-toggle {
+    font-size: $font-size-xs;
+
+    &.is-active {
+        color: $color-primary;
+        border-color: $color-primary;
+    }
+}
+
 .messenger {
     display: grid;
     grid-template-columns: 280px 1fr;
