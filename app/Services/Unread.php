@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\DiscussionMessage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Comptage des messages non lus.
@@ -36,6 +38,42 @@ class Unread
             ->groupBy('m.discussion_id')
             ->pluck('total', 'm.discussion_id')
             ->all();
+    }
+
+    /**
+     * Le message non lu le plus récent, de quoi composer une notification
+     * dans l'application. Null si tout est lu.
+     */
+    public static function latestFor(int $userId): ?array
+    {
+        $identifiant = self::baseQuery($userId)
+            ->orderByDesc('m.id')
+            ->value('m.id');
+
+        if (!$identifiant) {
+            return null;
+        }
+
+        $message = DiscussionMessage::with(['author', 'discussion.participants'])->find($identifiant);
+
+        if (!$message || !$message->discussion) {
+            return null;
+        }
+
+        $discussion = $message->discussion;
+
+        return [
+            'id'            => $message->id,
+            'discussion_id' => $discussion->id,
+            // Titre du fil vu par ce destinataire : nom du groupe, ou de l'auteur.
+            'title'         => $discussion->titleFor($userId),
+            'author'        => $message->author?->name ?? 'Utilisateur supprimé',
+            'initials'      => $message->author?->initials() ?? '?',
+            'avatar'        => $message->author?->avatarUrl(),
+            'is_group'      => $discussion->is_group,
+            'excerpt'       => Str::limit($message->body, 90),
+            'url'           => "/messages/{$discussion->id}",
+        ];
     }
 
     private static function baseQuery(int $userId)

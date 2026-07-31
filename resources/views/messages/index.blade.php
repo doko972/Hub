@@ -110,6 +110,7 @@
                  data-poll-url="{{ route('messages.poll', $discussion) }}"
                  data-send-url="{{ route('messages.send', $discussion) }}"
                  data-last-id="{{ $messages->last()->id ?? 0 }}"
+                 data-poll-interval="{{ (int) config('messaging.thread_poll_seconds', 5) }}"
                  aria-live="polite">
                 @foreach($messages as $message)
                     @include('messages.partials.bubble', ['message' => $message])

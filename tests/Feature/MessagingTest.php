@@ -179,6 +179,37 @@ class MessagingTest extends TestCase
             ->assertJsonPath("per_discussion.{$discussion->id}", 1);
     }
 
+    public function test_l_endpoint_decrit_le_dernier_message_non_lu(): void
+    {
+        $alice = $this->user('Alice');
+        $bob   = $this->user('Bob');
+
+        $discussion = Discussion::findOrCreateDirect($alice->id, $bob->id);
+        $discussion->messages()->create(['user_id' => $alice->id, 'body' => 'Premier']);
+        $dernier = $discussion->messages()->create(['user_id' => $alice->id, 'body' => 'Le plus récent']);
+
+        $this->actingAs($bob)->getJson(route('messages.unread'))
+            ->assertStatus(200)
+            ->assertJsonPath('latest.id', $dernier->id)
+            ->assertJsonPath('latest.author', 'Alice')
+            ->assertJsonPath('latest.excerpt', 'Le plus récent')
+            ->assertJsonPath('latest.url', "/messages/{$discussion->id}");
+    }
+
+    public function test_aucun_dernier_message_a_signaler_quand_tout_est_lu(): void
+    {
+        $alice = $this->user('Alice');
+        $bob   = $this->user('Bob');
+
+        $discussion = Discussion::findOrCreateDirect($alice->id, $bob->id);
+        // Message écrit par Bob lui-même : jamais « non lu » pour lui.
+        $discussion->messages()->create(['user_id' => $bob->id, 'body' => 'Mon propre message']);
+
+        $this->actingAs($bob)->getJson(route('messages.unread'))
+            ->assertStatus(200)
+            ->assertJsonPath('latest', null);
+    }
+
     // ---- Groupes ----
 
     public function test_un_groupe_se_cree_avec_ses_membres_et_son_auteur(): void

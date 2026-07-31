@@ -179,6 +179,9 @@ class DiscussionController extends Controller
             ->json([
                 'total'          => Unread::totalFor($request->user()->id),
                 'per_discussion' => Unread::perDiscussionFor($request->user()->id),
+                // De quoi composer une notification discrète pour le dernier
+                // message reçu, sans second aller-retour.
+                'latest'         => Unread::latestFor($request->user()->id),
             ])
             ->header('Cache-Control', 'no-store, private');
     }

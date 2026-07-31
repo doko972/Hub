@@ -91,6 +91,7 @@
                 <span class="sidebar__badge"
                       data-unread-badge
                       data-unread-url="{{ route('messages.unread') }}"
+                      data-unread-interval="{{ (int) config('messaging.unread_poll_seconds', 20) }}"
                       @if(!$unreadTotal) hidden @endif>{{ $unreadTotal > 99 ? '99+' : $unreadTotal }}</span>
             </a>
 

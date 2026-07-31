@@ -9,7 +9,7 @@
  * est du texte rédigé par un utilisateur, jamais du HTML.
  */
 
-const POLL_INTERVAL = 5000;
+import { showMessageToast } from './toast.js';
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -72,6 +72,7 @@ function initThread() {
 
     const pollUrl  = container.dataset.pollUrl;
     const sendUrl  = container.dataset.sendUrl;
+    const interval = (parseInt(container.dataset.pollInterval, 10) || 5) * 1000;
     const textarea = composer.querySelector('textarea');
     let lastId     = parseInt(container.dataset.lastId, 10) || 0;
     let polling    = false;
@@ -169,7 +170,7 @@ function initThread() {
         textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
     });
 
-    setInterval(poll, POLL_INTERVAL);
+    setInterval(poll, interval);
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) poll();
     });
@@ -206,10 +207,35 @@ function initModal() {
     });
 }
 
-// ---- Pastille de non-lus dans la sidebar ----
+// ---- Pastille de non-lus + notification discrète ----
 function initUnreadBadge() {
     const badge = document.querySelector('[data-unread-badge]');
     if (!badge) return;
+
+    const interval = (parseInt(badge.dataset.unreadInterval, 10) || 20) * 1000;
+
+    // Dernier message déjà signalé. Amorcé au premier appel sans rien afficher :
+    // à l'ouverture du Hub, les messages en attente relèvent de la pastille, pas
+    // d'une notification. Seul ce qui arrive pendant la session mérite un toast.
+    let lastNotifiedId = null;
+
+    function maybeNotify(latest) {
+        if (!latest) return;
+
+        if (lastNotifiedId === null) {
+            lastNotifiedId = latest.id;
+            return;
+        }
+
+        if (latest.id <= lastNotifiedId) return;
+
+        lastNotifiedId = latest.id;
+
+        // Inutile de signaler une conversation qu'on a déjà sous les yeux.
+        if (window.location.pathname === latest.url) return;
+
+        showMessageToast(latest);
+    }
 
     async function refresh() {
         if (document.hidden) return;
@@ -221,15 +247,19 @@ function initUnreadBadge() {
 
             if (!response.ok) return;
 
-            const { total } = await response.json();
+            const { total, latest } = await response.json();
+
             badge.textContent = total > 99 ? '99+' : total;
             badge.hidden = total === 0;
+
+            maybeNotify(latest);
         } catch {
             // Sans réponse, on conserve la dernière valeur connue.
         }
     }
 
-    setInterval(refresh, 30000);
+    refresh();
+    setInterval(refresh, interval);
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) refresh();
     });
