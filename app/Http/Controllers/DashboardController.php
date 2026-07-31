@@ -16,19 +16,29 @@ class DashboardController extends Controller
             ->orderBy('name')
             ->with(['tools' => function ($q) use ($user) {
                 $q->where('is_active', true)->orderBy('sort_order')->orderBy('title');
+
+                // ---- 1. Droits d'accès : ce que l'utilisateur a le droit de voir ----
+                // Un administrateur voit tout ; les autres, leurs outils assignés,
+                // ou les outils publics à défaut d'assignation.
                 if (!$user->isAdmin()) {
-                    // Si l'utilisateur a des outils assignés → uniquement les siens
-                    // Sinon → outils publics (repli)
                     if ($user->tools()->exists()) {
                         $q->whereHas('users', fn($q2) => $q2->where('users.id', $user->id));
                     } else {
                         $q->where('is_public', true);
                     }
-                    // Filtre de sélection personnelle (si l'utilisateur a des préférences)
-                    $selectedIds = $user->selectedTools()->allRelatedIds();
-                    if ($selectedIds->isNotEmpty()) {
-                        $q->whereIn('id', $selectedIds);
-                    }
+                }
+
+                // ---- 2. Préférence d'affichage : ce qu'il souhaite voir ----
+                // S'applique à tout le monde, administrateurs compris : choisir
+                // ses vignettes relève du confort, pas des droits. Ce filtre
+                // était auparavant imbriqué dans le test ci-dessus, si bien que
+                // la sélection d'un administrateur restait sans effet.
+                //
+                // Une sélection vide signifie « aucune préférence » : on affiche
+                // alors tout ce qui est accessible.
+                $selectedIds = $user->selectedTools()->allRelatedIds();
+                if ($selectedIds->isNotEmpty()) {
+                    $q->whereIn('id', $selectedIds);
                 }
             }])
             ->get()
