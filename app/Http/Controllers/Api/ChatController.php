@@ -674,7 +674,7 @@ class ChatController extends Controller
                             $calendar    = new GoogleCalendarService($user);
                             $events      = $calendar->getEvents($args['time_min'], $args['time_max'], 50);
                             $periodLabel = $args['period_label'];
-                            $recipient   = $user->email ?: env('CONTACT_EMAIL');
+                            $recipient   = $user->email ?: config('services.contact.email');
 
                             \Mail::to($recipient)->send(new \App\Mail\CalendarSummaryMail(
                                 $user,

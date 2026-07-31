@@ -35,11 +35,20 @@ class ProfileController extends Controller
             'email' => $validated['email'],
         ];
 
-        if (!empty($validated['password'])) {
+        $passwordChanged = !empty($validated['password']);
+
+        if ($passwordChanged) {
             $updateData['password'] = $validated['password'];
         }
 
         $user->update($updateData);
+
+        // Changement de mot de passe = révocation des jetons d'API émis avant.
+        // Un nouveau jeton est régénéré automatiquement à l'ouverture du chat.
+        if ($passwordChanged) {
+            $user->tokens()->delete();
+            $request->session()->forget(['api_token', 'api_token_expires_at']);
+        }
 
         return redirect()->route('profile.edit')
             ->with('success', 'Profil mis à jour avec succès.');

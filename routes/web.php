@@ -68,14 +68,15 @@ Route::middleware(['auth'])->group(function () {
     // Chatbot / Cortex IA
     Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');
     Route::get('/chat/c/{conversation}', [CortexWebController::class, 'show'])->name('cortex.conversation');
+
+    // Google OAuth — sous 'auth' : le compte Google est rattaché à l'utilisateur
+    // de la session, jamais à un identifiant fourni dans l'URL.
+    Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 });
 
 // ---- Conversation partagée (publique) ----
 Route::get('/share/{token}', [SharedConversationController::class, 'show'])->name('share.conversation');
-
-// ---- Google OAuth ----
-Route::get('/auth/google',          [GoogleAuthController::class, 'redirect'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 
 // ---- Administration (auth + admin requis) ----
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])

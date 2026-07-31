@@ -16,10 +16,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | Routes publiques (sans authentification)
 |--------------------------------------------------------------------------
+|
+| L'inscription libre a été retirée : les comptes du Hub sont créés par un
+| administrateur (admin/users). Une route /register publique permettait à
+| n'importe qui d'ouvrir un compte actif et de consommer les crédits IA.
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
 
 /*
 |--------------------------------------------------------------------------

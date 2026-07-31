@@ -26,7 +26,7 @@ class SendEventReminders extends Command
             try {
                 // Email — toujours vers l'utilisateur, BCC vers l'admin si configuré
                 $recipient    = $reminder->user->email;
-                $contactEmail = env('CONTACT_EMAIL');
+                $contactEmail = config('services.contact.email');
                 $mailer = Mail::to($recipient);
                 if ($contactEmail && $contactEmail !== $recipient) {
                     $mailer = $mailer->bcc($contactEmail);

@@ -37,7 +37,7 @@ class SendWeeklySummary extends Command
                 $periodLabel = 'Semaine du ' . $monday->format('d/m') . ' au ' . $sunday->format('d/m/Y');
 
                 // Email — toujours vers l'utilisateur, BCC vers l'admin si configuré
-                $contactEmail = env('CONTACT_EMAIL');
+                $contactEmail = config('services.contact.email');
                 $mailer = Mail::to($user->email);
                 if ($contactEmail && $contactEmail !== $user->email) {
                     $mailer = $mailer->bcc($contactEmail);

@@ -20,7 +20,7 @@ class BackgroundRemoverController extends Controller
         ]);
 
         $response = Http::withHeaders([
-            'X-Api-Key' => env('REMOVEBG_API_KEY'),
+            'X-Api-Key' => config('services.removebg.api_key'),
         ])->attach(
             'image_file',
             file_get_contents($request->file('image')->getRealPath()),

@@ -85,6 +85,8 @@ class UserController extends Controller
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
 
+        $originalRole = $user->role;
+
         $updateData = [
             'name'      => $validated['name'],
             'email'     => $validated['email'],
@@ -105,6 +107,17 @@ class UserController extends Controller
         $user->update($updateData);
         $user->tools()->sync($validated['tools'] ?? []);
 
+        // Une désactivation, une rétrogradation ou un changement de mot de passe
+        // doit couper les accès en cours : les jetons d'API survivent sinon à
+        // la session et restent valables jusqu'à leur expiration.
+        $mustRevokeTokens = !$updateData['is_active']
+            || $updateData['role'] !== $originalRole
+            || !empty($validated['password']);
+
+        if ($mustRevokeTokens) {
+            $user->tokens()->delete();
+        }
+
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilisateur "' . $user->name . '" mis à jour.');
     }
@@ -115,6 +128,9 @@ class UserController extends Controller
             return back()->withErrors(['error' => 'Impossible de supprimer votre propre compte.']);
         }
 
+        // Les jetons d'API ne sont pas liés par clé étrangère : sans suppression
+        // explicite ils resteraient en base après la suppression du compte.
+        $user->tokens()->delete();
         $user->tools()->detach();
         $user->delete();
 

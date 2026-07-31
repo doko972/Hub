@@ -1032,11 +1032,28 @@
             return html;
         }
 
+        /**
+         * Nettoie du HTML avant injection dans le DOM.
+         * Sans DOMPurify disponible, on refuse d'injecter du HTML : le texte
+         * est échappé. Mieux vaut un rendu dégradé qu'une XSS.
+         */
+        function sanitizeHtml(html) {
+            if (!window.DOMPurify) {
+                console.warn('DOMPurify indisponible — rendu HTML désactivé.');
+                return escapeHtml(html);
+            }
+            return window.DOMPurify.sanitize(html, {
+                USE_PROFILES: { html: true },
+                ADD_ATTR: ['target', 'rel'],
+            });
+        }
+
         function formatMarkdown(text) {
             if (!text) return '';
 
-            // Parser avec marked
-            let html = marked.parse(text);
+            // Parser avec marked, puis assainir AVANT d'ajouter nos propres
+            // éléments de confiance (boutons "Copier" avec onclick).
+            let html = sanitizeHtml(marked.parse(text));
 
             // Ajouter wrapper et bouton copier aux blocs de code
             html = html.replace(/<pre><code class="language-(\w+)">/g,
@@ -1922,8 +1939,10 @@
                 } catch (e) { }
             } else {
                 // Ouvrir la fenêtre d'auth Google
+                // L'identification se fait via la session (le popup partage les
+                // cookies) : aucun token ne transite par l'URL.
                 const popup = window.open(
-                    `/auth/google?token=${AUTH_TOKEN}`,
+                    '/auth/google',
                     'google_auth',
                     'width=600,height=700,left=200,top=100'
                 );

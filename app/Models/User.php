@@ -44,6 +44,10 @@ class User extends Authenticatable
             'is_active'               => 'boolean',
             'is_admin'                => 'boolean',
             'google_token_expires_at' => 'datetime',
+            // Chiffrés au repos (AES-256 via APP_KEY) : un dump de la base ne
+            // doit pas donner accès aux agendas Google des utilisateurs.
+            'google_access_token'     => 'encrypted',
+            'google_refresh_token'    => 'encrypted',
         ];
     }
 

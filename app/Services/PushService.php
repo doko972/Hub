@@ -14,9 +14,9 @@ class PushService
     {
         $this->webPush = new WebPush([
             'VAPID' => [
-                'subject'    => env('VAPID_SUBJECT', env('APP_URL')),
-                'publicKey'  => env('VAPID_PUBLIC_KEY'),
-                'privateKey' => env('VAPID_PRIVATE_KEY'),
+                'subject'    => config('services.webpush.subject'),
+                'publicKey'  => config('services.webpush.public_key'),
+                'privateKey' => config('services.webpush.private_key'),
             ],
         ]);
     }

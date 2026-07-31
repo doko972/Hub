@@ -12,32 +12,6 @@ use Illuminate\Validation\ValidationException;
 class AuthController extends Controller
 {
     /**
-     * Inscription d'un nouvel utilisateur
-     */
-    public function register(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
-
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Inscription réussie',
-            'user' => $user,
-            'token' => $token,
-        ], 201);
-    }
-
-    /**
      * Connexion d'un utilisateur
      */
     public function login(Request $request): JsonResponse
@@ -52,6 +26,15 @@ class AuthController extends Controller
         if (!$user || !Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Les identifiants sont incorrects.'],
+            ]);
+        }
+
+        // Même règle que sur le web : un compte désactivé n'obtient pas de jeton.
+        if (!$user->is_active) {
+            $user->tokens()->delete();
+
+            throw ValidationException::withMessages([
+                'email' => ['Votre compte est désactivé.'],
             ]);
         }
 

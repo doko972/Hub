@@ -255,3 +255,8 @@ php artisan migrate:fresh --seed
 - **SASS `@import`** utilisé à la place de `@use` pour permettre le partage des variables entre tous les fichiers composants.
 - **ES6 modules** : chaque fonctionnalité JS est dans son propre fichier, exportée et importée dans `app.js`.
 - **Aucune dépendance JS externe** : pas de jQuery, pas d'Alpine, pas de Vue.
+
+
+Déploiement : 
+APP_DEBUG=false
+APP_ENV=production

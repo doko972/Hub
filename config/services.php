@@ -54,4 +54,22 @@ return [
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect'      => env('GOOGLE_REDIRECT_URI'),
     ],
+
+    // (La clé OpenAI est gérée par config/openai.php, publié par openai-php/laravel.)
+
+    'removebg' => [
+        'api_key' => env('REMOVEBG_API_KEY'),
+    ],
+
+    // Notifications push navigateur (VAPID)
+    'webpush' => [
+        'subject'     => env('VAPID_SUBJECT', env('APP_URL')),
+        'public_key'  => env('VAPID_PUBLIC_KEY'),
+        'private_key' => env('VAPID_PRIVATE_KEY'),
+    ],
+
+    // Adresse mise en copie des emails de rappel / résumé
+    'contact' => [
+        'email' => env('CONTACT_EMAIL'),
+    ],
 ];

@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Auth;
 class GoogleAuthController extends Controller
 {
     /**
-     * Rediriger vers Google pour l'autorisation
+     * Rediriger vers Google pour l'autorisation.
+     *
+     * L'utilisateur est identifié par sa session (route sous middleware auth).
+     * Aucun token d'API ne doit transiter par l'URL : cela permettrait de
+     * rattacher le compte Google d'une victime au compte d'un attaquant.
      */
     public function redirect(Request $request)
     {
-        $request->session()->put('auth_token', $request->query('token'));
-
         return Socialite::driver('google')
             ->scopes(['https://www.googleapis.com/auth/calendar.events'])
             ->with(['access_type' => 'offline', 'prompt' => 'consent'])
@@ -29,24 +31,12 @@ class GoogleAuthController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
 
+            // Seule la session fait foi : le compte Google autorisé est rattaché
+            // à l'utilisateur réellement connecté dans ce navigateur.
             $user = Auth::user();
 
             if (!$user) {
-                $token = $request->session()->get('auth_token');
-                if ($token && str_contains($token, '|')) {
-                    [$id, $rawToken] = explode('|', $token, 2);
-                    $user = \App\Models\User::where('id', function ($query) use ($id, $rawToken) {
-                        $query->select('tokenable_id')
-                            ->from('personal_access_tokens')
-                            ->where('id', $id)
-                            ->where('token', hash('sha256', $rawToken))
-                            ->limit(1);
-                    })->first();
-                }
-            }
-
-            if (!$user) {
-                return redirect()->route('login')->with('error', 'Utilisateur non trouvé');
+                return redirect()->route('login')->with('error', 'Session expirée, veuillez vous reconnecter.');
             }
 
             $user->update([

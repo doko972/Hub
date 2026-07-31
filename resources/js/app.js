@@ -5,6 +5,13 @@
 
 import '../sass/app.scss';
 
+// Sanitizer HTML — exposé globalement car le rendu Markdown vit dans des
+// scripts inline (cortex/chat.blade.php et shared/conversation.blade.php).
+// Les modules Vite s'exécutent avant DOMContentLoaded : la variable est donc
+// disponible pour tout code qui s'exécute à partir de cet évènement.
+import DOMPurify from 'dompurify';
+window.DOMPurify = DOMPurify;
+
 import { initBurger }        from './components/burger.js';
 import { initDropdowns }     from './components/dropdown.js';
 import { initTooltips }      from './components/tooltip.js';

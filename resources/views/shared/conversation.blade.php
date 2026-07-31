@@ -51,7 +51,9 @@
                             <span class="shared-user-initial">U</span>
                         @endif
                     </div>
-                    <div class="message-content" data-role="{{ $message->role }}" data-content="{{ htmlspecialchars($message->content, ENT_QUOTES, 'UTF-8') }}">
+                    {{-- Blade échappe déjà la valeur : pas de htmlspecialchars() supplémentaire,
+                         sinon le contenu arrive double-échappé côté JS ("&lt;" affiché tel quel). --}}
+                    <div class="message-content" data-role="{{ $message->role }}" data-content="{{ $message->content }}">
                         @if($message->image_url)
                             <img src="{{ $message->image_url }}" class="message-image" alt="Image">
                         @endif
@@ -79,9 +81,30 @@
             gfm: true
         });
 
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        /**
+         * Page publique : le contenu vient de l'IA et de l'utilisateur qui a
+         * partagé. Il est donc entièrement non fiable et doit être assaini.
+         */
+        function sanitizeHtml(html) {
+            if (!window.DOMPurify) {
+                console.warn('DOMPurify indisponible — rendu HTML désactivé.');
+                return escapeHtml(html);
+            }
+            return window.DOMPurify.sanitize(html, {
+                USE_PROFILES: { html: true },
+                ADD_ATTR: ['target', 'rel'],
+            });
+        }
+
         function formatMarkdown(text) {
             if (!text) return '';
-            let html = marked.parse(text);
+            let html = sanitizeHtml(marked.parse(text));
             html = html.replace(/<pre><code class="language-(\w+)">/g,
                 '<div class="code-block-wrapper"><button class="copy-btn" onclick="copySharedCode(this)">Copier</button><pre><code class="language-$1">'
             );
@@ -100,19 +123,22 @@
             });
         }
 
-        // Rendre le markdown pour chaque message
-        document.querySelectorAll('.message-content[data-content]').forEach(div => {
-            const role = div.dataset.role;
-            const raw = div.dataset.content;
-            if (role === 'assistant') {
-                div.innerHTML = (div.querySelector('img')?.outerHTML || '') + formatMarkdown(raw);
-            } else {
-                const img = div.querySelector('img');
-                const escaped = raw.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#039;/g, "'");
-                const textDiv = document.createElement('div');
-                textDiv.textContent = escaped;
-                div.innerHTML = (img?.outerHTML || '') + textDiv.innerHTML;
-            }
+        // Rendre le markdown pour chaque message.
+        // On attend DOMContentLoaded pour garantir que le bundle Vite (et donc
+        // window.DOMPurify) a été exécuté avant tout rendu HTML.
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.message-content[data-content]').forEach(div => {
+                const role = div.dataset.role;
+                const raw = div.dataset.content;
+                if (role === 'assistant') {
+                    div.innerHTML = (div.querySelector('img')?.outerHTML || '') + formatMarkdown(raw);
+                } else {
+                    const img = div.querySelector('img');
+                    const textDiv = document.createElement('div');
+                    textDiv.textContent = raw;
+                    div.innerHTML = (img?.outerHTML || '') + textDiv.innerHTML;
+                }
+            });
         });
     </script>
 

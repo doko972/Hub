@@ -46,7 +46,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // 7 jours par défaut. Des jetons sans expiration restent exploitables
+    // indéfiniment en cas de fuite (le jeton du chat web vit dans la page HTML).
+    'expiration' => (int) env('SANCTUM_TOKEN_EXPIRATION', 10080),
 
     /*
     |--------------------------------------------------------------------------
