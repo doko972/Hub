@@ -37,7 +37,9 @@ class ToolController extends Controller
             'is_active'      => ['boolean'],
             'is_public'      => ['boolean'],
             'sort_order'     => ['integer', 'min:0'],
-            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048'],
+            // Pas de SVG : un SVG est un document XML pouvant embarquer du
+            // script, servi depuis notre origine via /storage.
+            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:2048'],
             'users'          => ['nullable', 'array'],
             'users.*'        => ['exists:users,id'],
         ], [
@@ -102,7 +104,9 @@ class ToolController extends Controller
             'is_active'      => ['boolean'],
             'is_public'      => ['boolean'],
             'sort_order'     => ['integer', 'min:0'],
-            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp,svg', 'max:2048'],
+            // Pas de SVG : un SVG est un document XML pouvant embarquer du
+            // script, servi depuis notre origine via /storage.
+            'image'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,gif,webp', 'max:2048'],
             'users'          => ['nullable', 'array'],
             'users.*'        => ['exists:users,id'],
         ], [

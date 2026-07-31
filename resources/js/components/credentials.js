@@ -107,28 +107,57 @@ export function initCredentials() {
     }
 
     // --- Ouverture ---
-    function openModal(btn) {
+    // Les identifiants ne sont plus présents dans la page : on les demande au
+    // serveur au moment où l'utilisateur ouvre la modale.
+    async function openModal(btn) {
         currentToolId = btn.dataset.toolId;
         currentKeyBtn = btn;
 
-        const login    = btn.dataset.login    || '';
-        const password = btn.dataset.password || '';
+        titleEl.textContent = btn.dataset.toolName;
+        openBtn.href        = btn.dataset.toolUrl;
+        passInput.type      = 'password';
+        loginInput.value    = '';
+        passInput.value     = '';
 
-        titleEl.textContent    = btn.dataset.toolName;
-        loginInput.value       = login;
-        passInput.value        = password;
-        openBtn.href           = btn.dataset.toolUrl;
-        passInput.type         = 'password';
-
-        const hasCreds = !!(login || password);
+        const hasCreds = btn.dataset.hasCredentials === '1';
         deleteBtn.style.display       = hasCreds ? '' : 'none';
-        bookmarkletWrap.style.display = hasCreds ? '' : 'none';
-
-        if (hasCreds) {
-            bookmarkletLink.href = buildBookmarklet(login, password);
-        }
+        bookmarkletWrap.style.display = 'none';
 
         overlay.classList.add('is-open');
+
+        if (hasCreds) {
+            loginInput.placeholder = 'Chargement…';
+
+            try {
+                const res = await fetch(`/credentials/${currentToolId}`, {
+                    headers: {
+                        'Accept':           'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!res.ok) throw new Error();
+
+                const { login, password } = await res.json();
+
+                // L'utilisateur a pu fermer la modale ou en ouvrir une autre
+                // pendant la requête : on n'écrase rien dans ce cas.
+                if (currentToolId !== btn.dataset.toolId) return;
+
+                loginInput.value = login    || '';
+                passInput.value  = password || '';
+
+                if (login || password) {
+                    bookmarkletLink.href = buildBookmarklet(login || '', password || '');
+                    bookmarkletWrap.style.display = '';
+                }
+            } catch {
+                showToast('Impossible de charger les identifiants.', 'error');
+            } finally {
+                loginInput.placeholder = "email ou nom d'utilisateur";
+            }
+        }
+
         setTimeout(() => loginInput.focus(), 50);
     }
 
@@ -136,6 +165,12 @@ export function initCredentials() {
         overlay.classList.remove('is-open');
         currentToolId = null;
         currentKeyBtn = null;
+
+        // Ne pas laisser traîner les identifiants dans le DOM après fermeture.
+        loginInput.value     = '';
+        passInput.value      = '';
+        passInput.type       = 'password';
+        bookmarkletLink.href = 'javascript:void(0)';
     }
 
     // --- Fermeture ---
@@ -194,9 +229,8 @@ export function initCredentials() {
 
             if (!res.ok) throw new Error();
 
-            // Mise à jour du DOM
-            currentKeyBtn.dataset.login    = loginInput.value;
-            currentKeyBtn.dataset.password = passInput.value;
+            // Mise à jour du DOM (sans y stocker les valeurs elles-mêmes)
+            currentKeyBtn.dataset.hasCredentials = '1';
             currentKeyBtn.classList.add('tile__key--saved');
 
             showToast('Identifiants sauvegardés.', 'success');
@@ -226,8 +260,7 @@ export function initCredentials() {
 
             if (!res.ok) throw new Error();
 
-            currentKeyBtn.dataset.login    = '';
-            currentKeyBtn.dataset.password = '';
+            currentKeyBtn.dataset.hasCredentials = '0';
             currentKeyBtn.classList.remove('tile__key--saved');
 
             showToast('Identifiants supprimés.', 'success');

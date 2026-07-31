@@ -34,15 +34,13 @@ class DashboardController extends Controller
             ->get()
             ->filter(fn($f) => $f->tools->isNotEmpty());
 
-        // Credentials de l'utilisateur, indexés par tool_id
-        $credentials = UserToolCredential::where('user_id', $user->id)
-            ->get()
-            ->keyBy('tool_id')
-            ->map(fn($c) => [
-                'login'    => $c->login,
-                'password' => $c->password, // auto-déchiffré par le cast 'encrypted'
-            ]);
+        // Identifiants des outils : on n'expose QUE la liste des outils qui en
+        // possèdent. Les valeurs (déchiffrées) sont récupérées à la demande via
+        // credentials.show, pour ne pas semer tout le coffre dans le HTML.
+        $toolsWithCredentials = UserToolCredential::where('user_id', $user->id)
+            ->pluck('tool_id')
+            ->all();
 
-        return view('dashboard.index', compact('families', 'credentials'));
+        return view('dashboard.index', compact('families', 'toolsWithCredentials'));
     }
 }

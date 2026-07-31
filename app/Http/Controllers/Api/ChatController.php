@@ -9,9 +9,11 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\UserMemory;
 use App\Services\GoogleCalendarService;
+use App\Services\ImageQuota;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use OpenAI\Laravel\Facades\OpenAI;
@@ -29,6 +31,20 @@ class ChatController extends Controller
         'claude-sonnet-4-20250514' => ['provider' => 'anthropic', 'name' => 'Claude Sonnet 4'],
         'claude-haiku-3-5-20241022' => ['provider' => 'anthropic', 'name' => 'Claude Haiku 3.5'],
     ];
+
+    /**
+     * Journalise une exception et renvoie un message présentable.
+     *
+     * Les messages d'erreur bruts (API OpenAI/Anthropic, Guzzle) peuvent
+     * contenir des URL internes, des en-têtes ou des fragments de requête :
+     * ils restent dans les logs et ne sont exposés qu'en mode debug.
+     */
+    private function safeError(\Throwable $e, string $fallback): string
+    {
+        Log::error($fallback, ['exception' => $e]);
+
+        return config('app.debug') ? $e->getMessage() : $fallback;
+    }
 
     /**
      * Envoyer un message et recevoir une réponse IA (non-streaming)
@@ -100,8 +116,7 @@ class ChatController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Erreur lors de la communication avec l\'IA',
-                'error' => $e->getMessage(),
+                'message' => $this->safeError($e, 'Erreur lors de la communication avec l\'IA'),
             ], 500);
         }
     }
@@ -188,7 +203,7 @@ class ChatController extends Controller
                 ob_flush();
                 flush();
             } catch (\Exception $e) {
-                echo "data: " . json_encode(['error' => $e->getMessage()]) . "\n\n";
+                echo "data: " . json_encode(['error' => $this->safeError($e, 'Erreur lors de la communication avec l\'IA')]) . "\n\n";
                 ob_flush();
                 flush();
             }
@@ -459,9 +474,10 @@ class ChatController extends Controller
         try {
             $stream = OpenAI::chat()->createStreamed($streamParams);
         } catch (\Exception $e) {
-            echo "data: " . json_encode(['chunk' => '❌ Erreur API OpenAI : ' . $e->getMessage()]) . "\n\n";
+            $msg = $this->safeError($e, 'Le service d\'IA est momentanément indisponible.');
+            echo "data: " . json_encode(['chunk' => '❌ ' . $msg]) . "\n\n";
             ob_flush(); flush();
-            return ['text' => $e->getMessage(), 'image_path' => null];
+            return ['text' => $msg, 'image_path' => null];
         }
 
         $toolCalls = [];
@@ -533,7 +549,7 @@ class ChatController extends Controller
                                 ob_flush(); flush();
                             }
                         } catch (\Exception $e) {
-                            $err = "❌ Erreur de recherche : " . $e->getMessage();
+                            $err = "❌ Erreur de recherche : " . $this->safeError($e, 'recherche web indisponible');
                             $fullContent = $err;
                             echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
                             ob_flush(); flush();
@@ -542,6 +558,18 @@ class ChatController extends Controller
                     // ── GÉNÉRATION D'IMAGE ──────────────────────────────────────────
                     } elseif ($toolCall['name'] === 'generate_image' && $user) {
                         $prompt = $args['prompt'] ?? $messageContent;
+
+                        // Même quota que la commande /imagine : sans ce contrôle,
+                        // il suffisait de demander une image en langage naturel
+                        // pour contourner la limite journalière.
+                        if (ImageQuota::exceeded($user->id)) {
+                            $limit = ImageQuota::DAILY_LIMIT;
+                            $err   = "🚫 Limite atteinte ({$limit} images par jour). Réessayez demain !";
+                            $fullContent = $err;
+                            echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
+                            ob_flush(); flush();
+                            continue;
+                        }
 
                         echo "data: " . json_encode(['generating_image' => true]) . "\n\n";
                         ob_flush(); flush();
@@ -557,7 +585,7 @@ class ChatController extends Controller
                             ]) . "\n\n";
                             ob_flush(); flush();
                         } catch (\Exception $e) {
-                            $err = "\n\n❌ Erreur lors de la génération de l'image : " . $e->getMessage();
+                            $err = "\n\n❌ " . $this->safeError($e, 'Erreur lors de la génération de l\'image.');
                             echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
                             ob_flush(); flush();
                             $fullContent .= $err;
@@ -1105,7 +1133,7 @@ class ChatController extends Controller
                 ob_flush();
                 flush();
             } catch (\Exception $e) {
-                echo "data: " . json_encode(['error' => $e->getMessage()]) . "\n\n";
+                echo "data: " . json_encode(['error' => $this->safeError($e, 'Erreur lors de la communication avec l\'IA')]) . "\n\n";
                 ob_flush();
                 flush();
             }

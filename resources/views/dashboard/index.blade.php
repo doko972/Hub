@@ -61,7 +61,7 @@
             <div class="tiles-grid">
 
                 @foreach($family->tools as $tool)
-                    @php $hasCreds = isset($credentials[$tool->id]); @endphp
+                    @php $hasCreds = in_array($tool->id, $toolsWithCredentials, true); @endphp
                     <div class="tile-wrap">
 
                         <a href="{{ $tool->url }}"
@@ -98,8 +98,7 @@
                                 data-tool-id="{{ $tool->id }}"
                                 data-tool-name="{{ $tool->title }}"
                                 data-tool-url="{{ $tool->url }}"
-                                data-login="{{ $hasCreds ? $credentials[$tool->id]['login'] : '' }}"
-                                data-password="{{ $hasCreds ? $credentials[$tool->id]['password'] : '' }}"
+                                data-has-credentials="{{ $hasCreds ? '1' : '0' }}"
                                 title="Identifiants">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
                                     <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/>
@@ -136,7 +135,7 @@
 @endif
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     const searchInput = document.getElementById('tool-search');
     if (searchInput) {
         searchInput.addEventListener('input', function () {

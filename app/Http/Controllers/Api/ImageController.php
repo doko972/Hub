@@ -4,20 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
+use App\Services\ImageQuota;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use OpenAI\Laravel\Facades\OpenAI;
-use Carbon\Carbon;
 
 class ImageController extends Controller
 {
-    /**
-     * Limite d'images par jour par utilisateur
-     */
-    private const DAILY_LIMIT = 20;
-
     /**
      * Générer une image avec DALL-E 3
      */
@@ -28,15 +24,17 @@ class ImageController extends Controller
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
-        // Vérifier la limite quotidienne
-        $todayCount = $this->getTodayImageCount($request->user()->id);
+        // Vérifier la limite quotidienne (les deux chemins de génération)
+        $todayCount = ImageQuota::usedToday($request->user()->id);
 
-        if ($todayCount >= self::DAILY_LIMIT) {
+        if ($todayCount >= ImageQuota::DAILY_LIMIT) {
+            $limit = ImageQuota::DAILY_LIMIT;
+
             return response()->json([
-                'message' => "Limite atteinte ({self::DAILY_LIMIT} images/jour). Réessayez demain !",
+                'message' => "Limite atteinte ({$limit} images/jour). Réessayez demain !",
                 'limit_reached' => true,
                 'count' => $todayCount,
-                'limit' => self::DAILY_LIMIT,
+                'limit' => $limit,
             ], 429);
         }
 
@@ -70,12 +68,13 @@ class ImageController extends Controller
             $revisedPrompt = $response->data[0]->revisedPrompt ?? $prompt;
 
             // Calculer les images restantes
-            $remaining = self::DAILY_LIMIT - $todayCount - 1;
+            $limit     = ImageQuota::DAILY_LIMIT;
+            $remaining = max(0, $limit - $todayCount - 1);
 
             // Sauvegarder la réponse avec l'URL de l'image
             $assistantMessage = $conversation->messages()->create([
                 'role' => 'assistant',
-                'content' => "🎨 **Image générée**\n\n![Image générée]({$imageUrl})\n\n*Prompt : {$revisedPrompt}*\n\n📊 *Images restantes aujourd'hui : {$remaining}/{self::DAILY_LIMIT}*",
+                'content' => "🎨 **Image générée**\n\n![Image générée]({$imageUrl})\n\n*Prompt : {$revisedPrompt}*\n\n📊 *Images restantes aujourd'hui : {$remaining}/{$limit}*",
             ]);
 
             $conversation->touch();
@@ -89,25 +88,12 @@ class ImageController extends Controller
                 'limit' => self::DAILY_LIMIT,
             ]);
         } catch (\Exception $e) {
+            Log::error('Génération DALL-E échouée', ['exception' => $e]);
+
             return response()->json([
                 'message' => 'Erreur lors de la génération de l\'image',
-                'error' => $e->getMessage(),
             ], 500);
         }
-    }
-
-    /**
-     * Compter les images générées aujourd'hui par l'utilisateur
-     */
-    private function getTodayImageCount(int $userId): int
-    {
-        return \App\Models\Message::whereHas('conversation', function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-        })
-            ->where('role', 'user')
-            ->where('content', 'like', '/imagine %')
-            ->whereDate('created_at', Carbon::today())
-            ->count();
     }
 
     /**

@@ -17,9 +17,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/js/app.js'])
-    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
     @include('partials.theme-boot')
+    @include('partials.sidebar-boot')
 </head>
 <body>
 
@@ -91,7 +91,21 @@
             </a>
 
             <hr class="sidebar__divider">
-            <span class="sidebar__section-title">Outils</span>
+
+            <div class="sidebar__section" data-sidebar-section="tools">
+                <button type="button"
+                        class="sidebar__section-toggle"
+                        data-sidebar-toggle="tools"
+                        aria-expanded="true"
+                        aria-controls="sidebar-section-tools">
+                    <span class="sidebar__section-title">Outils</span>
+                    <svg class="sidebar__section-chevron" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+
+                <div class="sidebar__section-body" id="sidebar-section-tools">
 
             <a href="{{ route('tools.background-remover') }}"
                class="sidebar__link {{ request()->routeIs('tools.background-remover*') ? 'is-active' : '' }}">
@@ -124,9 +138,26 @@
                 Générateur de QR Code
             </a>
 
+                </div>
+            </div>
+
             @if(auth()->user()->isAdmin())
                 <hr class="sidebar__divider">
-                <span class="sidebar__section-title">Administration</span>
+
+                <div class="sidebar__section" data-sidebar-section="admin">
+                    <button type="button"
+                            class="sidebar__section-toggle"
+                            data-sidebar-toggle="admin"
+                            aria-expanded="true"
+                            aria-controls="sidebar-section-admin">
+                        <span class="sidebar__section-title">Administration</span>
+                        <svg class="sidebar__section-chevron" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5" aria-hidden="true">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+
+                    <div class="sidebar__section-body" id="sidebar-section-admin">
 
                 <a href="{{ route('admin.families.index') }}"
                    class="sidebar__link {{ request()->routeIs('admin.families.*') ? 'is-active' : '' }}">
@@ -176,6 +207,9 @@
                     </svg>
                     Journaux
                 </a>
+
+                    </div>
+                </div>
             @endif
         </nav>
 
@@ -214,20 +248,20 @@
                 </button>
 
                 <a href="{{ route('dashboard') }}" class="navbar__brand">
-                    <dotlottie-player class="brand-lottie brand-lottie--light"
+                    <lottie-player class="brand-lottie brand-lottie--light"
                         src="{{ asset('logo.json') }}"
                         background="transparent"
                         speed="1"
                         style="width: 36px; height: 36px;"
                         autoplay>
-                    </dotlottie-player>
-                    <dotlottie-player class="brand-lottie brand-lottie--dark"
+                    </lottie-player>
+                    <lottie-player class="brand-lottie brand-lottie--dark"
                         src="{{ asset('logo-dark.json') }}"
                         background="transparent"
                         speed="1"
                         style="width: 36px; height: 36px;"
                         autoplay>
-                    </dotlottie-player>
+                    </lottie-player>
                     Hub
                 </a>
 
@@ -354,14 +388,14 @@
         class="chatbot-bubble"
         aria-label="Ouvrir le chatbot Cortex IA"
         title="Cortex IA – Assistant chatbot">
-    <dotlottie-player
+    <lottie-player
         src="{{ asset('chatbot-bubble.json') }}"
         background="transparent"
         speed="1"
         style="width: 44px; height: 44px; pointer-events: none;"
         loop
         autoplay>
-    </dotlottie-player>
+    </lottie-player>
 </button>
 
 {{-- ===== CHATBOT PANEL ===== --}}
@@ -415,7 +449,7 @@
 {{-- /CHATBOT PANEL --}}
 
 {{-- Données flash pour les toasts --}}
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     window.__hubFlash = {
         success: @json(session('success')),
         error:   @json(session('error')),
@@ -426,7 +460,7 @@
 
 @stack('scripts')
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     }

@@ -87,7 +87,7 @@
 
 </form>
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Tout cocher / décocher
     document.getElementById('check-all')?.addEventListener('click', () => {
         document.querySelectorAll('.pref-item__checkbox').forEach(cb => {

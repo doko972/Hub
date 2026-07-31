@@ -6,6 +6,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,6 +19,14 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::defaultView('vendor.pagination.hub');
+
+        // Toutes les URL générées (liens de partage, redirections OAuth, assets)
+        // passent en https hors développement. Sans cela, derrière un proxy TLS,
+        // Laravel génère des URL http qui déclenchent des avertissements de
+        // contenu mixte et exposent les jetons en clair sur le premier saut.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
 
         RateLimiter::for('chat', function (Request $request) {
             return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip());

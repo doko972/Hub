@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     @vite(['resources/js/app.js'])
-    <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
     @include('partials.theme-boot')
 </head>
@@ -19,20 +18,20 @@
 
         {{-- Logo --}}
         <div class="auth-card__logo">
-            <dotlottie-player class="brand-lottie brand-lottie--light"
+            <lottie-player class="brand-lottie brand-lottie--light"
                 src="{{ asset('logo.json') }}"
                 background="transparent"
                 speed="1"
                 style="width: 52px; height: 52px;"
                 autoplay>
-            </dotlottie-player>
-            <dotlottie-player class="brand-lottie brand-lottie--dark"
+            </lottie-player>
+            <lottie-player class="brand-lottie brand-lottie--dark"
                 src="{{ asset('logo-dark.json') }}"
                 background="transparent"
                 speed="1"
                 style="width: 52px; height: 52px;"
                 autoplay>
-            </dotlottie-player>
+            </lottie-player>
             <span class="logo-name">Hub</span>
         </div>
 

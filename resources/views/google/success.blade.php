@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Calendar connecté</title>
 
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    @vite(['resources/js/app.js', 'resources/js/cortex-styles.js'])
 
     @include('partials.theme-boot')
 </head>
@@ -16,7 +16,7 @@
         <h1>Google Calendar connecté !</h1>
         <p>Fermeture en cours…</p>
     </div>
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         // Fermer le popup automatiquement après connexion
         setTimeout(() => window.close(), 800);
     </script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class GoogleAuthController extends Controller
 {
@@ -49,7 +50,12 @@ class GoogleAuthController extends Controller
             return view('google.success');
 
         } catch (\Exception $e) {
-            return redirect()->route('cortex.chat')->with('error', 'Erreur de connexion Google : ' . $e->getMessage());
+            // Le détail (jetons, URL d'échange, réponse brute de Google) reste
+            // dans les logs : il n'a rien à faire dans un message flash.
+            Log::error('Callback Google OAuth en échec', ['exception' => $e]);
+
+            return redirect()->route('cortex.chat')
+                ->with('error', 'La connexion à Google a échoué. Veuillez réessayer.');
         }
     }
 

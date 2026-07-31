@@ -32,6 +32,55 @@
         margin-top: $spacing-sm;
     }
 
+    // ---- Sections repliables (Outils, Administration) ----
+
+    // En-tête cliquable : reprend la typographie de __section-title, mais
+    // porte lui-même l'espacement (le <span> interne est neutralisé).
+    &__section-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-sm;
+        width: 100%;
+        padding: $spacing-sm $spacing-md;
+        margin-top: $spacing-sm;
+        background: none;
+        border: 0;
+        cursor: pointer;
+        text-align: left;
+        color: rgba(255, 255, 255, 0.35);
+        transition: color $transition-fast;
+
+        .sidebar__section-title {
+            padding: 0;
+            margin: 0;
+            color: inherit;
+        }
+
+        &:hover {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        &:focus-visible {
+            outline: 2px solid $color-primary;
+            outline-offset: -2px;
+        }
+    }
+
+    &__section-chevron {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        opacity: 0.8;
+    }
+
+    &__section-body {
+        overflow: hidden;
+        // Plafond volontairement supérieur au contenu (5 liens au maximum) :
+        // une valeur en pixels est nécessaire pour pouvoir animer le repli.
+        max-height: 30rem;
+    }
+
     // Lien de navigation
     &__link {
         display: flex;
@@ -111,6 +160,42 @@
 
         &.is-open {
             transform: translateX(0);
+        }
+    }
+}
+
+// ---- Sections repliées ----
+// La classe vit sur <html> : posée dès le <head> par partials/sidebar-boot,
+// elle s'applique avant le rendu de la sidebar — donc sans clignotement.
+@each $section in (tools, admin) {
+    html.is-sidebar-collapsed-#{$section} {
+        .sidebar__section[data-sidebar-section='#{$section}'] {
+            .sidebar__section-body {
+                max-height: 0;
+            }
+
+            .sidebar__section-chevron {
+                transform: rotate(-90deg);
+            }
+        }
+    }
+}
+
+// Les transitions n'entrent en jeu qu'une fois l'état initial appliqué,
+// pour que le premier affichage ne soit pas animé.
+html.is-sidebar-ready {
+    .sidebar__section-body {
+        transition: max-height $transition-base;
+    }
+
+    .sidebar__section-chevron {
+        transition: transform $transition-base;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .sidebar__section-body,
+        .sidebar__section-chevron {
+            transition: none;
         }
     }
 }

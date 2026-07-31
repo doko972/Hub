@@ -12,6 +12,10 @@ import '../sass/app.scss';
 import DOMPurify from 'dompurify';
 window.DOMPurify = DOMPurify;
 
+// Lecteur d'animations du logo (<lottie-player>), auparavant chargé depuis
+// unpkg. Custom element : son enregistrement peut arriver après le HTML.
+import '@lottiefiles/lottie-player';
+
 import { initBurger }        from './components/burger.js';
 import { initDropdowns }     from './components/dropdown.js';
 import { initTooltips }      from './components/tooltip.js';
@@ -26,6 +30,7 @@ import { initImageConverter }     from './components/imageconverter.js';
 import { initQrCode }             from './components/qrcode.js';
 import { initCredentials }        from './components/credentials.js';
 import { initChatbot }            from './components/chatbot.js';
+import { initSidebarAccordion }   from './components/sidebarAccordion.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -42,4 +47,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initQrCode();
     initCredentials();
     initChatbot();
+    initSidebarAccordion();
 });

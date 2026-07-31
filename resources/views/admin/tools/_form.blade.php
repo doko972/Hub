@@ -199,7 +199,7 @@
 </div>
 
 {{-- Toggle "public" → masque la section utilisateurs --}}
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     document.getElementById('toggle-public')?.addEventListener('change', function () {
         const section = document.getElementById('users-section');
         if (section) {

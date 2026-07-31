@@ -1,3 +1,5 @@
+import QRious from 'qrious';
+
 export function initQrCode() {
     const canvas = document.getElementById('qr-canvas');
     if (!canvas) return;
@@ -271,7 +273,7 @@ export function initQrCode() {
             warningBox.style.display = 'none';
             btnDownloadQr.disabled   = false;
             try {
-                if (!qr) qr = new window.QRious({ element: canvas, size: 280, level: 'M' });
+                if (!qr) qr = new QRious({ element: canvas, size: 280, level: 'M' });
                 qr.value             = payload.qrValue;
                 canvas.style.display = 'block';
             } catch {

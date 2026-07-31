@@ -14,13 +14,9 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icon-192x192.png">
     <title>ChatBot</title>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"></script>
-    <!-- Markdown & Syntax Highlighting -->
-    <script src="https://cdn.jsdelivr.net/npm/marked@4/marked.min.js"></script>
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    {{-- Markdown, coloration syntaxique et lecteur Lottie : servis depuis
+         notre origine (resources/js/chat.js), plus depuis des CDN tiers. --}}
+    @vite(['resources/js/app.js', 'resources/js/chat.js'])
 
     @include('partials.theme-boot')
 </head>
@@ -395,7 +391,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
         // ============================================
         // CONFIGURATION
         // ============================================
@@ -989,19 +985,7 @@
         // FORMATAGE MARKDOWN
         // ============================================
 
-        // Configuration de marked
-        marked.setOptions({
-            highlight: function (code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    return hljs.highlight(code, {
-                        language: lang
-                    }).value;
-                }
-                return hljs.highlightAuto(code).value;
-            },
-            breaks: true,
-            gfm: true
-        });
+        // (Configuration de marked : resources/js/chat.js)
 
         function renderSearchResults(data) {
             const { answer, sources } = data;
@@ -1057,17 +1041,22 @@
 
             // Ajouter wrapper et bouton copier aux blocs de code
             html = html.replace(/<pre><code class="language-(\w+)">/g,
-                '<div class="code-block-wrapper"><button class="copy-btn" onclick="copyCode(this)">Copier</button><pre><code class="language-$1">'
+                '<div class="code-block-wrapper"><button type="button" class="copy-btn">Copier</button><pre><code class="language-$1">'
             );
             html = html.replace(/<pre><code>/g,
-                '<div class="code-block-wrapper"><button class="copy-btn" onclick="copyCode(this)">Copier</button><pre><code>'
+                '<div class="code-block-wrapper"><button type="button" class="copy-btn">Copier</button><pre><code>'
             );
             html = html.replace(/<\/code><\/pre>/g, '</code></pre></div>');
 
             return html;
         }
 
-        // Copier le code
+        // Copier le code — délégation, les blocs sont injectés dynamiquement.
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.copy-btn');
+            if (btn) copyCode(btn);
+        });
+
         function copyCode(button) {
             const codeBlock = button.parentElement.querySelector('code');
             const text = codeBlock.textContent;
@@ -2677,7 +2666,7 @@
 
             // Option "Par défaut"
             const isDefault = currentSystemPrompt === null;
-            html += `<div class="personality-item ${isDefault ? 'active' : ''}" onclick="selectPersonality(null)">
+            html += `<div class="personality-item ${isDefault ? 'active' : ''}" data-personality-action="select">
                 <div class="personality-item-name">
                     <span>⭐ Par défaut</span>
                     ${isDefault ? '<span class="personality-active-badge">Actif</span>' : ''}
@@ -2687,15 +2676,15 @@
 
             systemPrompts.forEach(p => {
                 const isActive = currentSystemPrompt?.id === p.id;
-                html += `<div class="personality-item ${isActive ? 'active' : ''}" onclick="selectPersonality(${p.id})">
+                html += `<div class="personality-item ${isActive ? 'active' : ''}" data-personality-action="select" data-personality-id="${p.id}">
                     <div class="personality-item-name">
                         <span>${escapeHtml(p.name)}</span>
                         <div style="display:flex;gap:0.4rem;align-items:center;">
                             ${isActive ? '<span class="personality-active-badge">Actif</span>' : ''}
                             ${p.is_default ? '<span class="personality-default-badge">Défaut</span>' : ''}
-                            <button class="personality-btn-icon" title="Modifier" onclick="event.stopPropagation(); editPersonality(${p.id})">✏️</button>
-                            <button class="personality-btn-icon" title="Définir comme défaut" onclick="event.stopPropagation(); setDefaultPersonality(${p.id})">${p.is_default ? '⭐' : '☆'}</button>
-                            <button class="personality-btn-icon danger" title="Supprimer" onclick="event.stopPropagation(); deletePersonality(${p.id})">🗑</button>
+                            <button type="button" class="personality-btn-icon" title="Modifier" data-personality-action="edit" data-personality-id="${p.id}">✏️</button>
+                            <button type="button" class="personality-btn-icon" title="Définir comme défaut" data-personality-action="default" data-personality-id="${p.id}">${p.is_default ? '⭐' : '☆'}</button>
+                            <button type="button" class="personality-btn-icon danger" title="Supprimer" data-personality-action="delete" data-personality-id="${p.id}">🗑</button>
                         </div>
                     </div>
                     <div class="personality-item-desc">${escapeHtml(p.content.substring(0, 80))}${p.content.length > 80 ? '…' : ''}</div>
@@ -2704,6 +2693,33 @@
 
             personalityList.innerHTML = html;
         }
+
+        // Délégation d'évènements : remplace les attributs onclick, interdits
+        // par la CSP (script-src sans 'unsafe-inline').
+        personalityList.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-personality-action]');
+            if (!el || !personalityList.contains(el)) return;
+
+            const id = el.dataset.personalityId ? Number(el.dataset.personalityId) : null;
+
+            switch (el.dataset.personalityAction) {
+                case 'edit':
+                    e.stopPropagation();
+                    editPersonality(id);
+                    break;
+                case 'default':
+                    e.stopPropagation();
+                    setDefaultPersonality(id);
+                    break;
+                case 'delete':
+                    e.stopPropagation();
+                    deletePersonality(id);
+                    break;
+                case 'select':
+                    selectPersonality(id);
+                    break;
+            }
+        });
 
         function selectPersonality(idOrNull) {
             if (idOrNull === null) {
@@ -2813,11 +2829,8 @@
             }
         }
 
-        // Exposer les fonctions appelées via onclick dans innerHTML
-        window.selectPersonality = selectPersonality;
-        window.editPersonality = editPersonality;
-        window.deletePersonality = deletePersonality;
-        window.setDefaultPersonality = setDefaultPersonality;
+        // (Plus d'export sur window : les actions passent par la délégation
+        //  d'évènements sur #personalityList.)
 
         console.log('HR Chatbot Web initialisé');
         console.log('Token présent:', AUTH_TOKEN ? 'Oui' : 'Non');

@@ -133,7 +133,9 @@ class GoogleCalendarService
             ->post("{$this->baseUrl}/calendars/primary/events", $body);
 
         if (!$response->successful()) {
-            throw new \Exception('Erreur lors de la création de l\'événement : ' . $response->body());
+            // Le corps de la réponse Google n'est pas renvoyé à l'utilisateur :
+            // il est journalisé côté serveur par l'appelant.
+            throw new \Exception('Erreur lors de la création de l\'événement.');
         }
 
         return $response->json();

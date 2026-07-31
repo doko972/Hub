@@ -15,7 +15,7 @@
     $themePref = auth()->check() ? auth()->user()->effectiveTheme() : null;
 @endphp
 
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     (function () {
         var el = document.documentElement;
 

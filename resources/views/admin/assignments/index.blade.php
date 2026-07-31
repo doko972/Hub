@@ -129,7 +129,7 @@
 </form>
 
 @push('scripts')
-<script>
+<script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
     // Tout cocher / décocher par groupe
     document.querySelectorAll('[data-check-all]').forEach(btn => {
         btn.addEventListener('click', () => {

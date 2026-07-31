@@ -53,6 +53,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.avatar.delete');
 
     // Credentials (identifiants par outil)
+    Route::get('/credentials/{tool}',    [CredentialController::class, 'show'])->name('credentials.show');
     Route::post('/credentials/{tool}',   [CredentialController::class, 'store'])->name('credentials.store');
     Route::delete('/credentials/{tool}', [CredentialController::class, 'destroy'])->name('credentials.destroy');
 

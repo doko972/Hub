@@ -16,8 +16,12 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@lottiefiles/lottie-player": "^2.0.8",
         "dompurify": "^3.4.12",
+        "highlight.js": "^11.9.0",
         "jszip": "^3.10.1",
+        "marked": "^4.3.0",
+        "qrious": "^4.0.2",
         "sortablejs": "^1.15.7"
     }
 }

@@ -6,11 +6,7 @@
     <meta name="robots" content="noindex, nofollow, noarchive">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $conversation->title ?? 'Conversation partagée' }} – HR Chatbot</title>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@2.0.8/dist/lottie-player.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@4/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+    @vite(['resources/js/app.js', 'resources/js/chat.js'])
 
     @include('partials.theme-boot')
 </head>
@@ -68,18 +64,8 @@
         </footer>
     </div>
 
-    <script>
-        // Markdown config identique à chat.blade.php
-        marked.setOptions({
-            highlight: function(code, lang) {
-                if (lang && hljs.getLanguage(lang)) {
-                    return hljs.highlight(code, { language: lang }).value;
-                }
-                return hljs.highlightAuto(code).value;
-            },
-            breaks: true,
-            gfm: true
-        });
+    <script nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}">
+        // (Configuration de marked : resources/js/chat.js)
 
         function escapeHtml(text) {
             const div = document.createElement('div');
@@ -106,22 +92,26 @@
             if (!text) return '';
             let html = sanitizeHtml(marked.parse(text));
             html = html.replace(/<pre><code class="language-(\w+)">/g,
-                '<div class="code-block-wrapper"><button class="copy-btn" onclick="copySharedCode(this)">Copier</button><pre><code class="language-$1">'
+                '<div class="code-block-wrapper"><button type="button" class="copy-btn">Copier</button><pre><code class="language-$1">'
             );
             html = html.replace(/<pre><code>/g,
-                '<div class="code-block-wrapper"><button class="copy-btn" onclick="copySharedCode(this)">Copier</button><pre><code>'
+                '<div class="code-block-wrapper"><button type="button" class="copy-btn">Copier</button><pre><code>'
             );
             html = html.replace(/<\/code><\/pre>/g, '</code></pre></div>');
             return html;
         }
 
-        function copySharedCode(button) {
+        // Délégation : pas d'attribut onclick, interdit par la CSP.
+        document.addEventListener('click', (e) => {
+            const button = e.target.closest('.copy-btn');
+            if (!button) return;
+
             const code = button.parentElement.querySelector('code');
             navigator.clipboard.writeText(code.textContent).then(() => {
                 button.textContent = 'Copié !';
                 setTimeout(() => { button.textContent = 'Copier'; }, 2000);
             });
-        }
+        });
 
         // Rendre le markdown pour chaque message.
         // On attend DOMContentLoaded pour garantir que le bundle Vite (et donc

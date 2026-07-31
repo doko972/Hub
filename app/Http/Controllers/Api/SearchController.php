@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class SearchController extends Controller
 {
@@ -40,9 +41,13 @@ class SearchController extends Controller
             ]);
 
             if (!$response->successful()) {
+                Log::error('Brave Search a répondu en erreur', [
+                    'status' => $response->status(),
+                    'body'   => $response->body(),
+                ]);
+
                 return response()->json([
                     'message' => 'Erreur lors de la recherche',
-                    'error' => $response->body(),
                 ], $response->status());
             }
 
@@ -66,9 +71,10 @@ class SearchController extends Controller
             return response()->json($results);
 
         } catch (\Exception $e) {
+            Log::error('Recherche web échouée', ['exception' => $e]);
+
             return response()->json([
                 'message' => 'Erreur lors de la recherche',
-                'error' => $e->getMessage(),
             ], 500);
         }
     }

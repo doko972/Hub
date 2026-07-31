@@ -17,6 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         // ouvertes en illimité (bruteforce du login, abus des appels IA…).
         $middleware->throttleApi();
 
+        // En-têtes de sécurité sur toutes les réponses, y compris les erreurs.
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
+
+        // CSP à nonce : uniquement sur les réponses HTML (groupe web).
+        $middleware->web(append: [
+            \App\Http\Middleware\ContentSecurityPolicy::class,
+        ]);
+
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
         ]);

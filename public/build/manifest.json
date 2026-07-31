@@ -1,24 +1,40 @@
 {
+  "__commonjsHelpers-BLfXAjvB.js": {
+    "file": "assets/_commonjsHelpers-BLfXAjvB.js",
+    "name": "_commonjsHelpers"
+  },
   "resources/js/app.js": {
-    "file": "assets/app-tGpx-q1w.js",
+    "file": "assets/app-Br-FBvcd.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
+    "imports": [
+      "__commonjsHelpers-BLfXAjvB.js"
+    ],
     "css": [
-      "assets/app-2qq4uR7l.css"
+      "assets/app-D8qWLg_X.css"
     ]
   },
-  "resources/sass/app.scss": {
-    "file": "assets/app-2qq4uR7l.css",
-    "src": "resources/sass/app.scss"
-  },
-  "resources/scss/app.scss": {
-    "file": "assets/app-CBBN-X59.css",
-    "src": "resources/scss/app.scss",
+  "resources/js/chat.js": {
+    "file": "assets/chat-pueVzPRh.js",
+    "name": "chat",
+    "src": "resources/js/chat.js",
     "isEntry": true,
-    "name": "app",
-    "names": [
-      "app.css"
+    "imports": [
+      "resources/js/cortex-styles.js",
+      "__commonjsHelpers-BLfXAjvB.js"
+    ],
+    "css": [
+      "assets/chat-ZgkIHsf0.css"
+    ]
+  },
+  "resources/js/cortex-styles.js": {
+    "file": "assets/cortex-styles-NAtLVWcZ.js",
+    "name": "cortex-styles",
+    "src": "resources/js/cortex-styles.js",
+    "isEntry": true,
+    "css": [
+      "assets/cortex-styles-CBBN-X59.css"
     ]
   }
 }
