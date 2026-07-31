@@ -22,6 +22,7 @@ class User extends Authenticatable
         'role',
         'is_active',
         'avatar_path',
+        'theme',
         'google_id',
         'google_access_token',
         'google_refresh_token',
@@ -68,6 +69,24 @@ class User extends Authenticatable
     public function isUser(): bool
     {
         return $this->role === 'user';
+    }
+
+    // ---- Thème d'interface ----
+
+    /**
+     * Thème effectif, en se rabattant sur le défaut si la valeur stockée
+     * n'existe plus (thème retiré de config/themes.php, colonne vide).
+     *
+     * Volontairement PAS nommée theme() : Eloquent traiterait la méthode
+     * comme une relation si la colonne du même nom venait à manquer.
+     */
+    public function effectiveTheme(): string
+    {
+        $available = array_keys(config('themes.available', []));
+
+        return in_array($this->theme, $available, true)
+            ? $this->theme
+            : config('themes.default', 'system');
     }
 
     // ---- Avatar ----

@@ -3,9 +3,44 @@
 namespace App\Http\Controllers;
 
 use App\Models\ToolFamily;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class PreferencesController extends Controller
 {
+    /**
+     * Enregistre le thème choisi.
+     *
+     * Répond en JSON quand l'appel vient du JS (bascule immédiate depuis la
+     * navbar, sans rechargement), et redirige sinon pour rester utilisable
+     * si JavaScript est indisponible.
+     */
+    public function updateTheme(Request $request)
+    {
+        $validated = $request->validate([
+            'theme' => ['required', Rule::in(array_keys(config('themes.available')))],
+        ]);
+
+        $request->user()->update(['theme' => $validated['theme']]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['theme' => $validated['theme']]);
+        }
+
+        return back()->with('success', 'Thème mis à jour.');
+    }
+
+    /**
+     * Page de choix du thème.
+     */
+    public function theme()
+    {
+        return view('preferences.theme', [
+            'themes'  => config('themes.available'),
+            'current' => auth()->user()->effectiveTheme(),
+        ]);
+    }
+
     public function edit()
     {
         $user = auth()->user();

@@ -24,7 +24,7 @@
     gap: 0.5rem;
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--text-light);
+    color: var(--chat-text);
     text-decoration: none;
 }
 
@@ -38,7 +38,7 @@
         text-decoration: none;
         transition: color 0.2s;
 
-        &:hover  { color: var(--text-light); }
+        &:hover  { color: var(--chat-text); }
         &.active { color: var(--primary); }
     }
 }
@@ -64,7 +64,7 @@
     display: block;
     width: 24px;
     height: 2px;
-    background: var(--text-light);
+    background: var(--chat-text);
     border-radius: 2px;
     transition: all 0.3s ease;
 
@@ -107,7 +107,7 @@
 }
 
 .mobile-link {
-    color: var(--text-light);
+    color: var(--chat-text);
     text-decoration: none;
     font-size: 1.5rem;
     font-weight: 500;

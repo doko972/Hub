@@ -5,7 +5,13 @@
 // =============================================
 
 // 1. Variables (doit être en premier)
+//    :root définit les tokens du thème clair.
 @import 'components/variables';
+
+// 1b. Palettes de thèmes — juste après les variables.
+//     `[data-theme="x"]` a la même spécificité que `:root` : c'est
+//     l'ordre source qui tranche, donc ce fichier DOIT suivre variables.
+@import 'components/themes';
 
 // 2. Reset & base
 @import 'components/reset';
@@ -28,6 +34,7 @@
 @import 'components/auth';
 @import 'components/profile';
 @import 'components/preferences';
+@import 'components/theme-picker';
 
 // 7. Utilitaires supplémentaires
 @import 'components/toasts';

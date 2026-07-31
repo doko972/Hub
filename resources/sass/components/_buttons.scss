@@ -59,7 +59,7 @@
 
         &:hover {
             background: $color-bg;
-            border-color: #CBD5E1;
+            border-color: var(--text-light);
         }
     }
 
@@ -69,8 +69,8 @@
         border-color: $color-danger;
 
         &:hover {
-            background: #DC2626;
-            border-color: #DC2626;
+            background: color-mix(in srgb, var(--danger) 88%, #000);
+            border-color: color-mix(in srgb, var(--danger) 88%, #000);
             color: white;
         }
     }
@@ -81,7 +81,7 @@
         border-color: $color-secondary;
 
         &:hover {
-            background: #059669;
+            background: color-mix(in srgb, var(--secondary) 88%, #000);
             color: white;
         }
     }

@@ -106,12 +106,12 @@
     }
 
     &--active {
-        background: #D1FAE5;
-        color: #065F46;
+        background: var(--success-bg);
+        color: var(--success-fg);
     }
 
     &--inactive {
-        background: #F3F4F6;
+        background: var(--surface-2);
         color: $color-text-muted;
     }
 
@@ -121,13 +121,13 @@
     }
 
     &--user {
-        background: #DBEAFE;
-        color: #1E40AF;
+        background: var(--info-bg);
+        color: var(--info-fg);
     }
 
     &--danger {
-        background: #FEE2E2;
-        color: #991B1B;
+        background: var(--danger-bg);
+        color: var(--danger-fg);
     }
 }
 
@@ -202,14 +202,14 @@ tr.sortable-chosen { background: $color-primary-light; box-shadow: $shadow-md; o
         background: $color-primary-light;
         img { width: 100%; height: 100%; object-fit: cover; border-radius: $radius-sm; }
         svg { color: $color-primary; }
-        &.tile--violet { background: #EDE9FE; svg { color: #7C3AED; } }
-        &.tile--blue   { background: #DBEAFE; svg { color: #3B82F6; } }
-        &.tile--green  { background: #D1FAE5; svg { color: #10B981; } }
-        &.tile--orange { background: #FEF3C7; svg { color: #F59E0B; } }
-        &.tile--red    { background: #FEE2E2; svg { color: #EF4444; } }
-        &.tile--pink   { background: #FCE7F3; svg { color: #EC4899; } }
-        &.tile--teal   { background: #CCFBF1; svg { color: #14B8A6; } }
-        &.tile--indigo { background: #E0E7FF; svg { color: #6366F1; } }
+        &.tile--violet { background: var(--accent-violet-bg); svg { color: var(--accent-violet-fg); } }
+        &.tile--blue   { background: var(--accent-blue-bg); svg { color: var(--accent-blue-fg); } }
+        &.tile--green  { background: var(--accent-green-bg); svg { color: var(--accent-green-fg); } }
+        &.tile--orange { background: var(--accent-orange-bg); svg { color: var(--accent-orange-fg); } }
+        &.tile--red    { background: var(--accent-red-bg); svg { color: var(--accent-red-fg); } }
+        &.tile--pink   { background: var(--accent-pink-bg); svg { color: var(--accent-pink-fg); } }
+        &.tile--teal   { background: var(--accent-teal-bg); svg { color: var(--accent-teal-fg); } }
+        &.tile--indigo { background: var(--accent-indigo-bg); svg { color: var(--accent-indigo-fg); } }
     }
 
     &__avatar {
@@ -279,18 +279,18 @@ tr.sortable-chosen { background: $color-primary-light; box-shadow: $shadow-md; o
         }
 
         &--green {
-            background: #D1FAE5;
-            color: #059669;
+            background: var(--accent-green-bg);
+            color: var(--accent-green-fg);
         }
 
         &--blue {
-            background: #DBEAFE;
-            color: #2563EB;
+            background: var(--accent-blue-bg);
+            color: var(--accent-blue-fg);
         }
 
         &--orange {
-            background: #FEF3C7;
-            color: #D97706;
+            background: var(--accent-orange-bg);
+            color: var(--accent-orange-fg);
         }
     }
 

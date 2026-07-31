@@ -1,30 +1,132 @@
 // =============================================
 // VARIABLES GLOBALES
+//
+// Architecture de theming :
+//   - Les COULEURS sont des custom properties CSS (--token) définies
+//     sur :root. Elles sont surchargées par thème dans _themes.scss.
+//   - Les variables SCSS $color-* ne sont plus que des ALIAS vers ces
+//     tokens : le code existant (`color: $color-text`) continue de
+//     fonctionner et devient automatiquement thémable.
+//
+// ⚠️ Conséquence : $color-* n'est PLUS une couleur au sens SCSS.
+//    Les fonctions darken() / lighten() / rgba() ne fonctionnent pas
+//    dessus. Utiliser color-mix() à la place :
+//      darken($color-primary, 8%)  → color-mix(in srgb, var(--primary) 92%, #000)
+//      rgba($color-primary, 0.1)   → color-mix(in srgb, var(--primary) 10%, transparent)
+//
+// Les dimensions, typo, espacements restent en SCSS pur (non thémables).
 // =============================================
 
-// Couleurs principales
-$color-primary:       #362ad7;
-$color-primary-dark:  #06c;
-$color-primary-light: #EDE9FE;
+// ---------------------------------------------
+// TOKENS DE COULEUR — thème clair (défaut)
+// ---------------------------------------------
+:root {
+    // Indique au navigateur la palette des widgets natifs
+    // (ascenseurs, sélecteurs de date, autofill).
+    color-scheme: light;
 
-$color-secondary:     #10B981;
-$color-danger:        #EF4444;
-$color-warning:       #F59E0B;
-$color-info:          #3B82F6;
+    // Marque
+    --primary:            #362ad7;
+    --primary-dark:       #06c;
+    --primary-light:      #EDE9FE;
+    --on-primary:         #FFFFFF;
 
-// Neutres
-$color-bg:            #F3F4F6;
-$color-surface:       #FFFFFF;
-$color-border:        #E5E7EB;
-$color-text:          #1F2937;
-$color-text-muted:    #6B7280;
-$color-text-light:    #9CA3AF;
+    // Sémantiques
+    --secondary:          #10B981;
+    --danger:             #EF4444;
+    --warning:            #F59E0B;
+    --info:               #3B82F6;
 
-// Sidebar / navbar
-$color-sidebar-bg:    #362ad7;
-$color-sidebar-text:  #C7D2FE;
-$color-sidebar-hover: #312E81;
-$color-sidebar-active:#06c;
+    // Surfaces & fonds
+    --bg:                 #F3F4F6;
+    --surface:            #FFFFFF;
+    --surface-2:          #F9FAFB;
+    --border:             #E5E7EB;
+
+    // Texte
+    --text:               #1F2937;
+    --text-muted:         #6B7280;
+    --text-light:         #9CA3AF;
+
+    // Sidebar / navbar (sombre par défaut dans les deux modes historiques)
+    --sidebar-bg:         #362ad7;
+    --sidebar-text:       #C7D2FE;
+    --sidebar-hover:      #312E81;
+    --sidebar-active:     #06c;
+
+    // Ombres — thémables pour pouvoir les durcir en mode sombre
+    --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.08);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-tile:        0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-tile-hover:  0 8px 20px rgba(54, 42, 215, 0.2);
+
+    // Couleur de la barre d'état mobile / meta theme-color
+    --theme-color:        #362ad7;
+
+    // -----------------------------------------
+    // Accents de vignettes (tile--violet, etc.)
+    // Étaient dupliqués en dur dans _tiles, _admin et _preferences.
+    // -----------------------------------------
+    --accent-violet-bg:   #EDE9FE;  --accent-violet-fg:   #7C3AED;
+    --accent-blue-bg:     #DBEAFE;  --accent-blue-fg:     #3B82F6;
+    --accent-green-bg:    #D1FAE5;  --accent-green-fg:    #10B981;
+    --accent-orange-bg:   #FEF3C7;  --accent-orange-fg:   #F59E0B;
+    --accent-red-bg:      #FEE2E2;  --accent-red-fg:      #EF4444;
+    --accent-pink-bg:     #FCE7F3;  --accent-pink-fg:     #EC4899;
+    --accent-teal-bg:     #CCFBF1;  --accent-teal-fg:     #14B8A6;
+    --accent-indigo-bg:   #E0E7FF;  --accent-indigo-fg:   #6366F1;
+
+    // -----------------------------------------
+    // Badges & alertes (fond / texte / bordure)
+    // -----------------------------------------
+    --success-bg:         #D1FAE5;  --success-fg:  #065F46;  --success-border:  #A7F3D0;
+    --danger-bg:          #FEE2E2;  --danger-fg:   #991B1B;  --danger-border:   #FECACA;
+    --warning-bg:         #FEF3C7;  --warning-fg:  #92400E;  --warning-border:  #FDE68A;
+    --info-bg:            #DBEAFE;  --info-fg:     #1E40AF;  --info-border:     #BFDBFE;
+
+    // Voile des overlays (sidebar mobile, modales)
+    --overlay:            rgba(0, 0, 0, 0.5);
+
+    // Chevron des <select> : la couleur est encodée dans l'URL data:,
+    // donc l'icône entière doit être un token (le %23 est un « # » échappé).
+    --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+// ---------------------------------------------
+// ALIAS SCSS → tokens CSS
+// (compatibilité avec tout le code existant)
+// ---------------------------------------------
+$color-primary:       var(--primary);
+$color-primary-dark:  var(--primary-dark);
+$color-primary-light: var(--primary-light);
+
+$color-secondary:     var(--secondary);
+$color-danger:        var(--danger);
+$color-warning:       var(--warning);
+$color-info:          var(--info);
+
+$color-bg:            var(--bg);
+$color-surface:       var(--surface);
+$color-border:        var(--border);
+$color-text:          var(--text);
+$color-text-muted:    var(--text-muted);
+$color-text-light:    var(--text-light);
+
+$color-sidebar-bg:    var(--sidebar-bg);
+$color-sidebar-text:  var(--sidebar-text);
+$color-sidebar-hover: var(--sidebar-hover);
+$color-sidebar-active:var(--sidebar-active);
+
+$shadow-sm:           var(--shadow-sm);
+$shadow-md:           var(--shadow-md);
+$shadow-lg:           var(--shadow-lg);
+$shadow-tile:         var(--shadow-tile);
+$shadow-tile-hover:   var(--shadow-tile-hover);
+
+// ---------------------------------------------
+// VALEURS NON THÉMABLES (SCSS pur)
+// ---------------------------------------------
 
 // Typographie
 $font-family:         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -49,13 +151,6 @@ $radius-md:           12px;
 $radius-lg:           16px;
 $radius-xl:           20px;
 $radius-full:         9999px;
-
-// Ombres
-$shadow-sm:           0 1px 3px rgba(0, 0, 0, 0.08);
-$shadow-md:           0 4px 12px rgba(0, 0, 0, 0.1);
-$shadow-lg:           0 8px 24px rgba(0, 0, 0, 0.12);
-$shadow-tile:         0 2px 8px rgba(0, 0, 0, 0.08);
-$shadow-tile-hover:   0 8px 20px rgba(124, 58, 237, 0.2);
 
 // Transitions
 $transition-fast:     0.15s ease;

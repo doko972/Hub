@@ -151,29 +151,29 @@
     }
 
     // ---- Couleurs d'accent (fond clair + icône colorée) ----
-    &--violet .tile__image-wrap { background: #EDE9FE; }
-    &--violet .tile__icon       { color: #7C3AED; }
+    &--violet .tile__image-wrap { background: var(--accent-violet-bg); }
+    &--violet .tile__icon       { color: var(--accent-violet-fg); }
 
-    &--blue .tile__image-wrap   { background: #DBEAFE; }
-    &--blue .tile__icon         { color: #3B82F6; }
+    &--blue .tile__image-wrap   { background: var(--accent-blue-bg); }
+    &--blue .tile__icon         { color: var(--accent-blue-fg); }
 
-    &--green .tile__image-wrap  { background: #D1FAE5; }
-    &--green .tile__icon        { color: #10B981; }
+    &--green .tile__image-wrap  { background: var(--accent-green-bg); }
+    &--green .tile__icon        { color: var(--accent-green-fg); }
 
-    &--orange .tile__image-wrap { background: #FEF3C7; }
-    &--orange .tile__icon       { color: #F59E0B; }
+    &--orange .tile__image-wrap { background: var(--accent-orange-bg); }
+    &--orange .tile__icon       { color: var(--accent-orange-fg); }
 
-    &--red .tile__image-wrap    { background: #FEE2E2; }
-    &--red .tile__icon          { color: #EF4444; }
+    &--red .tile__image-wrap    { background: var(--accent-red-bg); }
+    &--red .tile__icon          { color: var(--accent-red-fg); }
 
-    &--pink .tile__image-wrap   { background: #FCE7F3; }
-    &--pink .tile__icon         { color: #EC4899; }
+    &--pink .tile__image-wrap   { background: var(--accent-pink-bg); }
+    &--pink .tile__icon         { color: var(--accent-pink-fg); }
 
-    &--teal .tile__image-wrap   { background: #CCFBF1; }
-    &--teal .tile__icon         { color: #14B8A6; }
+    &--teal .tile__image-wrap   { background: var(--accent-teal-bg); }
+    &--teal .tile__icon         { color: var(--accent-teal-fg); }
 
-    &--indigo .tile__image-wrap { background: #E0E7FF; }
-    &--indigo .tile__icon       { color: #6366F1; }
+    &--indigo .tile__image-wrap { background: var(--accent-indigo-bg); }
+    &--indigo .tile__icon       { color: var(--accent-indigo-fg); }
 }
 
 // ---- Barre de recherche dashboard ----
@@ -212,7 +212,7 @@
         &:focus {
             outline: none;
             border-color: $color-primary;
-            box-shadow: 0 0 0 3px rgba(54, 42, 215, 0.12);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
         }
 
         &::-webkit-search-cancel-button { display: none; }

@@ -42,6 +42,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/preferences',  [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::post('/preferences', [PreferencesController::class, 'update'])->name('preferences.update');
 
+    // Thème d'interface
+    Route::get('/preferences/theme',  [PreferencesController::class, 'theme'])->name('preferences.theme');
+    Route::post('/preferences/theme', [PreferencesController::class, 'updateTheme'])->name('preferences.theme.update');
+
     // Profil utilisateur
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -23,7 +23,7 @@
         gap: 0.5rem;
         font-size: 1.25rem;
         font-weight: 700;
-        color: var(--text-light);
+        color: var(--chat-text);
         text-decoration: none;
         margin-bottom: 0.5rem;
     }
@@ -41,7 +41,7 @@
         gap: 0.75rem;
 
         &-title {
-            color: var(--text-light);
+            color: var(--chat-text);
             font-weight: 600;
             font-size: 0.95rem;
             margin-bottom: 0.25rem;
@@ -63,7 +63,7 @@
         gap: 0.75rem;
 
         &-title {
-            color: var(--text-light);
+            color: var(--chat-text);
             font-weight: 600;
             font-size: 0.95rem;
             margin-bottom: 0.25rem;

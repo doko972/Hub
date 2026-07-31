@@ -41,18 +41,18 @@
     }
 
     &:hover {
-        border-color: #CBD5E1;
+        border-color: var(--text-light);
     }
 
     &:focus {
         border-color: $color-primary;
-        box-shadow: 0 0 0 3px rgba($color-primary, 0.12);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
     }
 
     &--error {
         border-color: $color-danger;
         &:focus {
-            box-shadow: 0 0 0 3px rgba($color-danger, 0.12);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 12%, transparent);
         }
     }
 
@@ -71,7 +71,7 @@ textarea.form-control {
 
 select.form-control {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: var(--select-arrow);
     background-repeat: no-repeat;
     background-position: right $spacing-md center;
     padding-right: $spacing-xl;

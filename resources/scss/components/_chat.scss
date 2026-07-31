@@ -43,7 +43,7 @@
         transition: color 0.2s, background 0.2s;
 
         &:hover {
-            color: var(--text-light);
+            color: var(--chat-text);
             background: rgba(255,255,255,0.08);
         }
     }
@@ -53,7 +53,7 @@
         align-items: center;
         gap: 0.75rem;
         text-decoration: none;
-        color: var(--text-light);
+        color: var(--chat-text);
         transition: opacity 0.2s;
 
         &:hover {
@@ -103,7 +103,7 @@
         border: 1px solid var(--border-color);
         border-radius: 8px;
         padding: 0.5rem 0.75rem;
-        color: var(--text-light);
+        color: var(--chat-text);
         font-size: 0.875rem;
         outline: none;
         transition: border-color 0.2s;
@@ -386,7 +386,7 @@
     display: none;
     background: none;
     border: none;
-    color: var(--text-light);
+    color: var(--chat-text);
     font-size: 1.4rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
@@ -488,7 +488,7 @@ body.layout-chat.is-embedded {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    color: var(--text-light);
+    color: var(--chat-text);
     font-size: 0.9rem;
     cursor: pointer;
 }
@@ -708,8 +708,12 @@ body.layout-chat.is-embedded {
     }
 }
 
-// Overrides thème clair
-[data-theme="light"] {
+// Overrides des thèmes clairs :
+// les blocs de code restent sombres même sur fond clair (lisibilité de la
+// coloration syntaxique), ce qu'aucun token ne peut exprimer.
+// À compléter si un thème clair est ajouté à config/themes.php.
+[data-theme="light"],
+[data-theme="ocean"] {
     .message-content {
         pre {
             background: #1e1e1e;
@@ -747,7 +751,7 @@ body.layout-chat.is-embedded {
 
         &:hover {
             background: rgba(255, 255, 255, 0.2);
-            color: var(--text-light);
+            color: var(--chat-text);
         }
     }
 
@@ -856,7 +860,7 @@ body.layout-chat.is-embedded {
 
     &:hover {
         background: rgba(255, 255, 255, 0.08);
-        color: var(--text-light);
+        color: var(--chat-text);
     }
 
     &.active {
@@ -958,7 +962,7 @@ body.layout-chat.is-embedded {
     &-name {
         font-size: 0.875rem;
         font-weight: 500;
-        color: var(--text-light);
+        color: var(--chat-text);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

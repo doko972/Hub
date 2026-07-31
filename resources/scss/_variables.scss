@@ -5,68 +5,58 @@ $breakpoint-mobile: 768px;
 $breakpoint-tablet: 992px;
 
 // ============================================
-// CSS Custom Properties (runtime / theming)
+// VOCABULAIRE DE CETTE FEUILLE → TOKENS DE THÈME
+//
+// Les pages qui chargent ce bundle (chat Cortex, conversation partagée,
+// retour Google) chargent AUSSI resources/sass via app.js. Les tokens de
+// thème (--bg, --surface, --primary, …) y sont donc toujours disponibles.
+//
+// On ne redéfinit plus AUCUNE couleur en dur ici : on traduit simplement
+// le vocabulaire local vers ces tokens. Conséquence : les 8 thèmes du Hub
+// s'appliquent au chat sans une seule ligne de plus, et il n'y a plus de
+// palette à maintenir en double.
+//
+// ⚠️ Ne pas réintroduire de token portant le même nom que dans
+// resources/sass avec un sens différent : les deux feuilles coexistent sur
+// ces pages, et c'est l'ordre de chargement qui trancherait. C'est ce qui
+// est arrivé à --text-light (texte principal ici, texte tertiaire là-bas),
+// désormais renommé --chat-text.
 // ============================================
 :root {
-    // Couleurs primaires
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
+    // Marque
+    --primary-hover:      var(--primary-dark);
 
-    // Fonds (thème sombre par défaut)
-    --bg-dark: #0f172a;
-    --bg-card: #1e293b;
-    --bg-sidebar: #1e293b;
-    --bg-chat: #0f172a;
-    --bg-input: #1e293b;
-    --bg-message-user: #6366f1;
-    --bg-message-ai: #334155;
+    // Fonds
+    --bg-dark:            var(--bg);
+    --bg-card:            var(--surface);
+    --bg-sidebar:         var(--surface);
+    --bg-chat:            var(--bg);
+    --bg-input:           var(--surface-2);
+    --bg-message-user:    var(--primary);
+    --bg-message-ai:      var(--surface-2);
 
     // Texte
-    --text-light: #f8fafc;
-    --text-muted: #94a3b8;
-    --text-placeholder: #b8c9d9;
+    --chat-text:          var(--text);
+    --text-placeholder:   var(--text-light);
 
     // Bordures & états
-    --border-color: #334155;
-    --success: #22c55e;
-    --danger: #ef4444;
-    --error: #ef4444;
-    --warning: #f59e0b;
+    --border-color:       var(--border);
+    --success:            var(--secondary);
+    --error:              var(--danger);
 
-    // Plateformes (page téléchargement)
-    --android: #3ddc84;
-    --windows: #0078d4;
+    // Plateformes (page téléchargement) — couleurs de marque, non thémables
+    --android:            #3ddc84;
+    --windows:            #0078d4;
 
-    // Navbar / menus
-    --navbar-bg: rgba(15, 23, 42, 0.85);
-    --mobile-menu-bg: rgba(15, 23, 42, 0.97);
-    --hero-text-from: #ffffff;
+    // Navbar / menus : translucides pour l'effet de flou, quel que soit le thème
+    --navbar-bg:          color-mix(in srgb, var(--surface) 85%, transparent);
+    --mobile-menu-bg:     color-mix(in srgb, var(--surface) 97%, transparent);
+    --hero-text-from:     var(--text);
 
-    // Hero overlay (couche par-dessus l'image de fond)
-    --hero-overlay: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,0));
-}
-
-// ============================================
-// Thème clair (piloté en JS via data-theme)
-// ============================================
-[data-theme="light"] {
-    --bg-dark: #f1f5f9;
-    --bg-card: #ffffff;
-    --bg-sidebar: #ffffff;
-    --bg-chat: #f8fafc;
-    --bg-input: #ffffff;
-    --bg-message-user: #6366f1;
-    --bg-message-ai: #e2e8f0;
-    --text-light: #1e293b;
-    --text-muted: #64748b;
-    --text-placeholder: #94a3b8;
-    --border-color: #e2e8f0;
-
-    // Navbar / menus
-    --navbar-bg: rgba(255, 255, 255, 0.9);
-    --mobile-menu-bg: rgba(241, 245, 249, 0.98);
-    --hero-text-from: #1e293b;
-
-    // Hero overlay — voile clair par-dessus l'image sombre
-    --hero-overlay: linear-gradient(rgba(241,245,249,0.82), rgba(241,245,249,0.82));
+    // Voile posé sur l'image de fond du hero. Basé sur --bg, il s'éclaircit
+    // ou s'assombrit tout seul selon le thème actif.
+    --hero-overlay: linear-gradient(
+        color-mix(in srgb, var(--bg) 82%, transparent),
+        color-mix(in srgb, var(--bg) 82%, transparent)
+    );
 }

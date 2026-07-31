@@ -196,7 +196,7 @@
     gap: 6px;
     padding: 6px 12px;
     background: $color-primary;
-    color: #fff;
+    color: var(--on-primary);
     border: none;
     border-radius: $radius-md;
     font-size: $font-size-xs;
@@ -206,7 +206,7 @@
     white-space: nowrap;
 
     &:hover {
-        background: darken($color-primary, 8%);
+        background: color-mix(in srgb, var(--primary) 92%, #000);
         transform: translateY(-1px);
     }
 

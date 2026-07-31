@@ -7,6 +7,8 @@
     <title>Google Calendar connecté</title>
 
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+
+    @include('partials.theme-boot')
 </head>
 <body class="layout-auth">
     <div class="google-success">

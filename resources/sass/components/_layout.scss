@@ -97,27 +97,27 @@
     margin-bottom: $spacing-md;
 
     &--success {
-        background: #D1FAE5;
-        color: #065F46;
-        border: 1px solid #A7F3D0;
+        background: var(--success-bg);
+        color: var(--success-fg);
+        border: 1px solid var(--success-border);
     }
 
     &--error {
-        background: #FEE2E2;
-        color: #991B1B;
-        border: 1px solid #FECACA;
+        background: var(--danger-bg);
+        color: var(--danger-fg);
+        border: 1px solid var(--danger-border);
     }
 
     &--warning {
-        background: #FEF3C7;
-        color: #92400E;
-        border: 1px solid #FDE68A;
+        background: var(--warning-bg);
+        color: var(--warning-fg);
+        border: 1px solid var(--warning-border);
     }
 
     &--info {
-        background: #DBEAFE;
-        color: #1E40AF;
-        border: 1px solid #BFDBFE;
+        background: var(--info-bg);
+        color: var(--info-fg);
+        border: 1px solid var(--info-border);
     }
 }
 
@@ -126,7 +126,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay);
     z-index: 40;
     opacity: 0;
     transition: opacity $transition-base;

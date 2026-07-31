@@ -43,7 +43,7 @@
     user-select: none;
 
     &:hover {
-        border-color: #C4B5FD;
+        border-color: color-mix(in srgb, var(--primary) 45%, transparent);
         background: $color-primary-light;
     }
 
@@ -85,14 +85,14 @@
         }
 
         // Couleurs d'accent (reprend les classes tile--)
-        &.tile--violet { background: #EDE9FE; svg { color: #7C3AED; } }
-        &.tile--blue   { background: #DBEAFE; svg { color: #3B82F6; } }
-        &.tile--green  { background: #D1FAE5; svg { color: #10B981; } }
-        &.tile--orange { background: #FEF3C7; svg { color: #F59E0B; } }
-        &.tile--red    { background: #FEE2E2; svg { color: #EF4444; } }
-        &.tile--pink   { background: #FCE7F3; svg { color: #EC4899; } }
-        &.tile--teal   { background: #CCFBF1; svg { color: #14B8A6; } }
-        &.tile--indigo { background: #E0E7FF; svg { color: #6366F1; } }
+        &.tile--violet { background: var(--accent-violet-bg); svg { color: var(--accent-violet-fg); } }
+        &.tile--blue   { background: var(--accent-blue-bg); svg { color: var(--accent-blue-fg); } }
+        &.tile--green  { background: var(--accent-green-bg); svg { color: var(--accent-green-fg); } }
+        &.tile--orange { background: var(--accent-orange-bg); svg { color: var(--accent-orange-fg); } }
+        &.tile--red    { background: var(--accent-red-bg); svg { color: var(--accent-red-fg); } }
+        &.tile--pink   { background: var(--accent-pink-bg); svg { color: var(--accent-pink-fg); } }
+        &.tile--teal   { background: var(--accent-teal-bg); svg { color: var(--accent-teal-fg); } }
+        &.tile--indigo { background: var(--accent-indigo-bg); svg { color: var(--accent-indigo-fg); } }
     }
 
     // Textes

@@ -5,7 +5,7 @@
 .confirm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--overlay);
     z-index: 10000;
     display: flex;
     align-items: center;
@@ -41,7 +41,7 @@
         width: 56px;
         height: 56px;
         border-radius: $radius-full;
-        background: #FEF3C7;
+        background: var(--warning-bg);
         color: $color-warning;
         display: flex;
         align-items: center;

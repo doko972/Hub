@@ -21,6 +21,8 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+
+    @include('partials.theme-boot')
 </head>
 
 <body class="layout-chat {{ request()->query('embedded') ? 'is-embedded' : '' }}">
@@ -99,9 +101,6 @@
                     <button class="btn-share-conv" id="btnShareConv" title="Partager cette conversation"
                         style="display: none;">
                         🔗
-                    </button>
-                    <button class="btn-theme" id="btnTheme" title="Changer de thème">
-                        🌙
                     </button>
                     <select class="model-selector" id="modelSelector">
                         <option value="gpt-4o" selected>GPT-4o</option>
@@ -465,7 +464,6 @@
 
 
 
-        const btnTheme = document.getElementById('btnTheme');
         const btnGoogleCalendar = document.getElementById('btnGoogleCalendar');
         const btnMenuMobile = document.getElementById('btnMenuMobile');
         const btnMic = document.getElementById('btnMic');
@@ -1741,28 +1739,9 @@
                 alert('Erreur lors du renommage du dossier');
             }
         }
-        // ============================================
-        // GESTION DU THÈME
-        // ============================================
-
-        // Charger le thème sauvegardé
-        const savedTheme = localStorage.getItem('cortex-theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        updateThemeButton(savedTheme);
-
-        btnTheme.addEventListener('click', () => {
-            const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('cortex-theme', newTheme);
-            updateThemeButton(newTheme);
-        });
-
-        function updateThemeButton(theme) {
-            btnTheme.textContent = theme === 'dark' ? '☀️' : '🌙';
-            btnTheme.title = theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre';
-        }
+        // Le thème est géré globalement par resources/js/components/theme.js
+        // (sélecteur de la navbar / page Préférences). Cette page suit donc
+        // les 8 thèmes du Hub : plus de bascule local ni de clé cortex-theme.
         // ============================================
         // NOTIFICATIONS PUSH
         // ============================================

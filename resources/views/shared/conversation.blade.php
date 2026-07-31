@@ -11,9 +11,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     @vite(['resources/scss/app.scss', 'resources/js/app.js'])
+
+    @include('partials.theme-boot')
 </head>
 
-<body class="layout-chat" data-theme="dark">
+<body class="layout-chat">
     <div class="shared-conversation">
         <!-- Header -->
         <header class="shared-header">

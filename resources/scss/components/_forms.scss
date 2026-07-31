@@ -9,7 +9,7 @@
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
-        color: var(--text-light);
+        color: var(--chat-text);
     }
 
     input {
@@ -18,7 +18,7 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 10px;
         background: rgba(255, 255, 255, 0.05);
-        color: var(--text-light);
+        color: var(--chat-text);
         font-size: 1rem;
         transition: border-color 0.2s, box-shadow 0.2s;
         box-sizing: border-box;

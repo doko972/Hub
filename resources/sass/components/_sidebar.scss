@@ -64,7 +64,7 @@
         }
 
         &.is-active {
-            background: rgba($color-primary, 0.25);
+            background: color-mix(in srgb, var(--primary) 25%, transparent);
             color: white;
             border-left: 3px solid $color-primary;
 

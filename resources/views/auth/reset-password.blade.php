@@ -10,16 +10,7 @@
     @vite(['resources/js/app.js'])
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
-    {{-- Anti-flash thème --}}
-    <script>
-        (function () {
-            var saved = localStorage.getItem('hub-theme');
-            var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            if ((saved || sys) === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        })();
-    </script>
+    @include('partials.theme-boot')
 </head>
 <body>
 

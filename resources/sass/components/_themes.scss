@@ -1,0 +1,335 @@
+// =============================================
+// PALETTES DE THÈMES
+//
+// Chaque thème ne redéfinit QUE des tokens de couleur.
+// Aucune règle de composant ici : si un composant n'est pas
+// thémable, c'est qu'il lui manque un var(--token) — on corrige
+// le composant, pas ce fichier.
+//
+// Le thème clair est le défaut, défini sur :root dans _variables.scss.
+//
+// Repères sémantiques :
+//   --bg          fond de page
+//   --surface     cartes, navbar, modales
+//   --surface-2   fond enfoncé : inputs, hover de ligne
+//   --border      traits de séparation
+//   --text        texte principal        (viser ≥ 7:1 sur --surface)
+//   --text-muted  texte secondaire       (viser ≥ 4.5:1 sur --surface)
+//   --text-light  texte tertiaire, hints
+//   --primary     accent de marque
+//   --on-primary  texte POSÉ SUR --primary (doit contraster avec lui)
+//   --primary-light  fond teinté subtil (hover, ligne sélectionnée)
+// =============================================
+
+// ---------------------------------------------
+// Liste des thèmes sombres, réutilisée plus bas
+// ---------------------------------------------
+$dark-themes: 'dark', 'nord', 'forest', 'sunset', 'midnight', 'contrast';
+
+// =============================================
+// SOMBRE — slate, l'historique de l'app
+// =============================================
+[data-theme="dark"] {
+    --primary:            #7C3AED;
+    --primary-dark:       #6D28D9;
+    --primary-light:      #2A2145;
+    --on-primary:         #FFFFFF;
+
+    --secondary:          #34D399;
+    --danger:             #F87171;
+    --warning:            #FBBF24;
+    --info:               #60A5FA;
+
+    --bg:                 #0F172A;
+    --surface:            #1E293B;
+    --surface-2:          #263348;
+    --border:             #334155;
+
+    --text:               #F1F5F9;
+    --text-muted:         #94A3B8;
+    --text-light:         #64748B;
+
+    --sidebar-bg:         #0F172A;
+    --sidebar-text:       #C7D2FE;
+    --sidebar-hover:      #1E293B;
+    --sidebar-active:     #7C3AED;
+
+    --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.45);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.55);
+    --shadow-tile:        0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-tile-hover:  0 8px 20px rgba(124, 58, 237, 0.35);
+
+    --theme-color:        #0F172A;
+}
+
+// =============================================
+// OCEAN — bleu froid, clair
+// =============================================
+[data-theme="ocean"] {
+    --primary:            #0369A1;
+    --primary-dark:       #075985;
+    --primary-light:      #E0F2FE;
+    --on-primary:         #FFFFFF;
+
+    --secondary:          #0D9488;
+    --danger:             #DC2626;
+    --warning:            #D97706;
+    --info:               #0284C7;
+
+    --bg:                 #EDF4FA;
+    --surface:            #FFFFFF;
+    --surface-2:          #F5F9FD;
+    --border:             #D3E2F0;
+
+    --text:               #0C2740;
+    --text-muted:         #4A6B87;
+    --text-light:         #86A2BA;
+
+    --sidebar-bg:         #0C4A6E;
+    --sidebar-text:       #BAE6FD;
+    --sidebar-hover:      #075985;
+    --sidebar-active:     #0EA5E9;
+
+    --shadow-sm:          0 1px 3px rgba(12, 39, 64, 0.10);
+    --shadow-md:          0 4px 12px rgba(12, 39, 64, 0.12);
+    --shadow-lg:          0 8px 24px rgba(12, 39, 64, 0.15);
+    --shadow-tile:        0 2px 8px rgba(12, 39, 64, 0.10);
+    --shadow-tile-hover:  0 8px 20px rgba(3, 105, 161, 0.25);
+
+    --theme-color:        #0C4A6E;
+}
+
+// =============================================
+// NORD — bleu froid, sombre (palette Nord)
+// =============================================
+[data-theme="nord"] {
+    --primary:            #88C0D0;
+    --primary-dark:       #5E81AC;
+    --primary-light:      #3B4A57;
+    --on-primary:         #2E3440;
+
+    --secondary:          #A3BE8C;
+    --danger:             #BF616A;
+    --warning:            #EBCB8B;
+    --info:               #81A1C1;
+
+    --bg:                 #2E3440;
+    --surface:            #3B4252;
+    --surface-2:          #434C5E;
+    --border:             #4C566A;
+
+    --text:               #ECEFF4;
+    --text-muted:         #C3CBD8;
+    --text-light:         #9AA5B5;
+
+    --sidebar-bg:         #272C36;
+    --sidebar-text:       #D8DEE9;
+    --sidebar-hover:      #3B4252;
+    --sidebar-active:     #88C0D0;
+
+    --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.35);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-tile:        0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-tile-hover:  0 8px 20px rgba(136, 192, 208, 0.28);
+
+    --theme-color:        #2E3440;
+}
+
+// =============================================
+// FOREST — vert profond, sombre
+// =============================================
+[data-theme="forest"] {
+    --primary:            #34D399;
+    --primary-dark:       #059669;
+    --primary-light:      #163328;
+    --on-primary:         #05261A;
+
+    --secondary:          #A3E635;
+    --danger:             #F87171;
+    --warning:            #FBBF24;
+    --info:               #5EEAD4;
+
+    --bg:                 #0D1A14;
+    --surface:            #15271E;
+    --surface-2:          #1D3529;
+    --border:             #2A4A37;
+
+    --text:               #E6F5EC;
+    --text-muted:         #9BC0AB;
+    --text-light:         #6E9481;
+
+    --sidebar-bg:         #091310;
+    --sidebar-text:       #A7F3D0;
+    --sidebar-hover:      #15271E;
+    --sidebar-active:     #34D399;
+
+    --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-tile:        0 2px 8px rgba(0, 0, 0, 0.45);
+    --shadow-tile-hover:  0 8px 20px rgba(52, 211, 153, 0.3);
+
+    --theme-color:        #0D1A14;
+}
+
+// =============================================
+// SUNSET — ambre & rose, sombre chaud
+// =============================================
+[data-theme="sunset"] {
+    --primary:            #FB7185;
+    --primary-dark:       #E11D48;
+    --primary-light:      #3A2229;
+    --on-primary:         #2A0A12;
+
+    --secondary:          #FBBF24;
+    --danger:             #EF4444;
+    --warning:            #F59E0B;
+    --info:               #F0ABFC;
+
+    --bg:                 #191316;
+    --surface:            #241A1F;
+    --surface-2:          #31242A;
+    --border:             #44323A;
+
+    --text:               #FCF1F3;
+    --text-muted:         #C8A3AE;
+    --text-light:         #9C7B87;
+
+    --sidebar-bg:         #140F11;
+    --sidebar-text:       #FECDD3;
+    --sidebar-hover:      #241A1F;
+    --sidebar-active:     #FB7185;
+
+    --shadow-sm:          0 1px 3px rgba(0, 0, 0, 0.45);
+    --shadow-md:          0 4px 12px rgba(0, 0, 0, 0.5);
+    --shadow-lg:          0 8px 24px rgba(0, 0, 0, 0.6);
+    --shadow-tile:        0 2px 8px rgba(0, 0, 0, 0.45);
+    --shadow-tile-hover:  0 8px 20px rgba(251, 113, 133, 0.3);
+
+    --theme-color:        #191316;
+}
+
+// =============================================
+// MIDNIGHT — noir pur (économie de batterie OLED)
+// =============================================
+[data-theme="midnight"] {
+    --primary:            #A78BFA;
+    --primary-dark:       #8B5CF6;
+    --primary-light:      #1C1726;
+    --on-primary:         #0A0A0A;
+
+    --secondary:          #4ADE80;
+    --danger:             #F87171;
+    --warning:            #FBBF24;
+    --info:               #60A5FA;
+
+    --bg:                 #000000;
+    --surface:            #0A0A0A;
+    --surface-2:          #171717;
+    --border:             #292929;
+
+    --text:               #FAFAFA;
+    --text-muted:         #A3A3A3;
+    --text-light:         #737373;
+
+    --sidebar-bg:         #000000;
+    --sidebar-text:       #D4D4D4;
+    --sidebar-hover:      #171717;
+    --sidebar-active:     #A78BFA;
+
+    // Sur du noir pur une ombre est invisible : on s'appuie sur les bordures.
+    --shadow-sm:          0 0 0 1px #1F1F1F;
+    --shadow-md:          0 0 0 1px #292929;
+    --shadow-lg:          0 0 0 1px #333333;
+    --shadow-tile:        0 0 0 1px #1F1F1F;
+    --shadow-tile-hover:  0 0 0 1px #A78BFA;
+
+    --theme-color:        #000000;
+}
+
+// =============================================
+// CONTRASTE ÉLEVÉ — accessibilité (cible WCAG AAA)
+// Bordures pleines et opaques, accent jaune sur noir (≈ 15:1).
+// =============================================
+[data-theme="contrast"] {
+    --primary:            #FFD400;
+    --primary-dark:       #FFE566;
+    --primary-light:      #2B2B00;
+    --on-primary:         #000000;
+
+    --secondary:          #4ADE80;
+    --danger:             #FF6B6B;
+    --warning:            #FFD400;
+    --info:               #67E8F9;
+
+    --bg:                 #000000;
+    --surface:            #000000;
+    --surface-2:          #1A1A1A;
+    --border:             #FFFFFF;
+
+    --text:               #FFFFFF;
+    --text-muted:         #E8E8E8;
+    --text-light:         #CFCFCF;
+
+    --sidebar-bg:         #000000;
+    --sidebar-text:       #FFFFFF;
+    --sidebar-hover:      #1A1A1A;
+    --sidebar-active:     #FFD400;
+
+    --shadow-sm:          0 0 0 1px #FFFFFF;
+    --shadow-md:          0 0 0 2px #FFFFFF;
+    --shadow-lg:          0 0 0 2px #FFFFFF;
+    --shadow-tile:        0 0 0 1px #FFFFFF;
+    --shadow-tile-hover:  0 0 0 2px #FFD400;
+
+    --theme-color:        #000000;
+}
+
+// =============================================
+// ACCENTS & BADGES EN MODE SOMBRE
+//
+// Les pastels du thème clair (#EDE9FE…) sont illisibles sur fond sombre.
+// On les remplace par la même teinte en fond translucide + texte vif.
+// Mutualisé sur tous les thèmes sombres : une seule source de vérité.
+// =============================================
+@each $t in $dark-themes {
+    [data-theme="#{$t}"] {
+        color-scheme: dark;
+
+        --accent-violet-bg: rgba(124, 58, 237, 0.22);  --accent-violet-fg: #A78BFA;
+        --accent-blue-bg:   rgba(59, 130, 246, 0.22);  --accent-blue-fg:   #93C5FD;
+        --accent-green-bg:  rgba(16, 185, 129, 0.22);  --accent-green-fg:  #6EE7B7;
+        --accent-orange-bg: rgba(245, 158, 11, 0.22);  --accent-orange-fg: #FCD34D;
+        --accent-red-bg:    rgba(239, 68, 68, 0.22);   --accent-red-fg:    #FCA5A5;
+        --accent-pink-bg:   rgba(236, 72, 153, 0.22);  --accent-pink-fg:   #F9A8D4;
+        --accent-teal-bg:   rgba(20, 184, 166, 0.22);  --accent-teal-fg:   #5EEAD4;
+        --accent-indigo-bg: rgba(99, 102, 241, 0.22);  --accent-indigo-fg: #A5B4FC;
+
+        --success-bg: rgba(16, 185, 129, 0.18);  --success-fg: #6EE7B7;  --success-border: rgba(16, 185, 129, 0.4);
+        --danger-bg:  rgba(239, 68, 68, 0.18);   --danger-fg:  #FCA5A5;  --danger-border:  rgba(239, 68, 68, 0.4);
+        --warning-bg: rgba(245, 158, 11, 0.18);  --warning-fg: #FCD34D;  --warning-border: rgba(245, 158, 11, 0.4);
+        --info-bg:    rgba(59, 130, 246, 0.18);  --info-fg:    #93C5FD;  --info-border:    rgba(59, 130, 246, 0.4);
+
+        --overlay: rgba(0, 0, 0, 0.7);
+
+        // Chevron des <select> en clair (%2394A3B8 = #94A3B8)
+        --select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    }
+}
+
+// ---- Contraste élevé : accents opaques et bordures pleines ----
+[data-theme="contrast"] {
+    --accent-violet-fg: #D8B4FE;  --accent-blue-fg:   #93C5FD;
+    --accent-green-fg:  #86EFAC;  --accent-orange-fg: #FCD34D;
+    --accent-red-fg:    #FCA5A5;  --accent-pink-fg:   #F9A8D4;
+    --accent-teal-fg:   #5EEAD4;  --accent-indigo-fg: #A5B4FC;
+
+    --success-fg: #86EFAC;  --success-border: #86EFAC;
+    --danger-fg:  #FCA5A5;  --danger-border:  #FCA5A5;
+    --warning-fg: #FCD34D;  --warning-border: #FCD34D;
+    --info-fg:    #93C5FD;  --info-border:    #93C5FD;
+
+    --overlay: rgba(0, 0, 0, 0.85);
+}

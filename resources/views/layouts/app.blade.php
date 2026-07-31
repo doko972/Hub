@@ -19,16 +19,7 @@
     @vite(['resources/js/app.js'])
     <script src="https://unpkg.com/@dotlottie/player-component@2.7.12/dist/dotlottie-player.mjs" type="module"></script>
 
-    {{-- Anti-flash : applique le thème AVANT le rendu CSS pour éviter le clignotement --}}
-    <script>
-        (function () {
-            var saved = localStorage.getItem('hub-theme');
-            var sys   = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            if ((saved || sys) === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-            }
-        })();
-    </script>
+    @include('partials.theme-boot')
 </head>
 <body>
 
@@ -66,7 +57,7 @@
             </a>
 
             <a href="{{ route('preferences.edit') }}"
-               class="sidebar__link {{ request()->routeIs('preferences.*') ? 'is-active' : '' }}">
+               class="sidebar__link {{ request()->routeIs('preferences.edit') ? 'is-active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="4" y1="6" x2="20" y2="6"/>
                     <line x1="4" y1="12" x2="20" y2="12"/>
@@ -76,6 +67,18 @@
                     <circle cx="10" cy="18" r="2" fill="currentColor" stroke="none"/>
                 </svg>
                 Mes outils
+            </a>
+
+            <a href="{{ route('preferences.theme') }}"
+               class="sidebar__link {{ request()->routeIs('preferences.theme') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="13.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+                    <circle cx="17.5" cy="10.5" r="1.5" fill="currentColor" stroke="none"/>
+                    <circle cx="8.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/>
+                    <circle cx="6.5" cy="12.5" r="1.5" fill="currentColor" stroke="none"/>
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 0-.926.746-1.688 1.688-1.688h1.996c3.078 0 5.543-2.465 5.543-5.543C22 6.012 17.52 2 12 2z"/>
+                </svg>
+                Thème
             </a>
 
             <a href="{{ route('profile.edit') }}"
@@ -242,28 +245,52 @@
                     <span>Installer</span>
                 </button>
 
-                {{-- Bouton Dark / Light mode --}}
-                <button id="theme-toggle"
-                        class="theme-toggle"
-                        aria-label="Passer en mode sombre"
-                        title="Passer en mode sombre">
-                    {{-- Soleil (visible en mode sombre → revenir au clair) --}}
-                    <svg id="theme-icon-sun" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                        <circle cx="12" cy="12" r="5"/>
-                        <line x1="12" y1="1" x2="12" y2="3"/>
-                        <line x1="12" y1="21" x2="12" y2="23"/>
-                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                        <line x1="1" y1="12" x2="3" y2="12"/>
-                        <line x1="21" y1="12" x2="23" y2="12"/>
-                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                    </svg>
-                    {{-- Lune (visible en mode clair → passer au sombre) --}}
-                    <svg id="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-                    </svg>
-                </button>
+                {{-- Sélecteur de thème --}}
+                <div class="navbar__dropdown">
+                    <button id="theme-toggle"
+                            class="theme-toggle"
+                            data-dropdown="theme-menu"
+                            aria-haspopup="true"
+                            aria-expanded="false"
+                            aria-label="Changer de thème"
+                            title="Changer de thème">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <circle cx="13.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/>
+                            <circle cx="17.5" cy="10.5" r="1.5" fill="currentColor" stroke="none"/>
+                            <circle cx="8.5" cy="7.5" r="1.5" fill="currentColor" stroke="none"/>
+                            <circle cx="6.5" cy="12.5" r="1.5" fill="currentColor" stroke="none"/>
+                            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 0-.926.746-1.688 1.688-1.688h1.996c3.078 0 5.543-2.465 5.543-5.543C22 6.012 17.52 2 12 2z"/>
+                        </svg>
+                    </button>
+
+                    <div id="theme-menu" class="dropdown-menu dropdown-menu--themes">
+                        @foreach(config('themes.available') as $key => $theme)
+                            <button type="button"
+                                    class="theme-option"
+                                    data-theme-choice="{{ $key }}"
+                                    aria-pressed="false">
+                                <span class="theme-option__swatch" aria-hidden="true">
+                                    @foreach($theme['swatch'] as $color)
+                                        <span style="background: {{ $color }}"></span>
+                                    @endforeach
+                                </span>
+                                <span class="theme-option__label">{{ $theme['label'] }}</span>
+                                <svg class="theme-option__check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                    <polyline points="20 6 9 17 4 12"/>
+                                </svg>
+                            </button>
+                        @endforeach
+
+                        <hr>
+                        <a href="{{ route('preferences.theme') }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"/>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6h.09A1.65 1.65 0 0 0 10.6 3.09V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 16.11 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 20.4 9v.09A1.65 1.65 0 0 0 21.91 10.6H22a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                            </svg>
+                            Tous les thèmes
+                        </a>
+                    </div>
+                </div>
 
                 {{-- Menu utilisateur --}}
                 <div class="navbar__dropdown">

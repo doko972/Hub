@@ -137,7 +137,7 @@
 }
 
 .btn-remove {
-    border-color: lighten($color-danger, 20%);
+    border-color: color-mix(in srgb, var(--danger) 80%, #fff);
     color: $color-danger;
 
     &:hover { background: $color-danger; color: #fff; border-color: $color-danger; }
@@ -237,7 +237,7 @@
     transition: background $transition-fast;
     align-self: flex-start;
 
-    &:hover    { background: darken($color-primary, 8%); }
+    &:hover    { background: color-mix(in srgb, var(--primary) 92%, #000); }
     &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
@@ -332,7 +332,7 @@
     white-space: nowrap;
     flex-shrink: 0;
 
-    &:hover { background: darken($color-primary, 8%); }
+    &:hover { background: color-mix(in srgb, var(--primary) 92%, #000); }
 }
 
 .download-all-btn {
@@ -348,5 +348,5 @@
     transition: background $transition-fast;
     align-self: flex-start;
 
-    &:hover { background: darken($color-secondary, 8%); }
+    &:hover { background: color-mix(in srgb, var(--secondary) 92%, #000); }
 }

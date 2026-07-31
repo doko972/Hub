@@ -3,7 +3,9 @@
  * Stratégie : Cache First pour les assets statiques, Network First pour les pages
  */
 
-const CACHE_NAME     = 'hub-v2';
+// Incrémenter à chaque changement de stratégie : `activate` purge alors les
+// anciens caches, ce qui évite de laisser traîner des réponses obsolètes.
+const CACHE_NAME     = 'hub-v3';
 const ASSETS_TO_CACHE = [
     '/',
     '/chat',
@@ -42,6 +44,17 @@ self.addEventListener('fetch', (event) => {
     // Ignorer les requêtes non-GET et les API
     if (request.method !== 'GET') return;
     if (url.pathname.startsWith('/api/')) return;
+
+    // Ne jamais intercepter une autre origine.
+    //
+    // ⚠️ Sans ce garde-fou, le serveur de dev Vite (http://localhost:5173) était
+    // servi en Cache First : son URL /resources/js/app.js ne change JAMAIS alors
+    // que son contenu change à chaque modification. Résultat, le navigateur
+    // exécutait indéfiniment une version figée du JS, et seul un rechargement
+    // forcé (qui contourne le service worker) reflétait le code réel.
+    // Les assets de production, eux, sont sur cette origine sous /build/ avec un
+    // nom haché : les mettre en cache est sûr, un nouveau build = une nouvelle URL.
+    if (url.origin !== self.location.origin) return;
 
     // Assets statiques (build Vite) → Cache First
     if (url.pathname.startsWith('/build/') || isStaticAsset(url.pathname)) {
