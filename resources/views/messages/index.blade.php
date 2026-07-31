@@ -111,18 +111,56 @@
                  data-send-url="{{ route('messages.send', $discussion) }}"
                  data-last-id="{{ $messages->last()->id ?? 0 }}"
                  data-poll-interval="{{ (int) config('messaging.thread_poll_seconds', 5) }}"
+                 {{-- __ID__ est remplacé côté client par l'identifiant du message --}}
+                 data-reaction-url="{{ route('messages.reactions.toggle', [$discussion, '__ID__']) }}"
                  aria-live="polite">
                 @foreach($messages as $message)
                     @include('messages.partials.bubble', ['message' => $message])
                 @endforeach
             </div>
 
-            <form class="messenger__composer" data-composer>
+            <form class="messenger__composer" data-composer
+                  data-max-files="{{ (int) config('messaging.attachments.max_files') }}"
+                  data-max-size-kb="{{ (int) config('messaging.attachments.max_size_kb') }}">
                 @csrf
-                <label class="sr-only" for="message-body">Votre message</label>
-                <textarea id="message-body" name="body" rows="1" maxlength="5000"
-                          placeholder="Écrivez votre message…  (Entrée pour envoyer)" required></textarea>
-                <button type="submit" class="btn btn--primary btn--sm">Envoyer</button>
+
+                {{-- Fichiers choisis, avant envoi --}}
+                <ul class="composer-files" data-file-list hidden></ul>
+
+                {{-- Panneau GIF, alimenté par la recherche relayée --}}
+                @if(\App\Services\TenorGifs::isConfigured())
+                    <div class="gif-panel" data-gif-panel
+                         data-search-url="{{ route('messages.gifs.search') }}"
+                         data-send-url="{{ route('messages.gif.send', $discussion) }}" hidden>
+                        <input type="search" class="gif-panel__search" data-gif-search
+                               placeholder="Rechercher un GIF…" aria-label="Rechercher un GIF">
+                        <div class="gif-panel__results" data-gif-results></div>
+                        <p class="gif-panel__credit">GIF fournis par Tenor</p>
+                    </div>
+                @endif
+
+                <div class="composer-row">
+                    @if(\App\Services\TenorGifs::isConfigured())
+                        <button type="button" class="composer-btn" data-gif-toggle title="Envoyer un GIF">GIF</button>
+                    @endif
+
+                    <button type="button" class="composer-btn" data-emoji-toggle title="Émoticones">😊</button>
+
+                    <label class="composer-attach" title="Joindre un fichier">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                        </svg>
+                        <span class="sr-only">Joindre un fichier</span>
+                        <input type="file" name="attachments[]" multiple data-file-input
+                               accept=".{{ implode(',.', config('messaging.attachments.allowed_extensions')) }}">
+                    </label>
+
+                    <label class="sr-only" for="message-body">Votre message</label>
+                    <textarea id="message-body" name="body" rows="1" maxlength="5000"
+                              placeholder="Écrivez votre message…  (Entrée pour envoyer)"></textarea>
+
+                    <button type="submit" class="btn btn--primary btn--sm">Envoyer</button>
+                </div>
             </form>
         @else
             <div class="messenger__placeholder">

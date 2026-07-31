@@ -1,0 +1,293 @@
+// =============================================
+// ÉMOTICONES, RÉACTIONS ET GIF
+// =============================================
+
+// ---- Boutons du composeur ----
+.composer-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    background: none;
+    color: $color-text-muted;
+    font-size: $font-size-sm;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+        color: $color-primary;
+        border-color: $color-primary;
+    }
+}
+
+// ---- Sélecteur d'émoticones ----
+.emoji-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+
+    &[hidden] { display: none; }
+}
+
+.emoji-picker {
+    width: 300px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    overflow: hidden;
+
+    &__tabs {
+        display: flex;
+        border-bottom: 1px solid $color-border;
+    }
+
+    &__tab {
+        flex: 1;
+        padding: 6px 0;
+        border: 0;
+        background: none;
+        font-size: 15px;
+        cursor: pointer;
+        opacity: 0.55;
+        transition: opacity $transition-fast, background $transition-fast;
+
+        &:hover { opacity: 1; }
+
+        &.is-active {
+            opacity: 1;
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(8, 1fr);
+        gap: 2px;
+        padding: $spacing-sm;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    &__emoji {
+        border: 0;
+        background: none;
+        font-size: 19px;
+        line-height: 1;
+        padding: 4px 0;
+        border-radius: $radius-sm;
+        cursor: pointer;
+
+        &:hover {
+            background: $color-bg;
+        }
+    }
+
+    &__empty {
+        grid-column: 1 / -1;
+        margin: 0;
+        padding: $spacing-md 0;
+        text-align: center;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+    }
+}
+
+// ---- Réactions sous une bulle ----
+.reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    // Pas de marge quand la ligne est vide, pour ne pas creuser la bulle.
+    &:not(:empty) {
+        margin-top: 5px;
+    }
+}
+
+.reaction {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 1px 7px;
+    border: 1px solid $color-border;
+    border-radius: $radius-full;
+    background: $color-surface;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.6;
+    transition: border-color $transition-fast, background $transition-fast;
+
+    &:hover {
+        border-color: $color-primary;
+    }
+
+    // Ce que l'on a soi-même posé se distingue d'un coup d'œil.
+    &.is-mine {
+        border-color: $color-primary;
+        background: color-mix(in srgb, var(--primary) 14%, transparent);
+    }
+
+    &__count {
+        color: $color-text-muted;
+        font-weight: 600;
+    }
+
+    &.is-mine &__count {
+        color: $color-primary;
+    }
+}
+
+// Bouton « réagir », révélé au survol de la bulle
+.bubble {
+    position: relative;
+
+    &__react {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 24px;
+        height: 24px;
+        border: 1px solid $color-border;
+        border-radius: $radius-full;
+        background: $color-surface;
+        color: $color-text-muted;
+        font-size: 12px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        opacity: 0;
+        transition: opacity $transition-fast;
+    }
+
+    &.is-mine &__react {
+        right: auto;
+        left: -6px;
+    }
+
+    &:hover &__react,
+    &__react:focus-visible {
+        opacity: 1;
+    }
+}
+
+// Raccourcis de réaction
+.quick-reactions {
+    position: absolute;
+    top: 22px;
+    right: 0;
+    z-index: 20;
+    display: flex;
+    gap: 2px;
+    padding: 4px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-full;
+    box-shadow: $shadow-md;
+
+    button {
+        border: 0;
+        background: none;
+        font-size: 17px;
+        line-height: 1;
+        padding: 3px;
+        border-radius: $radius-full;
+        cursor: pointer;
+
+        &:hover { background: $color-bg; }
+    }
+}
+
+// ---- Panneau GIF ----
+.gif-panel {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    z-index: 30;
+    width: 320px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-lg;
+    padding: $spacing-sm;
+
+    &[hidden] { display: none; }
+
+    &__search {
+        width: 100%;
+        padding: 6px $spacing-sm;
+        border: 1px solid $color-border;
+        border-radius: $radius-sm;
+        background: $color-bg;
+        color: $color-text;
+        font: inherit;
+        font-size: $font-size-sm;
+
+        &:focus {
+            outline: 2px solid $color-primary;
+            outline-offset: -1px;
+        }
+    }
+
+    &__results {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+        max-height: 260px;
+        overflow-y: auto;
+        margin-top: $spacing-sm;
+    }
+
+    &__item {
+        border: 0;
+        padding: 0;
+        background: none;
+        cursor: pointer;
+        border-radius: $radius-sm;
+        overflow: hidden;
+        aspect-ratio: 1;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        &:hover {
+            outline: 2px solid $color-primary;
+        }
+    }
+
+    &__status,
+    &__credit {
+        grid-column: 1 / -1;
+        margin: $spacing-sm 0 0;
+        text-align: center;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+    }
+
+    &__credit {
+        margin-top: $spacing-sm;
+        font-size: 10px;
+        opacity: 0.7;
+    }
+}
+
+// La zone de saisie ancre les panneaux flottants.
+.messenger__composer {
+    position: relative;
+}
+
+.composer-row {
+    position: relative;
+}

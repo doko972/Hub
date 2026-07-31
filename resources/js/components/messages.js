@@ -9,7 +9,9 @@
  * est du texte rédigé par un utilisateur, jamais du HTML.
  */
 
-import { showMessageToast } from './toast.js';
+import { showMessageToast, showToast } from './toast.js';
+import { attachEmojiPicker } from './emojiPicker.js';
+import { QUICK_REACTIONS } from '../emoji-data.js';
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -47,18 +49,106 @@ function buildBubble(message) {
         content.appendChild(author);
     }
 
-    const body = document.createElement('p');
-    body.className = 'bubble__body';
-    body.textContent = message.body;
+    if (message.body) {
+        const body = document.createElement('p');
+        body.className = 'bubble__body';
+        body.textContent = message.body;
+        content.appendChild(body);
+    }
+
+    if (message.attachments?.length) {
+        content.appendChild(buildAttachments(message.attachments));
+    }
 
     const time = document.createElement('span');
     time.className = 'bubble__time';
     time.textContent = message.sent_at;
 
-    content.append(body, time);
+    const reactions = document.createElement('div');
+    reactions.className = 'reactions';
+    reactions.dataset.reactions = '';
+
+    content.append(time, reactions);
     bubble.appendChild(content);
 
+    const react = document.createElement('button');
+    react.type = 'button';
+    react.className = 'bubble__react';
+    react.dataset.reactTrigger = '';
+    react.setAttribute('aria-label', 'Réagir');
+    react.textContent = '🙂';
+    bubble.appendChild(react);
+
+    if (message.reactions?.length) {
+        renderReactions(reactions, message.reactions);
+    }
+
     return bubble;
+}
+
+/**
+ * (Re)dessine la ligne de réactions d'un message.
+ * Miroir de messages/partials/bubble.blade.php.
+ */
+function renderReactions(container, reactions) {
+    container.replaceChildren();
+
+    reactions.forEach((reaction) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'reaction' + (reaction.mine ? ' is-mine' : '');
+        button.dataset.emoji = reaction.emoji;
+
+        const emoji = document.createElement('span');
+        emoji.className = 'reaction__emoji';
+        emoji.textContent = reaction.emoji;
+
+        const count = document.createElement('span');
+        count.className = 'reaction__count';
+        count.textContent = reaction.count;
+
+        button.append(emoji, count);
+        container.appendChild(button);
+    });
+}
+
+// Miroir de messages/partials/bubble.blade.php : garder les deux en phase.
+function buildAttachments(attachments) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'attachments';
+
+    attachments.forEach((file) => {
+        const link = document.createElement('a');
+        link.href = file.url;
+
+        if (file.is_image) {
+            link.className = 'attachments__image';
+            link.target = '_blank';
+            link.rel = 'noopener';
+
+            const img = document.createElement('img');
+            img.src = file.url;
+            img.alt = file.name;
+            img.loading = 'lazy';
+            link.appendChild(img);
+        } else {
+            link.className = 'attachments__file';
+
+            const name = document.createElement('span');
+            name.className = 'attachments__name';
+            name.textContent = file.name;
+
+            const size = document.createElement('span');
+            size.className = 'attachments__size';
+            size.textContent = file.size;
+
+            link.append(name, size);
+        }
+
+        wrapper.appendChild(link);
+    });
+
+    return wrapper;
 }
 
 function isScrolledToBottom(container) {
@@ -79,6 +169,76 @@ function initThread() {
 
     container.scrollTop = container.scrollHeight;
 
+    // ---- Fichiers en attente d'envoi ----
+    const fileInput = composer.querySelector('[data-file-input]');
+    const fileList  = composer.querySelector('[data-file-list]');
+    const maxFiles  = parseInt(composer.dataset.maxFiles, 10) || 5;
+    const maxBytes  = (parseInt(composer.dataset.maxSizeKb, 10) || 10240) * 1024;
+    let pending     = [];
+
+    function humanSize(bytes) {
+        if (bytes < 1024) return `${bytes} o`;
+        if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+        return `${(bytes / 1024 / 1024).toFixed(1)} Mo`;
+    }
+
+    function renderFiles() {
+        fileList.replaceChildren();
+        fileList.hidden = pending.length === 0;
+
+        pending.forEach((file, index) => {
+            const item = document.createElement('li');
+            item.className = 'composer-files__item';
+
+            const name = document.createElement('span');
+            name.textContent = file.name;
+
+            const size = document.createElement('span');
+            size.className = 'composer-files__size';
+            size.textContent = humanSize(file.size);
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'composer-files__remove';
+            remove.setAttribute('aria-label', `Retirer ${file.name}`);
+            remove.textContent = '×';
+            remove.addEventListener('click', () => {
+                pending.splice(index, 1);
+                renderFiles();
+            });
+
+            item.append(name, size, remove);
+            fileList.appendChild(item);
+        });
+    }
+
+    function clearFiles() {
+        pending = [];
+        fileInput.value = '';
+        renderFiles();
+    }
+
+    fileInput?.addEventListener('change', () => {
+        // Contrôles côté client pour un retour immédiat ; le serveur revalide
+        // de toute façon, c'est lui qui fait foi.
+        for (const file of fileInput.files) {
+            if (pending.length >= maxFiles) {
+                showToast(`Pas plus de ${maxFiles} fichiers par message.`, 'warning');
+                break;
+            }
+
+            if (file.size > maxBytes) {
+                showToast(`« ${file.name} » dépasse ${humanSize(maxBytes)}.`, 'warning');
+                continue;
+            }
+
+            pending.push(file);
+        }
+
+        fileInput.value = '';
+        renderFiles();
+    });
+
     function append(messages) {
         if (!messages.length) return;
 
@@ -95,6 +255,92 @@ function initThread() {
         if (stick) container.scrollTop = container.scrollHeight;
     }
 
+    // ---- Réactions ----
+    const reactionUrlTemplate = container.dataset.reactionUrl;
+
+    async function toggleReaction(messageId, emoji) {
+        try {
+            const response = await fetch(reactionUrlTemplate.replace('__ID__', messageId), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({ emoji }),
+            });
+
+            if (!response.ok) return;
+
+            const { reactions } = await response.json();
+            const bubble = container.querySelector(`[data-message-id="${messageId}"] [data-reactions]`);
+
+            if (bubble) renderReactions(bubble, reactions);
+        } catch {
+            // Sans réponse, le sondage rétablira l'état réel.
+        }
+    }
+
+    /**
+     * Applique l'état renvoyé par le sondage : les réactions posées par les
+     * autres n'arrivent pas avec les nouveaux messages, puisqu'elles portent
+     * sur des messages déjà affichés.
+     */
+    function applyReactions(map) {
+        container.querySelectorAll('[data-message-id]').forEach((bubble) => {
+            const row = bubble.querySelector('[data-reactions]');
+            if (!row) return;
+
+            renderReactions(row, map?.[bubble.dataset.messageId] ?? []);
+        });
+    }
+
+    // Clic sur une réaction existante : bascule.
+    container.addEventListener('click', (event) => {
+        const reaction = event.target.closest('.reaction');
+        if (!reaction) return;
+
+        const bubble = reaction.closest('[data-message-id]');
+        if (bubble) toggleReaction(bubble.dataset.messageId, reaction.dataset.emoji);
+    });
+
+    // Clic sur le bouton « réagir » : raccourcis les plus courants.
+    let quickPanel = null;
+
+    container.addEventListener('click', (event) => {
+        const trigger = event.target.closest('[data-react-trigger]');
+        if (!trigger) return;
+
+        event.stopPropagation();
+        quickPanel?.remove();
+
+        const bubble = trigger.closest('[data-message-id]');
+        quickPanel = document.createElement('div');
+        quickPanel.className = 'quick-reactions';
+
+        QUICK_REACTIONS.forEach((emoji) => {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = emoji;
+            button.addEventListener('click', () => {
+                toggleReaction(bubble.dataset.messageId, emoji);
+                quickPanel.remove();
+                quickPanel = null;
+            });
+            quickPanel.appendChild(button);
+        });
+
+        trigger.parentElement.appendChild(quickPanel);
+    });
+
+    document.addEventListener('click', (event) => {
+        if (quickPanel && !quickPanel.contains(event.target)) {
+            quickPanel.remove();
+            quickPanel = null;
+        }
+    });
+
     async function poll() {
         if (document.hidden || polling) return;
         polling = true;
@@ -105,7 +351,9 @@ function initThread() {
             });
 
             if (response.ok) {
-                append((await response.json()).messages);
+                const data = await response.json();
+                append(data.messages);
+                applyReactions(data.reactions);
             }
         } catch {
             // Coupure réseau : on retentera au tour suivant.
@@ -116,35 +364,49 @@ function initThread() {
 
     async function send() {
         const body = textarea.value.trim();
-        if (!body) return;
+
+        // Un message peut n'être qu'une pièce jointe.
+        if (!body && !pending.length) return;
 
         const button = composer.querySelector('button[type="submit"]');
         button.disabled = true;
+
+        // multipart plutôt que JSON : c'est le seul format qui transporte des
+        // fichiers. Le corps du message voyage dans le même envoi.
+        const form = new FormData();
+        form.append('body', body);
+        pending.forEach((file) => form.append('attachments[]', file));
 
         try {
             const response = await fetch(sendUrl, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfToken(),
                     'X-Requested-With': 'XMLHttpRequest',
                     Accept: 'application/json',
                 },
-                body: JSON.stringify({ body }),
+                body: form,
             });
 
-            if (!response.ok) throw new Error();
+            if (!response.ok) {
+                const erreur = response.status === 422
+                    ? Object.values((await response.json()).errors ?? {})[0]?.[0]
+                    : null;
+
+                throw new Error(erreur || '');
+            }
 
             const { message } = await response.json();
             append([message]);
 
             textarea.value = '';
             textarea.style.height = 'auto';
+            clearFiles();
             container.scrollTop = container.scrollHeight;
-        } catch {
-            // Le texte reste dans le champ : l'utilisateur peut réessayer.
-            button.textContent = 'Échec — réessayer';
-            setTimeout(() => { button.textContent = 'Envoyer'; }, 2500);
+        } catch (error) {
+            // Le contenu reste en place : l'utilisateur peut corriger et réessayer.
+            button.textContent = error.message || 'Échec — réessayer';
+            setTimeout(() => { button.textContent = 'Envoyer'; }, 3500);
         } finally {
             button.disabled = false;
             textarea.focus();
@@ -170,9 +432,135 @@ function initThread() {
         textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
     });
 
+    // ---- Émoticones dans le message ----
+    const emojiToggle = composer.querySelector('[data-emoji-toggle]');
+
+    if (emojiToggle) {
+        attachEmojiPicker(emojiToggle, (emoji) => {
+            // Insertion à la position du curseur plutôt qu'en fin de champ.
+            const debut = textarea.selectionStart ?? textarea.value.length;
+            const fin   = textarea.selectionEnd ?? textarea.value.length;
+
+            textarea.value = textarea.value.slice(0, debut) + emoji + textarea.value.slice(fin);
+            textarea.selectionStart = textarea.selectionEnd = debut + emoji.length;
+            textarea.focus();
+        });
+    }
+
+    // ---- Panneau GIF ----
+    initGifPanel(composer, (message) => {
+        append([message]);
+        container.scrollTop = container.scrollHeight;
+    });
+
     setInterval(poll, interval);
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) poll();
+    });
+}
+
+/**
+ * Recherche et envoi de GIF. La requête passe par notre serveur : la clé Tenor
+ * n'est jamais exposée et les recherches ne partent pas du navigateur.
+ */
+function initGifPanel(composer, onSent) {
+    const panel  = composer.querySelector('[data-gif-panel]');
+    const toggle = composer.querySelector('[data-gif-toggle]');
+    if (!panel || !toggle) return;
+
+    const input   = panel.querySelector('[data-gif-search]');
+    const results = panel.querySelector('[data-gif-results]');
+    let debounce  = null;
+
+    toggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden) input.focus();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!panel.hidden && !panel.contains(event.target) && event.target !== toggle) {
+            panel.hidden = true;
+        }
+    });
+
+    async function search(query) {
+        results.replaceChildren();
+
+        if (query.trim().length < 2) return;
+
+        const attente = document.createElement('p');
+        attente.className = 'gif-panel__status';
+        attente.textContent = 'Recherche…';
+        results.appendChild(attente);
+
+        try {
+            const response = await fetch(`${panel.dataset.searchUrl}?q=${encodeURIComponent(query)}`, {
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            const { gifs } = await response.json();
+            results.replaceChildren();
+
+            if (!gifs.length) {
+                const vide = document.createElement('p');
+                vide.className = 'gif-panel__status';
+                vide.textContent = 'Aucun résultat.';
+                results.appendChild(vide);
+                return;
+            }
+
+            gifs.forEach((gif) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'gif-panel__item';
+
+                const img = document.createElement('img');
+                img.src = gif.preview;
+                img.alt = gif.description;
+                img.loading = 'lazy';
+
+                button.appendChild(img);
+                button.addEventListener('click', () => send(gif));
+                results.appendChild(button);
+            });
+        } catch {
+            results.replaceChildren();
+            const erreur = document.createElement('p');
+            erreur.className = 'gif-panel__status';
+            erreur.textContent = 'Recherche indisponible.';
+            results.appendChild(erreur);
+        }
+    }
+
+    async function send(gif) {
+        panel.hidden = true;
+
+        try {
+            const response = await fetch(panel.dataset.sendUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    Accept: 'application/json',
+                },
+                body: JSON.stringify({ url: gif.url, description: gif.description }),
+            });
+
+            if (!response.ok) throw new Error();
+
+            onSent((await response.json()).message);
+        } catch {
+            showToast("Impossible d'envoyer ce GIF.", 'error');
+        }
+    }
+
+    input.addEventListener('input', () => {
+        clearTimeout(debounce);
+        // Laisse le temps de finir de taper : une requête par frappe saturerait
+        // la limitation de débit.
+        debounce = setTimeout(() => search(input.value), 400);
     });
 }
 

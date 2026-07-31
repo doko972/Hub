@@ -72,4 +72,12 @@ return [
     'contact' => [
         'email' => env('CONTACT_EMAIL'),
     ],
+
+    // Recherche de GIF dans la messagerie (https://developers.google.com/tenor).
+    // Sans clé, l'onglet GIF n'apparaît pas : le reste fonctionne normalement.
+    'tenor' => [
+        'api_key'    => env('TENOR_API_KEY'),
+        // Identifie l'application auprès de Tenor ; sans conséquence fonctionnelle.
+        'client_key' => env('TENOR_CLIENT_KEY', 'hub'),
+    ],
 ];

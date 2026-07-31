@@ -86,9 +86,6 @@
     }
 
     &__composer {
-        display: flex;
-        align-items: flex-end;
-        gap: $spacing-sm;
         padding: $spacing-sm $spacing-md;
         border-top: 1px solid $color-border;
 
@@ -218,6 +215,152 @@
         font-weight: 700;
         line-height: 20px;
         text-align: center;
+    }
+}
+
+// ---- Zone de saisie : ligne bouton + champ + envoi ----
+.composer-row {
+    display: flex;
+    align-items: flex-end;
+    gap: $spacing-sm;
+}
+
+.composer-attach {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    color: $color-text-muted;
+    cursor: pointer;
+    transition: color $transition-fast, border-color $transition-fast;
+
+    &:hover {
+        color: $color-primary;
+        border-color: $color-primary;
+    }
+
+    // Le champ natif est masqué : c'est le label qui sert de bouton.
+    input[type='file'] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    &:focus-within {
+        outline: 2px solid $color-primary;
+        outline-offset: 1px;
+    }
+}
+
+// ---- Fichiers choisis, avant envoi ----
+.composer-files {
+    list-style: none;
+    margin: 0 0 $spacing-sm;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+
+    &[hidden] { display: none; }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px $spacing-sm;
+        background: $color-bg;
+        border: 1px solid $color-border;
+        border-radius: $radius-full;
+        font-size: $font-size-xs;
+        color: $color-text;
+        max-width: 260px;
+
+        > span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__size {
+        color: $color-text-muted;
+        flex-shrink: 0;
+    }
+
+    &__remove {
+        border: 0;
+        background: none;
+        color: $color-text-muted;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 0 2px;
+        flex-shrink: 0;
+
+        &:hover { color: $color-danger; }
+    }
+}
+
+// ---- Pièces jointes dans une bulle ----
+.attachments {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: $spacing-xs;
+
+    &__image {
+        display: block;
+        max-width: 260px;
+        border-radius: $radius-sm;
+        overflow: hidden;
+        border: 1px solid $color-border;
+
+        img {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-height: 260px;
+            object-fit: cover;
+        }
+    }
+
+    &__file {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: 6px $spacing-sm;
+        background: $color-surface;
+        border: 1px solid $color-border;
+        border-radius: $radius-sm;
+        color: $color-text;
+        text-decoration: none;
+        font-size: $font-size-xs;
+        transition: border-color $transition-fast;
+
+        &:hover {
+            border-color: $color-primary;
+            color: $color-primary;
+        }
+
+        svg { flex-shrink: 0; }
+    }
+
+    &__name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 190px;
+    }
+
+    &__size {
+        color: $color-text-muted;
+        flex-shrink: 0;
     }
 }
 

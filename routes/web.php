@@ -63,11 +63,24 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/unread',  [DiscussionController::class, 'unread'])->name('unread');
         Route::post('/groups', [DiscussionController::class, 'storeGroup'])->name('groups.store');
         Route::post('/direct/{user}', [DiscussionController::class, 'openDirect'])->name('direct');
+        Route::get('/attachments/{attachment}', [DiscussionController::class, 'attachment'])->name('attachment');
 
         Route::get('/{discussion}',              [DiscussionController::class, 'index'])->name('show');
         Route::get('/{discussion}/poll',         [DiscussionController::class, 'poll'])->name('poll');
         Route::post('/{discussion}/leave',       [DiscussionController::class, 'leave'])->name('leave');
         Route::post('/{discussion}/participants',[DiscussionController::class, 'addParticipants'])->name('participants.add');
+
+        Route::post('/{discussion}/messages/{message}/reactions', [DiscussionController::class, 'toggleReaction'])
+            ->middleware('throttle:120,1')
+            ->name('reactions.toggle');
+
+        Route::get('/gifs/search', [DiscussionController::class, 'searchGifs'])
+            ->middleware('throttle:60,1')
+            ->name('gifs.search');
+
+        Route::post('/{discussion}/gif', [DiscussionController::class, 'sendGif'])
+            ->middleware('throttle:30,1')
+            ->name('gif.send');
 
         Route::post('/{discussion}', [DiscussionController::class, 'send'])
             ->middleware('throttle:60,1')
