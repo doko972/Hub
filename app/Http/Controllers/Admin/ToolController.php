@@ -21,7 +21,9 @@ class ToolController extends Controller
     public function create()
     {
         $colors   = Tool::availableColors();
-        $users    = User::where('role', 'user')->orderBy('name')->get();
+        // Tous les comptes sont listés : le formulaire indique lui-même le rôle
+        // et l'état, plutôt que de masquer silencieusement des utilisateurs.
+        $users    = User::orderBy('name')->get();
         $families = ToolFamily::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
         return view('admin.tools.create', compact('colors', 'users', 'families'));
     }
@@ -87,7 +89,9 @@ class ToolController extends Controller
     public function edit(Tool $tool)
     {
         $colors   = Tool::availableColors();
-        $users    = User::where('role', 'user')->orderBy('name')->get();
+        // Tous les comptes sont listés : le formulaire indique lui-même le rôle
+        // et l'état, plutôt que de masquer silencieusement des utilisateurs.
+        $users    = User::orderBy('name')->get();
         $assigned = $tool->users()->pluck('users.id')->toArray();
         $families = ToolFamily::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
         return view('admin.tools.edit', compact('tool', 'colors', 'users', 'assigned', 'families'));

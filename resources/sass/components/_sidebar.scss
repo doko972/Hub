@@ -135,6 +135,18 @@
     }
 
     // Pastille de compteur (messages non lus)
+    //
+    // Elle bat tant qu'il reste des messages à lire : c'est le rappel passif
+    // qui subsiste une fois la carte de notification disparue.
+    &__badge.is-pulsing {
+        animation: badge-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badge-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--danger) 70%, transparent); }
+        70%      { box-shadow: 0 0 0 6px transparent; }
+    }
+
     &__badge {
         margin-left: auto;
         min-width: 18px;

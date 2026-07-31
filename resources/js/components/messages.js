@@ -9,9 +9,11 @@
  * est du texte rédigé par un utilisateur, jamais du HTML.
  */
 
-import { showMessageToast, showToast } from './toast.js';
+import { showToast } from './toast.js';
+import { showMessageModal } from './messageModal.js';
 import { attachEmojiPicker } from './emojiPicker.js';
 import { QUICK_REACTIONS } from '../emoji-data.js';
+import { playNotificationSound, soundEnabled, setSoundEnabled } from './notificationSound.js';
 
 function csrfToken() {
     return document.querySelector('meta[name="csrf-token"]')?.content ?? '';
@@ -769,12 +771,21 @@ function initModal() {
     });
 }
 
-// ---- Pastille de non-lus + notification discrète ----
+// ---- Pastille de non-lus, titre d'onglet et notification ----
 function initUnreadBadge() {
     const badge = document.querySelector('[data-unread-badge]');
     if (!badge) return;
 
     const interval = (parseInt(badge.dataset.unreadInterval, 10) || 20) * 1000;
+
+    // Titre d'origine, pour pouvoir le restaurer une fois tout lu.
+    const baseTitle = document.title;
+
+    function updateTitle(total) {
+        // Le compteur dans l'onglet reste visible même quand la fenêtre est
+        // réduite ou masquée par une autre application.
+        document.title = total > 0 ? `(${total}) ${baseTitle}` : baseTitle;
+    }
 
     // Dernier message déjà signalé. À l'ouverture du Hub, les messages en
     // attente relèvent de la pastille, pas d'une notification : seul ce qui
@@ -801,12 +812,14 @@ function initUnreadBadge() {
         // Inutile de signaler une conversation qu'on a déjà sous les yeux.
         if (window.location.pathname === latest.url) return;
 
-        showMessageToast(latest);
+        playNotificationSound();
+        showMessageModal(latest);
     }
 
     async function refresh() {
-        if (document.hidden) return;
-
+        // Contrairement au sondage du fil, celui-ci continue quand l'onglet
+        // passe en arrière-plan : c'est précisément là que le compteur dans le
+        // titre rend service.
         try {
             const response = await fetch(badge.dataset.unreadUrl, {
                 headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
@@ -818,6 +831,8 @@ function initUnreadBadge() {
 
             badge.textContent = total > 99 ? '99+' : total;
             badge.hidden = total === 0;
+            badge.classList.toggle('is-pulsing', total > 0);
+            updateTitle(total);
 
             maybeNotify(latest);
         } catch {
@@ -832,8 +847,31 @@ function initUnreadBadge() {
     });
 }
 
+// ---- Réglage du son ----
+function initSoundToggle() {
+    const toggle = document.querySelector('[data-sound-toggle]');
+    if (!toggle) return;
+
+    function paint() {
+        const actif = soundEnabled();
+        toggle.textContent = actif ? '🔊 Son activé' : '🔇 Son coupé';
+        toggle.classList.toggle('is-active', actif);
+    }
+
+    toggle.addEventListener('click', () => {
+        setSoundEnabled(!soundEnabled());
+        paint();
+
+        // Rejoue le signal à l'activation : on entend ce que l'on vient de choisir.
+        if (soundEnabled()) playNotificationSound();
+    });
+
+    paint();
+}
+
 export function initMessages() {
     initThread();
     initModal();
     initUnreadBadge();
+    initSoundToggle();
 }

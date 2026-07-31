@@ -1,0 +1,124 @@
+// =============================================
+// FENÊTRE DE NOUVEAU MESSAGE
+// =============================================
+
+.message-modal {
+    position: fixed;
+    inset: 0;
+    // Au-dessus de tout, y compris de la bulle de chat et des modales métier :
+    // une notification masquée ne sert à rien.
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md;
+    background: var(--overlay, rgba(0, 0, 0, 0.45));
+    backdrop-filter: blur(2px);
+    animation: message-modal-fade 0.18s ease-out;
+
+    &[hidden] { display: none; }
+
+    &__panel {
+        width: min(420px, 100%);
+        background: $color-surface;
+        border: 2px solid $color-primary;
+        border-radius: $radius-lg;
+        box-shadow: 0 24px 60px -12px rgba(0, 0, 0, 0.45);
+        padding: $spacing-lg;
+        animation: message-modal-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+    }
+
+    &__avatar {
+        width: 46px;
+        height: 46px;
+        flex-shrink: 0;
+        border-radius: $radius-full;
+        background: color-mix(in srgb, var(--primary) 18%, transparent);
+        color: $color-primary;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: $font-size-sm;
+        font-weight: 700;
+
+        img {
+            width: 100%;
+            height: 100%;
+            border-radius: $radius-full;
+            object-fit: cover;
+        }
+    }
+
+    &__subtitle {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: $color-primary;
+    }
+
+    &__title {
+        margin: 2px 0 0;
+        font-size: $font-size-base;
+        font-weight: 700;
+        color: $color-text;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    &__excerpt {
+        margin: 0;
+        padding: $spacing-sm $spacing-md;
+        background: $color-bg;
+        border-radius: $radius-sm;
+        font-size: $font-size-sm;
+        color: $color-text;
+        // Le message peut être long : on en montre l'essentiel.
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        overflow-wrap: anywhere;
+    }
+
+    &__more {
+        margin: $spacing-sm 0 0;
+        font-size: $font-size-xs;
+        font-weight: 600;
+        color: $color-primary;
+
+        &[hidden] { display: none; }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: $spacing-sm;
+        margin-top: $spacing-lg;
+    }
+}
+
+@keyframes message-modal-fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes message-modal-pop {
+    from { transform: scale(0.94); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .message-modal,
+    .message-modal__panel {
+        animation: none;
+    }
+}

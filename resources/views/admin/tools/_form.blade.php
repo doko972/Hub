@@ -173,13 +173,29 @@
             </span>
             <div style="display:flex; flex-direction:column; gap:8px; max-height:220px; overflow-y:auto; border:1.5px solid #E5E7EB; border-radius:12px; padding:12px;">
                 @foreach($users as $user)
-                    <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+                    @php
+                        // Un administrateur voit tous les outils actifs quoi qu'il arrive
+                        // (User::visibleTools) : sa case n'aurait aucun effet.
+                        $estAdmin = $user->isAdmin();
+                    @endphp
+                    <label style="display:flex; align-items:center; gap:10px; font-size:14px; cursor:{{ $estAdmin ? 'default' : 'pointer' }}; opacity:{{ $user->is_active ? 1 : 0.55 }};">
                         <input type="checkbox"
                                name="users[]"
                                value="{{ $user->id }}"
-                               {{ in_array($user->id, old('users', $assigned ?? [])) ? 'checked' : '' }}>
+                               {{ $estAdmin || in_array($user->id, old('users', $assigned ?? [])) ? 'checked' : '' }}
+                               {{ $estAdmin ? 'disabled' : '' }}>
                         <span>{{ $user->name }}</span>
                         <span style="color:#9CA3AF; font-size:12px;">{{ $user->email }}</span>
+
+                        @if($estAdmin)
+                            <span style="margin-left:auto; font-size:11px; font-weight:600; color:#7C3AED; white-space:nowrap;">
+                                accès permanent
+                            </span>
+                        @elseif(!$user->is_active)
+                            <span style="margin-left:auto; font-size:11px; font-weight:600; color:#9CA3AF; white-space:nowrap;">
+                                compte désactivé
+                            </span>
+                        @endif
                     </label>
                 @endforeach
                 @if($users->isEmpty())

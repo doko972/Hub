@@ -76,60 +76,16 @@ export function showToast(message, type = 'success') {
     present(toast);
 }
 
+// (La notification de nouveau message est désormais une fenêtre :
+//  voir components/messageModal.js — décision prise après essai en équipe,
+//  la carte en bas d'écran passait inaperçue.)
+
 /**
- * Notification discrète d'un nouveau message : une carte cliquable qui mène
- * à la conversation, et qui s'efface d'elle-même.
- *
- * Volontairement pas une modale : elle bloquerait la page et volerait le focus
- * pour une information qui n'appelle aucune décision immédiate.
+ * Rejoue les messages flash de la session au chargement de la page.
  */
-export function showMessageToast(message) {
-    const toast = document.createElement('a');
-    toast.className = 'toast toast--message';
-    toast.href = message.url;
-    toast.setAttribute('role', 'alert');
-
-    const avatar = document.createElement('span');
-    avatar.className = 'toast__avatar';
-
-    if (message.avatar) {
-        const img = document.createElement('img');
-        img.src = message.avatar;
-        img.alt = '';
-        avatar.appendChild(img);
-    } else {
-        avatar.textContent = message.initials || '?';
-    }
-
-    const body = document.createElement('span');
-    body.className = 'toast__body';
-
-    const title = document.createElement('span');
-    title.className = 'toast__title';
-    // En groupe, le fil ne dit pas qui parle : on l'ajoute.
-    title.textContent = message.is_group
-        ? `${message.title} — ${message.author}`
-        : message.author;
-
-    const excerpt = document.createElement('span');
-    excerpt.className = 'toast__excerpt';
-    excerpt.textContent = message.excerpt;
-
-    body.append(title, excerpt);
-
-    const close = document.createElement('button');
-    close.className = 'toast__close';
-    close.setAttribute('aria-label', 'Fermer');
-    close.innerHTML = CLOSE_ICON;
-
-    toast.append(avatar, body, close);
-
-    // Un peu plus longtemps qu'un toast ordinaire : il y a du texte à lire.
-    present(toast, 8000);
-}
-
 export function initToasts() {
     const data = window.__hubFlash || {};
+
     if (data.success) showToast(data.success, 'success');
     if (data.error)   showToast(data.error,   'error');
     if (data.status)  showToast(data.status,  'info');
