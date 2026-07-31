@@ -108,6 +108,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('throttle:60,1')
         ->name('presence.index');
 
+    // Signal de vie émis par toutes les pages, y compris celles sans sondage.
+    Route::get('/presence/ping', [PresenceController::class, 'ping'])
+        ->middleware('throttle:60,1')
+        ->name('presence.ping');
+
     // Credentials (identifiants par outil)
     Route::get('/credentials/{tool}',    [CredentialController::class, 'show'])->name('credentials.show');
     Route::post('/credentials/{tool}',   [CredentialController::class, 'store'])->name('credentials.store');

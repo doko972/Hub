@@ -34,6 +34,7 @@ import { initSidebarAccordion }   from './components/sidebarAccordion.js';
 import { initPresence }           from './components/presence.js';
 import { initMessages }           from './components/messages.js';
 import { initPushNotifications }  from './components/pushNotifications.js';
+import { initHeartbeat }          from './components/heartbeat.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -54,4 +55,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initPresence();
     initMessages();
     initPushNotifications();
+    initHeartbeat();
 });

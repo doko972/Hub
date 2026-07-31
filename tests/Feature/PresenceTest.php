@@ -97,6 +97,36 @@ class PresenceTest extends TestCase
         $this->get('/presence')->assertRedirect('/login');
     }
 
+    public function test_le_signal_de_vie_rafraichit_la_presence(): void
+    {
+        $user = User::factory()->create([
+            'is_active'    => true,
+            'last_seen_at' => now()->subHour(),
+        ]);
+
+        $this->assertFalse($user->isOnline());
+
+        $this->actingAs($user)->get(route('presence.ping'))->assertNoContent();
+
+        $this->assertTrue($user->fresh()->isOnline());
+    }
+
+    public function test_le_signal_de_vie_est_ferme_aux_visiteurs_anonymes(): void
+    {
+        $this->get(route('presence.ping'))->assertRedirect('/login');
+    }
+
+    public function test_la_page_de_chat_emet_aussi_un_signal_de_vie(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+
+        // Cette page n'utilise pas le layout principal : sans la balise, ses
+        // utilisateurs passaient hors ligne en pleine conversation.
+        $this->actingAs($user)->get('/chat')
+            ->assertStatus(200)
+            ->assertSee('name="presence-ping"', false);
+    }
+
     public function test_le_panneau_est_rendu_dans_la_sidebar(): void
     {
         $user = User::factory()->create(['is_active' => true]);

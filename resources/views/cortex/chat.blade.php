@@ -16,6 +16,7 @@
     <title>ChatBot</title>
     {{-- Markdown, coloration syntaxique et lecteur Lottie : servis depuis
          notre origine (resources/js/chat.js), plus depuis des CDN tiers. --}}
+    <meta name="presence-ping" content="{{ route('presence.ping') }}">
     @vite(['resources/js/app.js', 'resources/js/chat.js'])
 
     @include('partials.theme-boot')
