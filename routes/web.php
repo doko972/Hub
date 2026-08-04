@@ -127,6 +127,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tools/image-converter',     [ImageConverterController::class, 'index'])->name('tools.image-converter');
     Route::get('/tools/qr-code',             [QrCodeController::class, 'index'])->name('tools.qr-code');
 
+    // Configurations enregistrées du générateur de QR code
+    Route::post('/tools/qr-code/presets',            [QrCodeController::class, 'store'])->name('tools.qr-code.presets.store');
+    Route::get('/tools/qr-code/presets/{preset}',    [QrCodeController::class, 'show'])->name('tools.qr-code.presets.show');
+    Route::delete('/tools/qr-code/presets/{preset}', [QrCodeController::class, 'destroy'])->name('tools.qr-code.presets.destroy');
+
     // Chatbot / Cortex IA
     Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');
     Route::get('/chat/c/{conversation}', [CortexWebController::class, 'show'])->name('cortex.conversation');

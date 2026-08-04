@@ -155,6 +155,12 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+    // ---- Générateur de QR code ----
+    public function qrPresets()
+    {
+        return $this->hasMany(QrPreset::class)->orderBy('name');
+    }
+
     // ---- Relations dashboard ----
     public function tools()
     {

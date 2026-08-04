@@ -1,0 +1,98 @@
+// =============================================
+// CONFIGURATIONS ENREGISTRÉES DU GÉNÉRATEUR QR
+// =============================================
+
+.qr-presets {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+        flex-wrap: wrap;
+        margin-bottom: $spacing-sm;
+    }
+
+    &__title {
+        font-size: $font-size-sm;
+        font-weight: 700;
+        color: $color-text;
+    }
+
+    &__save {
+        padding: 5px $spacing-md;
+        border: 1px solid $color-primary;
+        border-radius: $radius-sm;
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+        color: $color-primary;
+        font: inherit;
+        font-size: $font-size-xs;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background $transition-fast;
+
+        &:hover {
+            background: color-mix(in srgb, var(--primary) 22%, transparent);
+        }
+    }
+
+    &__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-xs;
+    }
+
+    &__empty {
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        font-style: italic;
+    }
+}
+
+.qr-preset {
+    display: flex;
+    align-items: center;
+    border: 1px solid $color-border;
+    border-radius: $radius-full;
+    overflow: hidden;
+    background: $color-bg;
+
+    &:hover {
+        border-color: $color-primary;
+    }
+
+    &__load {
+        border: 0;
+        background: none;
+        padding: 4px $spacing-sm 4px $spacing-md;
+        color: $color-text;
+        font: inherit;
+        font-size: $font-size-xs;
+        font-weight: 600;
+        cursor: pointer;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__delete {
+        border: 0;
+        background: none;
+        padding: 4px $spacing-sm 4px 2px;
+        color: $color-text-muted;
+        font-size: 16px;
+        line-height: 1;
+        cursor: pointer;
+
+        &:hover { color: $color-danger; }
+    }
+}

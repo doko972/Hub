@@ -1,4 +1,5 @@
 import QRious from 'qrious';
+import { showToast } from './toast.js';
 
 export function initQrCode() {
     const canvas = document.getElementById('qr-canvas');
@@ -147,6 +148,183 @@ export function initQrCode() {
         document.querySelectorAll('#qr-panel-qr .qr-input, #qr-panel-qr .qr-textarea').forEach(el => { el.value = ''; });
         updatePreview();
     });
+
+    // ── Configurations enregistrées ────────────────────────────────────────
+    //
+    // Le formulaire est entièrement côté client : sans cela, un rafraîchissement
+    // faisait perdre toute la saisie. L'état part au serveur, où il est chiffré
+    // (il contient les mots de passe SIP et administrateur).
+
+    const SIP_FIELDS  = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
+                         'sip-transport', 'sip-port', 'sip-admin-password'];
+    const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
+                         'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
+
+    const presetsRoot = document.querySelector('[data-qr-presets]');
+
+    function readField(id) {
+        return document.getElementById(id)?.value ?? '';
+    }
+
+    /** État complet du formulaire, tel qu'il sera enregistré. */
+    function collectState() {
+        const sip  = {};
+        const free = {};
+
+        SIP_FIELDS.forEach(id => { sip[id] = readField(id); });
+        FREE_FIELDS.forEach(id => { free[id] = readField(id); });
+
+        const contacts = [];
+        contactsList.querySelectorAll('.qr-contact-row').forEach(row => {
+            contacts.push({
+                name:  row.querySelector('[data-field="name"]').value,
+                phone: row.querySelector('[data-field="phone"]').value,
+                blf:   row.querySelector('[data-field="blf"]').checked,
+            });
+        });
+
+        return { version: 1, tab: activeTab, subTab: qrSubTab, sip, free, contacts };
+    }
+
+    /** Rejoue un état enregistré dans le formulaire. */
+    function applyState(state) {
+        if (!state || typeof state !== 'object') return;
+
+        Object.entries(state.sip ?? {}).forEach(([id, valeur]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = valeur;
+        });
+
+        Object.entries(state.free ?? {}).forEach(([id, valeur]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = valeur;
+        });
+
+        // Les lignes de contacts sont dynamiques : on les reconstruit.
+        contactsList.innerHTML = '';
+        (state.contacts ?? []).forEach(c => addContactRow(c.name ?? '', c.phone ?? '', Boolean(c.blf)));
+        if (!contactsList.children.length) addContactRow();
+
+        // Onglets : on rejoue le clic pour réutiliser la logique d'affichage.
+        document.querySelector(`.qr-subtab[data-subtab="${state.subTab}"]`)?.click();
+        document.querySelector(`.qr-tab[data-tab="${state.tab}"]`)?.click();
+
+        updatePreview();
+    }
+
+    if (presetsRoot) {
+        const list       = presetsRoot.querySelector('[data-preset-list]');
+        const storeUrl   = presetsRoot.dataset.storeUrl;
+        const showUrl    = presetsRoot.dataset.showUrl;
+        const destroyUrl = presetsRoot.dataset.destroyUrl;
+
+        const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+        function addPresetToList(preset) {
+            presetsRoot.querySelector('[data-preset-empty]')?.remove();
+
+            // Déjà présente (réenregistrement sous le même nom) : rien à ajouter.
+            if (list.querySelector(`[data-preset-id="${preset.id}"]`)) return;
+
+            const item = document.createElement('li');
+            item.className = 'qr-preset';
+            item.dataset.presetId = preset.id;
+
+            const charger = document.createElement('button');
+            charger.type = 'button';
+            charger.className = 'qr-preset__load';
+            charger.dataset.presetLoad = '';
+            charger.textContent = preset.name;
+
+            const supprimer = document.createElement('button');
+            supprimer.type = 'button';
+            supprimer.className = 'qr-preset__delete';
+            supprimer.dataset.presetDelete = '';
+            supprimer.title = 'Supprimer';
+            supprimer.setAttribute('aria-label', `Supprimer ${preset.name}`);
+            supprimer.textContent = '×';
+
+            item.append(charger, supprimer);
+            list.appendChild(item);
+        }
+
+        presetsRoot.querySelector('[data-preset-save]').addEventListener('click', async () => {
+            const nom = window.prompt('Nom de la configuration :', '');
+            if (!nom || !nom.trim()) return;
+
+            try {
+                const reponse = await fetch(storeUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf(),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        Accept: 'application/json',
+                    },
+                    body: JSON.stringify({ name: nom.trim(), payload: collectState() }),
+                });
+
+                const donnees = await reponse.json();
+
+                if (!reponse.ok) {
+                    showToast(donnees.message ?? "L'enregistrement a échoué.", 'error');
+                    return;
+                }
+
+                addPresetToList(donnees.preset);
+                showToast(donnees.updated ? 'Configuration mise à jour.' : 'Configuration enregistrée.', 'success');
+            } catch {
+                showToast("L'enregistrement a échoué.", 'error');
+            }
+        });
+
+        list.addEventListener('click', async (event) => {
+            const item = event.target.closest('[data-preset-id]');
+            if (!item) return;
+
+            const id = item.dataset.presetId;
+
+            if (event.target.closest('[data-preset-load]')) {
+                try {
+                    const reponse = await fetch(showUrl.replace('__ID__', id), {
+                        headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+                    });
+
+                    if (!reponse.ok) throw new Error();
+
+                    const { name, payload } = await reponse.json();
+                    applyState(payload);
+                    showToast(`« ${name} » chargée.`, 'success');
+                } catch {
+                    showToast('Impossible de charger cette configuration.', 'error');
+                }
+
+                return;
+            }
+
+            if (event.target.closest('[data-preset-delete]')) {
+                if (!window.confirm('Supprimer cette configuration ?')) return;
+
+                try {
+                    const reponse = await fetch(destroyUrl.replace('__ID__', id), {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': csrf(),
+                            'X-Requested-With': 'XMLHttpRequest',
+                            Accept: 'application/json',
+                        },
+                    });
+
+                    if (!reponse.ok) throw new Error();
+
+                    item.remove();
+                    showToast('Configuration supprimée.', 'success');
+                } catch {
+                    showToast('La suppression a échoué.', 'error');
+                }
+            }
+        });
+    }
 
     // ── Construction des données ──
     function buildSipData() {

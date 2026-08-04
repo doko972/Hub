@@ -12,6 +12,35 @@
     </div>
 </div>
 
+{{-- Configurations enregistrées.
+     Seuls les noms sont rendus ici : la charge utile contient les mots de passe
+     SIP et n'est demandée au serveur qu'au moment du chargement. --}}
+<div class="qr-presets"
+     data-qr-presets
+     data-store-url="{{ route('tools.qr-code.presets.store') }}"
+     data-show-url="{{ route('tools.qr-code.presets.show', '__ID__') }}"
+     data-destroy-url="{{ route('tools.qr-code.presets.destroy', '__ID__') }}">
+
+    <div class="qr-presets__header">
+        <span class="qr-presets__title">Mes configurations</span>
+        <button type="button" class="qr-presets__save" data-preset-save>💾 Enregistrer la configuration</button>
+    </div>
+
+    <ul class="qr-presets__list" data-preset-list>
+        @forelse($presets as $preset)
+            <li class="qr-preset" data-preset-id="{{ $preset->id }}">
+                <button type="button" class="qr-preset__load" data-preset-load>{{ $preset->name }}</button>
+                <button type="button" class="qr-preset__delete" data-preset-delete
+                        aria-label="Supprimer {{ $preset->name }}" title="Supprimer">×</button>
+            </li>
+        @empty
+            <li class="qr-presets__empty" data-preset-empty>
+                Aucune configuration enregistrée. Remplissez le formulaire puis cliquez sur « Enregistrer ».
+            </li>
+        @endforelse
+    </ul>
+</div>
+
 <div class="qr-tool">
 
     {{-- Onglets principaux --}}
