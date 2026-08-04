@@ -394,6 +394,8 @@
 
         {{-- PAGE --}}
         <main class="page-content">
+            @include('partials.push-banner')
+
             @yield('content')
         </main>
 

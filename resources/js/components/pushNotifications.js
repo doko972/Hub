@@ -44,6 +44,86 @@ async function post(url, payload) {
     return response.json();
 }
 
+/**
+ * Bandeau d'invitation, affiché tant que l'utilisateur n'a pas tranché.
+ *
+ * « Plus tard » le masque une semaine : insister à chaque page serait pénible,
+ * ne plus jamais proposer ferait perdre ceux qui ont cliqué par réflexe.
+ */
+const SNOOZE_KEY  = 'hub.push.snoozedUntil';
+const SNOOZE_DAYS = 7;
+
+function isSnoozed() {
+    const jusqua = parseInt(localStorage.getItem(SNOOZE_KEY) ?? '0', 10);
+    return Number.isFinite(jusqua) && Date.now() < jusqua;
+}
+
+export function initPushBanner() {
+    const banner = document.querySelector('[data-push-banner]');
+    if (!banner) return;
+
+    // Rien à proposer si le navigateur ne sait pas faire, si la permission est
+    // déjà tranchée (accordée ou refusée), ou si l'on a demandé du répit.
+    if (!isSupported() || Notification.permission !== 'default' || isSnoozed()) return;
+
+    navigator.serviceWorker.getRegistration()
+        .then((registration) => registration?.pushManager.getSubscription())
+        .then((subscription) => {
+            if (subscription) return; // déjà abonné sur cet appareil
+            banner.hidden = false;
+        })
+        .catch(() => { banner.hidden = false; });
+
+    banner.querySelector('[data-push-later]').addEventListener('click', () => {
+        try {
+            localStorage.setItem(SNOOZE_KEY, String(Date.now() + SNOOZE_DAYS * 86400000));
+        } catch {
+            // Stockage indisponible : le bandeau reviendra au prochain chargement.
+        }
+        banner.hidden = true;
+    });
+
+    banner.querySelector('[data-push-enable]').addEventListener('click', async () => {
+        const bouton = banner.querySelector('[data-push-enable]');
+        bouton.disabled = true;
+
+        try {
+            if (await Notification.requestPermission() !== 'granted') {
+                banner.hidden = true;
+                return;
+            }
+
+            const registration = await navigator.serviceWorker.register('/sw.js');
+            await navigator.serviceWorker.ready;
+
+            const { public_key: publicKey } = await (await fetch(banner.dataset.vapidUrl, {
+                headers: { Accept: 'application/json' },
+            })).json();
+
+            if (!publicKey) throw new Error('clé VAPID absente');
+
+            const subscription = await registration.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(publicKey),
+            });
+
+            const json = subscription.toJSON();
+
+            await post(banner.dataset.subscribeUrl, {
+                endpoint:   json.endpoint,
+                public_key: json.keys.p256dh,
+                auth_token: json.keys.auth,
+            });
+
+            banner.hidden = true;
+        } catch (error) {
+            console.error('Activation des notifications :', error);
+            bouton.textContent = 'Échec — réessayer';
+            bouton.disabled = false;
+        }
+    });
+}
+
 export function initPushNotifications() {
     const button = document.querySelector('[data-push-toggle]');
     if (!button) return;

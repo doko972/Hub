@@ -79,13 +79,15 @@ class PushService
         }
     }
 
-    private function toSubscription(PushSubscription $sub): Subscription
+    public function toSubscription(PushSubscription $sub): Subscription
     {
         return Subscription::create([
-            'endpoint'        => $sub->endpoint,
-            'publicKey'       => $sub->public_key,
-            'authToken'       => $sub->auth_token,
-            'contentEncoding' => 'aesgcm',
+            'endpoint'  => $sub->endpoint,
+            'publicKey' => $sub->public_key,
+            'authToken' => $sub->auth_token,
+            // Pas de contentEncoding forcé : la librairie retient « aes128gcm »,
+            // le chiffrement normalisé. L'ancien « aesgcm » (brouillon 04) est
+            // progressivement refusé par les services de push.
         ]);
     }
 
@@ -101,16 +103,26 @@ class PushService
             return;
         }
 
-        if ($report->isSubscriptionExpired()) {
-            $endpoint = $report->getEndpoint();
+        $statut = $report->getResponse()?->getStatusCode();
 
-            $subscriptions->firstWhere('endpoint', $endpoint)?->delete();
+        // 404/410 : abonnement disparu. 403 : signature VAPID refusée, ce qui
+        // arrive quand la paire de clés a changé depuis l'abonnement — la ligne
+        // ne redeviendra jamais valide, autant la retirer.
+        if ($report->isSubscriptionExpired() || in_array($statut, [403, 404, 410], true)) {
+            $subscriptions->firstWhere('endpoint', $report->getEndpoint())?->delete();
+
+            Log::info('Abonnement push supprimé', [
+                'endpoint' => $report->getEndpoint(),
+                'status'   => $statut,
+                'reason'   => $report->getReason(),
+            ]);
 
             return;
         }
 
-        Log::info('Notification push refusée par le service', [
+        Log::warning('Notification push refusée par le service', [
             'endpoint' => $report->getEndpoint(),
+            'status'   => $statut,
             'reason'   => $report->getReason(),
         ]);
     }
