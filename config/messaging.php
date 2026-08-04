@@ -10,7 +10,14 @@ return [
 
     // Rafraîchissement du fil ouvert. Court : on y attend une conversation
     // vivante, et seul l'onglet au premier plan sonde.
-    'thread_poll_seconds' => (int) env('MESSAGING_THREAD_POLL', 5),
+    // Descendu à 3 s : ce sondage porte aussi l'indicateur de frappe, qui perd
+    // tout intérêt s'il arrive trop tard. Seul l'onglet au premier plan sonde.
+    'thread_poll_seconds' => (int) env('MESSAGING_THREAD_POLL', 3),
+
+    // Durée de validité d'un signal de frappe. Doit rester supérieure à
+    // l'intervalle de renouvellement côté client (3 s), sinon l'indicateur
+    // clignote entre deux signaux.
+    'typing_ttl_seconds' => (int) env('MESSAGING_TYPING_TTL', 8),
 
     // Rafraîchissement de la pastille et des notifications discrètes, depuis
     // n'importe quelle page du Hub. Plus espacé : c'est un bruit de fond.

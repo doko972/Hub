@@ -116,11 +116,18 @@
                  {{-- __ID__ est remplacé côté client par l'identifiant du message --}}
                  data-reaction-url="{{ route('messages.reactions.toggle', [$discussion, '__ID__']) }}"
                  data-message-url="{{ route('messages.messages.update', [$discussion, '__ID__']) }}"
+                 data-typing-url="{{ route('messages.typing', $discussion) }}"
                  aria-live="polite">
                 @foreach($messages as $message)
                     @include('messages.partials.bubble', ['message' => $message])
                 @endforeach
             </div>
+
+            {{-- Indicateur de frappe, alimenté par le sondage du fil --}}
+            <p class="typing-indicator" data-typing-indicator hidden>
+                <span class="typing-indicator__text" data-typing-text></span>
+                <span class="typing-indicator__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            </p>
 
             <form class="messenger__composer" data-composer
                   data-max-files="{{ (int) config('messaging.attachments.max_files') }}"

@@ -8,6 +8,7 @@ use App\Models\DiscussionAttachment;
 use App\Models\DiscussionMessage;
 use App\Models\User;
 use App\Services\GifSearch;
+use App\Services\Typing;
 use App\Services\Unread;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -156,6 +157,7 @@ class DiscussionController extends Controller
 
         $discussion->update(['last_message_at' => $message->created_at]);
         $this->markAsRead($discussion, $request->user()->id);
+        Typing::clear($discussion->id, $request->user()->id);
 
         // afterResponse() plutôt qu'une vraie mise en file : les notifications
         // partent une fois la réponse envoyée, sans imposer de « queue:work »
@@ -306,6 +308,25 @@ class DiscussionController extends Controller
     }
 
     /**
+     * Signale que l'on est en train d'écrire, ou que l'on a cessé.
+     */
+    public function typing(Request $request, Discussion $discussion): JsonResponse
+    {
+        $discussion->load('participants');
+        $this->authorize('send', $discussion);
+
+        $validated = $request->validate([
+            'typing' => ['required', 'boolean'],
+        ]);
+
+        $validated['typing']
+            ? Typing::mark($discussion->id, $request->user()->id, $request->user()->name)
+            : Typing::clear($discussion->id, $request->user()->id);
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
      * Pose ou retire une réaction sur un message.
      *
      * Bascule plutôt que deux routes : cliquer une réaction déjà posée la
@@ -440,6 +461,8 @@ class DiscussionController extends Controller
                 // ne peuvent pas transiter par la liste des nouveaux messages.
                 'reactions' => $this->reactionsFor($discussion, $request->user()->id),
                 ...$this->revisionsFor($discussion, $request->user()->id),
+                // Qui écrit en ce moment : volatile, jamais stocké en base.
+                'typing' => Typing::othersFor($discussion->id, $request->user()->id),
             ])
             ->header('Cache-Control', 'no-store, private');
     }

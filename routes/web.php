@@ -78,6 +78,12 @@ Route::middleware(['auth'])->group(function () {
             ->middleware('throttle:60,1')
             ->name('messages.destroy');
 
+        // Signal de frappe : appelé souvent, donc plafond haut et traitement
+        // très léger (cache uniquement, aucune écriture en base).
+        Route::post('/{discussion}/typing', [DiscussionController::class, 'typing'])
+            ->middleware('throttle:120,1')
+            ->name('typing');
+
         Route::post('/{discussion}/messages/{message}/reactions', [DiscussionController::class, 'toggleReaction'])
             ->middleware('throttle:120,1')
             ->name('reactions.toggle');

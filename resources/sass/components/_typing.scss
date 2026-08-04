@@ -1,0 +1,47 @@
+// =============================================
+// INDICATEUR DE FRAPPE
+// =============================================
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 4px $spacing-md;
+    font-size: $font-size-xs;
+    font-style: italic;
+    color: $color-text-muted;
+    // Hauteur réservée : l'apparition ne doit pas décaler la zone de saisie.
+    min-height: 22px;
+
+    &[hidden] { display: none; }
+
+    &__dots {
+        display: inline-flex;
+        gap: 3px;
+
+        i {
+            width: 5px;
+            height: 5px;
+            border-radius: $radius-full;
+            background: $color-primary;
+            opacity: 0.35;
+            animation: typing-bounce 1.2s infinite ease-in-out;
+
+            &:nth-child(2) { animation-delay: 0.18s; }
+            &:nth-child(3) { animation-delay: 0.36s; }
+        }
+    }
+}
+
+@keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0);     opacity: 0.35; }
+    30%           { transform: translateY(-3px);  opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .typing-indicator__dots i {
+        animation: none;
+        opacity: 0.7;
+    }
+}

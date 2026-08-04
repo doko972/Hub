@@ -289,6 +289,69 @@ function initThread() {
         if (stick) container.scrollTop = container.scrollHeight;
     }
 
+    // ---- Indicateur de frappe ----
+    //
+    // Le signal est renouvelé au plus toutes les 3 s tant que l'on écrit, et
+    // retiré dès l'envoi ou le champ vidé. Le serveur le garde 8 s : la marge
+    // évite que l'indicateur clignote entre deux renouvellements.
+    const typingUrl       = container.dataset.typingUrl;
+    const typingIndicator = document.querySelector('[data-typing-indicator]');
+    const typingText      = document.querySelector('[data-typing-text]');
+    const TYPING_PING_MS  = 3000;
+    let dernierSignal     = 0;
+    let arretDifféré      = null;
+
+    function signalTyping(enCours) {
+        if (!typingUrl) return;
+
+        fetch(typingUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                Accept: 'application/json',
+            },
+            body: JSON.stringify({ typing: enCours }),
+        }).catch(() => {
+            // Sans réseau, l'indicateur expirera tout seul côté serveur.
+        });
+    }
+
+    function noteFrappe() {
+        const maintenant = Date.now();
+
+        if (maintenant - dernierSignal > TYPING_PING_MS) {
+            dernierSignal = maintenant;
+            signalTyping(true);
+        }
+
+        // Arrêt anticipé après une pause : sans cela il faudrait attendre
+        // l'expiration côté serveur.
+        clearTimeout(arretDifféré);
+        arretDifféré = setTimeout(() => {
+            dernierSignal = 0;
+            signalTyping(false);
+        }, 5000);
+    }
+
+    function renderTyping(noms) {
+        if (!typingIndicator) return;
+
+        if (!noms || !noms.length) {
+            typingIndicator.hidden = true;
+            return;
+        }
+
+        typingText.textContent = noms.length === 1
+            ? `${noms[0]} écrit`
+            : (noms.length === 2
+                ? `${noms[0]} et ${noms[1]} écrivent`
+                : `${noms.length} personnes écrivent`);
+
+        typingIndicator.hidden = false;
+    }
+
     // ---- Modification et suppression de ses propres messages ----
     const messageUrlTemplate = container.dataset.messageUrl;
 
@@ -530,6 +593,7 @@ function initThread() {
                 });
 
                 (data.deleted ?? []).forEach(removeBubble);
+                renderTyping(data.typing);
             }
         } catch {
             // Coupure réseau : on retentera au tour suivant.
@@ -577,6 +641,8 @@ function initThread() {
 
             textarea.value = '';
             textarea.style.height = 'auto';
+            clearTimeout(arretDifféré);
+            dernierSignal = 0;
             clearFiles();
             container.scrollTop = container.scrollHeight;
         } catch (error) {
@@ -604,6 +670,7 @@ function initThread() {
 
     // Le champ grandit avec le texte, dans la limite de quelques lignes.
     textarea.addEventListener('input', () => {
+        textarea.value.trim() ? noteFrappe() : signalTyping(false);
         textarea.style.height = 'auto';
         textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
     });
