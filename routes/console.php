@@ -31,3 +31,7 @@ Schedule::command('calendar:weekly-summary')
 // Purge des jetons Sanctum expirés depuis plus de 24 h
 Schedule::command('sanctum:prune-expired --hours=24')
     ->daily();
+
+// Purge des messages supprimés depuis plus de 30 jours
+Schedule::command("messages:prune")
+    ->weeklyOn(1, "03:00");

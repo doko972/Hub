@@ -597,3 +597,108 @@
     white-space: nowrap;
     border: 0;
 }
+
+// ---- Recherche dans les messages ----
+.messenger__search {
+    padding: $spacing-xs $spacing-xs $spacing-sm;
+
+    input {
+        width: 100%;
+        padding: 6px $spacing-sm;
+        border: 1px solid $color-border;
+        border-radius: $radius-sm;
+        background: $color-bg;
+        color: $color-text;
+        font: inherit;
+        font-size: $font-size-sm;
+
+        &:focus {
+            outline: 2px solid $color-primary;
+            outline-offset: -1px;
+        }
+    }
+}
+
+.search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &[hidden] { display: none; }
+
+    &__empty {
+        padding: $spacing-md $spacing-sm;
+        margin: 0;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        font-style: italic;
+    }
+}
+
+.search-result {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: $spacing-sm;
+    border-radius: $radius-sm;
+    text-decoration: none;
+    color: $color-text;
+
+    &:hover { background: $color-bg; }
+
+    &__head {
+        font-size: $font-size-xs;
+        font-weight: 700;
+        color: $color-primary;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__excerpt {
+        font-size: $font-size-xs;
+        color: $color-text;
+        // Deux lignes suffisent à situer le passage.
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    &__date {
+        font-size: 10px;
+        color: $color-text-muted;
+    }
+}
+
+// ---- Remontée dans l'historique ----
+.load-older {
+    align-self: center;
+    margin-bottom: $spacing-sm;
+    padding: 4px $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-full;
+    background: $color-surface;
+    color: $color-text-muted;
+    font: inherit;
+    font-size: $font-size-xs;
+    cursor: pointer;
+    flex-shrink: 0;
+
+    &[hidden] { display: none; }
+
+    &:hover:not(:disabled) {
+        border-color: $color-primary;
+        color: $color-primary;
+    }
+
+    &:disabled { cursor: wait; opacity: 0.6; }
+}
+
+// Message atteint depuis un résultat de recherche
+.bubble.is-focused .bubble__content {
+    outline: 2px solid $color-primary;
+    outline-offset: 2px;
+    // Transition au retrait : l'apparition doit être franche, l'effacement doux.
+    transition: outline-color 1s ease 3s;
+}

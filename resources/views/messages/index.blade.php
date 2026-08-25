@@ -35,6 +35,18 @@
 
     {{-- ===== Colonne gauche : les fils ===== --}}
     <aside class="messenger__list" aria-label="Discussions">
+
+        <div class="messenger__search">
+            <input type="search" data-search-input
+                   data-search-url="{{ route('messages.search') }}"
+                   placeholder="Rechercher un message…"
+                   aria-label="Rechercher dans les messages">
+        </div>
+
+        {{-- Résultats : masquent la liste des fils tant qu'une recherche est active --}}
+        <div class="search-results" data-search-results hidden></div>
+
+        <div data-thread-list>
         @forelse($discussions as $thread)
             @php
                 $count = $unread[$thread->id] ?? 0;
@@ -78,6 +90,7 @@
         @empty
             <p class="messenger__empty">Aucune discussion pour l'instant.</p>
         @endforelse
+        </div>
     </aside>
 
     {{-- ===== Colonne droite : le fil ouvert ===== --}}
@@ -117,7 +130,14 @@
                  data-reaction-url="{{ route('messages.reactions.toggle', [$discussion, '__ID__']) }}"
                  data-message-url="{{ route('messages.messages.update', [$discussion, '__ID__']) }}"
                  data-typing-url="{{ route('messages.typing', $discussion) }}"
+                 data-history-url="{{ route('messages.history', $discussion) }}"
+                 data-focused-id="{{ $focusedId ?? '' }}"
                  aria-live="polite">
+                {{-- Remontée dans l'historique : le fil ne charge qu'une fenêtre --}}
+                <button type="button" class="load-older" data-load-older @unless($hasOlder ?? false) hidden @endunless>
+                    ↑ Charger les messages précédents
+                </button>
+
                 @foreach($messages as $message)
                     @include('messages.partials.bubble', ['message' => $message])
                 @endforeach

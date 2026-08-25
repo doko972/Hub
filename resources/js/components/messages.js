@@ -289,6 +289,65 @@ function initThread() {
         if (stick) container.scrollTop = container.scrollHeight;
     }
 
+    // ---- Remontée dans l'historique ----
+    //
+    // Le fil ne charge qu'une fenêtre : au-delà, on remonte à la demande. Le
+    // défilement est réancré après insertion, sinon la lecture serait projetée
+    // en arrière à chaque chargement.
+    const historyUrl = container.dataset.historyUrl;
+    const loadOlder  = container.querySelector('[data-load-older]');
+
+    async function fetchOlder() {
+        const premiere = container.querySelector('[data-message-id]');
+        if (!premiere || !historyUrl) return;
+
+        loadOlder.disabled = true;
+        loadOlder.textContent = 'Chargement…';
+
+        // Repère de position avant insertion.
+        const hauteurAvant = container.scrollHeight;
+        const positionAvant = container.scrollTop;
+
+        try {
+            const reponse = await fetch(`${historyUrl}?before=${premiere.dataset.messageId}`, {
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            if (!reponse.ok) throw new Error();
+
+            const { messages, has_older: encore } = await reponse.json();
+
+            const fragment = document.createDocumentFragment();
+            messages.forEach((message) => fragment.appendChild(buildBubble(message)));
+            premiere.parentNode.insertBefore(fragment, premiere);
+
+            container.scrollTop = positionAvant + (container.scrollHeight - hauteurAvant);
+            loadOlder.hidden = !encore;
+        } catch {
+            showToast("Impossible de charger les messages précédents.", 'error');
+        } finally {
+            loadOlder.disabled = false;
+            loadOlder.textContent = '↑ Charger les messages précédents';
+        }
+    }
+
+    loadOlder?.addEventListener('click', fetchOlder);
+
+    // Ouverture depuis un résultat de recherche : on met le message en évidence.
+    const focusedId = container.dataset.focusedId;
+
+    if (focusedId) {
+        const cible = container.querySelector(`[data-message-id="${focusedId}"]`);
+
+        if (cible) {
+            cible.classList.add('is-focused');
+            cible.scrollIntoView({ block: 'center' });
+            // La mise en évidence s'efface d'elle-même : elle sert à retrouver
+            // le message, pas à le marquer durablement.
+            setTimeout(() => cible.classList.remove('is-focused'), 4000);
+        }
+    }
+
     // ---- Indicateur de frappe ----
     //
     // Le signal est renouvelé au plus toutes les 3 s tant que l'on écrit, et
@@ -948,7 +1007,86 @@ function initSoundToggle() {
     paint();
 }
 
+// ---- Recherche dans les messages ----
+function initSearch() {
+    const input   = document.querySelector('[data-search-input]');
+    const panneau = document.querySelector('[data-search-results]');
+    const fils    = document.querySelector('[data-thread-list]');
+    if (!input || !panneau || !fils) return;
+
+    let debounce = null;
+
+    function reset() {
+        panneau.hidden = true;
+        panneau.replaceChildren();
+        fils.hidden = false;
+    }
+
+    async function chercher(terme) {
+        if (terme.trim().length < 2) return reset();
+
+        try {
+            const reponse = await fetch(`${input.dataset.searchUrl}?q=${encodeURIComponent(terme)}`, {
+                headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            });
+
+            if (!reponse.ok) return reset();
+
+            const { results } = await reponse.json();
+
+            panneau.replaceChildren();
+            fils.hidden = true;
+            panneau.hidden = false;
+
+            if (!results.length) {
+                const vide = document.createElement('p');
+                vide.className = 'search-results__empty';
+                vide.textContent = 'Aucun message trouvé.';
+                panneau.appendChild(vide);
+                return;
+            }
+
+            results.forEach((resultat) => {
+                const lien = document.createElement('a');
+                lien.className = 'search-result';
+                lien.href = resultat.url;
+
+                const entete = document.createElement('span');
+                entete.className = 'search-result__head';
+                entete.textContent = `${resultat.discussion} · ${resultat.author}`;
+
+                const extrait = document.createElement('span');
+                extrait.className = 'search-result__excerpt';
+                // textContent : le message est du texte rédigé par un utilisateur.
+                extrait.textContent = resultat.excerpt;
+
+                const date = document.createElement('span');
+                date.className = 'search-result__date';
+                date.textContent = resultat.date;
+
+                lien.append(entete, extrait, date);
+                panneau.appendChild(lien);
+            });
+        } catch {
+            reset();
+        }
+    }
+
+    input.addEventListener('input', () => {
+        clearTimeout(debounce);
+        debounce = setTimeout(() => chercher(input.value), 350);
+    });
+
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            input.value = '';
+            reset();
+        }
+    });
+}
+
 export function initMessages() {
+    initSearch();
     initThread();
     initModal();
     initUnreadBadge();

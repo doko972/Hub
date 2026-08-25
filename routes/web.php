@@ -61,12 +61,16 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('messages')->name('messages.')->group(function () {
         Route::get('/',        [DiscussionController::class, 'index'])->name('index');
         Route::get('/unread',  [DiscussionController::class, 'unread'])->name('unread');
+        Route::get('/search',  [DiscussionController::class, 'search'])
+            ->middleware('throttle:60,1')
+            ->name('search');
         Route::post('/groups', [DiscussionController::class, 'storeGroup'])->name('groups.store');
         Route::post('/direct/{user}', [DiscussionController::class, 'openDirect'])->name('direct');
         Route::get('/attachments/{attachment}', [DiscussionController::class, 'attachment'])->name('attachment');
 
         Route::get('/{discussion}',              [DiscussionController::class, 'index'])->name('show');
         Route::get('/{discussion}/poll',         [DiscussionController::class, 'poll'])->name('poll');
+        Route::get('/{discussion}/history',      [DiscussionController::class, 'history'])->name('history');
         Route::post('/{discussion}/leave',       [DiscussionController::class, 'leave'])->name('leave');
         Route::post('/{discussion}/participants',[DiscussionController::class, 'addParticipants'])->name('participants.add');
 

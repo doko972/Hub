@@ -27,6 +27,16 @@ class DiscussionController extends Controller
     private const HISTORY_LIMIT = 100;
 
     /**
+     * Nombre de messages ramenés à chaque remontée dans l'historique.
+     */
+    private const PAGE_SIZE = 50;
+
+    /**
+     * Nombre maximum de résultats de recherche renvoyés.
+     */
+    private const SEARCH_LIMIT = 40;
+
+    /**
      * Liste des discussions, éventuellement avec un fil ouvert.
      */
     public function index(Request $request, ?Discussion $discussion = null)
@@ -38,16 +48,22 @@ class DiscussionController extends Controller
             $this->authorize('view', $discussion);
         }
 
-        $messages = collect();
+        $messages   = collect();
+        $hasOlder   = false;
+        $focusedId  = null;
 
         if ($discussion?->exists) {
-            $messages = $discussion->messages()
-                ->with(['author:id,name,avatar_path', 'attachments'])
-                ->latest('id')
-                ->limit(self::HISTORY_LIMIT)
-                ->get()
-                ->reverse()
-                ->values();
+            // Un résultat de recherche peut viser un message ancien : on ouvre
+            // alors le fil autour de lui plutôt qu'à la fin.
+            $focusedId = (int) $request->query('at') ?: null;
+
+            if ($focusedId && !$discussion->messages()->whereKey($focusedId)->exists()) {
+                $focusedId = null;
+            }
+
+            $messages = $this->windowFor($discussion, $focusedId);
+            $hasOlder = $messages->isNotEmpty()
+                && $discussion->messages()->where('id', '<', $messages->first()->id)->exists();
 
             $this->markAsRead($discussion, $user->id);
         }
@@ -57,6 +73,8 @@ class DiscussionController extends Controller
             'unread'        => Unread::perDiscussionFor($user->id),
             'discussion'    => $discussion?->exists ? $discussion : null,
             'messages'      => $messages,
+            'hasOlder'      => $hasOlder,
+            'focusedId'     => $focusedId,
             'contacts'      => $this->contactsFor($user->id),
         ]);
     }
@@ -429,6 +447,131 @@ class DiscussionController extends Controller
                 'size'          => $file->getSize(),
             ]);
         }
+    }
+
+    /**
+     * Recherche dans les messages de l'utilisateur.
+     *
+     * Le filtrage par participation est la première clause, pas un ajout : une
+     * recherche qui fouillerait toutes les discussions serait une fuite bien
+     * plus grave qu'un simple défaut d'affichage.
+     */
+    public function search(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'q' => ['required', 'string', 'min:2', 'max:120'],
+        ], [
+            'q.min' => 'Saisissez au moins deux caractères.',
+        ]);
+
+        $userId = $request->user()->id;
+        $terme  = trim($validated['q']);
+
+        // Les caractères jokers de LIKE sont neutralisés : sans cela, un « % »
+        // saisi par mégarde retournerait toute la conversation.
+        // « ! » comme caractère d échappement plutôt que l antislash : SQLite
+        // n en retient aucun par défaut (il faut le déclarer), et « ! » évite
+        // les empilements d antislashs entre PHP et SQL.
+        $motif = "%" . str_replace(["!", "%", "_"], ["!!", "!%", "!_"], $terme) . "%";
+
+        $resultats = DiscussionMessage::query()
+            ->whereHas('discussion.participants', fn ($q) => $q->whereKey($userId))
+            ->whereRaw("body LIKE ? ESCAPE '!'", [$motif])
+            ->with(['author:id,name', 'discussion.participants:id,name'])
+            ->latest('id')
+            ->limit(self::SEARCH_LIMIT)
+            ->get()
+            ->map(fn (DiscussionMessage $m) => [
+                'id'         => $m->id,
+                'discussion' => $m->discussion->titleFor($userId),
+                'author'     => $m->author?->name ?? 'Utilisateur supprimé',
+                'excerpt'    => $this->excerpt($m->body, $terme),
+                'date'       => $m->created_at->locale('fr')->isoFormat('D MMM YYYY'),
+                // L'ouverture se fait au bon endroit du fil, pas à la fin.
+                'url'        => route('messages.show', $m->discussion) . '?at=' . $m->id,
+            ])
+            ->values()
+            ->all();
+
+        return response()
+            ->json(['results' => $resultats])
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    /**
+     * Extrait le passage autour du terme trouvé, plutôt que le début du message.
+     */
+    private function excerpt(string $corps, string $terme): string
+    {
+        $position = mb_stripos($corps, $terme);
+
+        if ($position === false || mb_strlen($corps) <= 120) {
+            return Str::limit($corps, 120);
+        }
+
+        $debut = max(0, $position - 40);
+
+        return ($debut > 0 ? '…' : '') . Str::limit(mb_substr($corps, $debut), 120);
+    }
+
+    /**
+     * Messages plus anciens qu'un identifiant donné.
+     *
+     * Le fil ne charge qu'une fenêtre : sans cela, une conversation de plusieurs
+     * milliers de messages serait intégralement transmise à chaque ouverture.
+     */
+    public function history(Request $request, Discussion $discussion): JsonResponse
+    {
+        $discussion->load('participants');
+        $this->authorize('view', $discussion);
+
+        $validated = $request->validate([
+            'before' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $messages = $discussion->messages()
+            ->with(['author:id,name,avatar_path', 'attachments', 'reactions'])
+            ->where('id', '<', $validated['before'])
+            ->latest('id')
+            ->limit(self::PAGE_SIZE)
+            ->get()
+            ->reverse()
+            ->values();
+
+        $plusAncien = $messages->first()?->id;
+
+        return response()
+            ->json([
+                'messages'  => $messages->map(fn ($m) => $m->toPayload($request->user()->id))->all(),
+                // Sert au client à masquer le bouton une fois le fil épuisé.
+                'has_older' => $plusAncien
+                    ? $discussion->messages()->where('id', '<', $plusAncien)->exists()
+                    : false,
+            ])
+            ->header('Cache-Control', 'no-store, private');
+    }
+
+    /**
+     * Fenêtre de messages à afficher à l'ouverture d'un fil.
+     *
+     * Sans cible : les plus récents. Avec cible : le message visé, entouré de
+     * son contexte, afin qu'un résultat de recherche s'ouvre au bon endroit.
+     */
+    private function windowFor(Discussion $discussion, ?int $focusedId)
+    {
+        $requete = $discussion->messages()->with(['author:id,name,avatar_path', 'attachments']);
+
+        if (!$focusedId) {
+            return $requete->latest('id')->limit(self::HISTORY_LIMIT)->get()->reverse()->values();
+        }
+
+        $avant = (clone $requete)->where('id', '<=', $focusedId)
+            ->latest('id')->limit(intdiv(self::HISTORY_LIMIT, 2))->get();
+
+        $apres = (clone $requete)->where('id', '>', $focusedId)
+            ->oldest('id')->limit(intdiv(self::HISTORY_LIMIT, 2))->get();
+
+        return $avant->reverse()->concat($apres)->values();
     }
 
     /**
