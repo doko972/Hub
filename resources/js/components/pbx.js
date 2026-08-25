@@ -33,6 +33,20 @@ export function initPbx() {
 
     const field = (name) => form.querySelector(`[name="${name}"]`);
 
+    /**
+     * Fiche embarquée dans la carte (tout sauf le mot de passe).
+     * Un attribut illisible doit se voir : sans ce garde-fou, l'exception
+     * laissait simplement le bouton sans effet.
+     */
+    function ficheDe(card) {
+        try {
+            return JSON.parse(card.dataset.pbx);
+        } catch {
+            showToast('Fiche illisible : rechargez la page.', 'error');
+            return null;
+        }
+    }
+
     // Jeton de requête : si l'utilisateur ouvre une deuxième fiche pendant le
     // chargement de la première, la réponse en retard est ignorée.
     let secretRequest = 0;
@@ -99,7 +113,9 @@ export function initPbx() {
     // ---------------------------------------------------------------
 
     async function openSecret(card, url) {
-        const fiche = JSON.parse(card.dataset.pbx);
+        const fiche = ficheDe(card);
+        if (!fiche) return;
+
         const jeton = ++secretRequest;
 
         secretTitle.textContent = fiche.name;
@@ -177,7 +193,8 @@ export function initPbx() {
 
         const edition = e.target.closest('[data-pbx-edit]');
         if (edition) {
-            openForm(JSON.parse(edition.closest('[data-pbx]').dataset.pbx));
+            const fiche = ficheDe(edition.closest('[data-pbx]'));
+            if (fiche) openForm(fiche);
             return;
         }
 

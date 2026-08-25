@@ -80,8 +80,12 @@
                 ];
             @endphp
 
+            {{-- json_encode + {{ }} et non @json : l'échappement Blade transforme
+                 les guillemets en &quot;, que le parseur HTML restitue tels quels.
+                 @json les laisse bruts, ce qui tronque l'attribut au premier
+                 guillemet interne et casse le JSON.parse côté navigateur. --}}
             <article class="pbx-card {{ $centrex->is_active ? '' : 'pbx-card--off' }}"
-                     data-pbx="@json($fiche)">
+                     data-pbx="{{ json_encode($fiche) }}">
 
                 <header class="pbx-card__head">
                     <div class="pbx-card__identity">

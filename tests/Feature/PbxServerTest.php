@@ -61,6 +61,36 @@ class PbxServerTest extends TestCase
             ->assertDontSee('MotDePasseCentrex42');
     }
 
+    /**
+     * L'attribut data-pbx alimente les modales « Identifiants » et
+     * « Modifier ». Rendu avec @json, ses guillemets restaient bruts et
+     * tronquaient l'attribut : les deux boutons ne réagissaient plus.
+     */
+    public function test_la_fiche_embarquee_dans_la_carte_est_du_json_valide(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+        $this->centrex([
+            'name'   => 'Centrex « Guillemets » & Cie',
+            'client' => "L'Atelier",
+            'notes'  => "Première ligne\nSeconde ligne",
+        ]);
+
+        $html = $this->actingAs($user)->get(route('tools.centrex.index'))->getContent();
+
+        $this->assertSame(1, preg_match('/data-pbx="([^"]*)"/', $html, $trouve));
+
+        // Le navigateur décode les entités avant d'exposer dataset.pbx.
+        $fiche = json_decode(html_entity_decode($trouve[1], ENT_QUOTES, 'UTF-8'), true);
+
+        $this->assertIsArray($fiche, 'data-pbx doit contenir du JSON exploitable');
+        $this->assertSame('Centrex « Guillemets » & Cie', $fiche['name']);
+        $this->assertSame("L'Atelier", $fiche['client']);
+        $this->assertTrue($fiche['hasPassword']);
+
+        // Le mot de passe lui-même ne doit pas s'y trouver.
+        $this->assertArrayNotHasKey('password', $fiche);
+    }
+
     public function test_un_centrex_s_ajoute_et_son_mot_de_passe_est_chiffre(): void
     {
         $user = User::factory()->create(['is_active' => true]);
