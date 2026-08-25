@@ -210,6 +210,33 @@ class MessagingTest extends TestCase
             ->assertJsonPath('latest', null);
     }
 
+    // ---- Notification depuis n'importe quelle page ----
+
+    public function test_toutes_les_pages_portent_les_parametres_de_notification(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+
+        // Le chat IA n'utilise pas le gabarit principal : sans ces balises, ses
+        // utilisateurs ne recevaient ni fenêtre, ni son, ni compteur d'onglet.
+        foreach (['/', '/messages', '/chat'] as $url) {
+            $this->actingAs($user)->get($url)
+                ->assertStatus(200)
+                ->assertSee('name="messages-unread-url"', false);
+        }
+    }
+
+    public function test_le_bandeau_d_activation_est_propose_partout(): void
+    {
+        config(['services.webpush.public_key' => 'cle', 'services.webpush.private_key' => 'cle']);
+
+        $user = User::factory()->create(['is_active' => true]);
+
+        foreach (['/', '/chat'] as $url) {
+            $this->actingAs($user)->get($url)
+                ->assertStatus(200)
+                ->assertSee('data-push-banner', false);
+        }
+    }
     // ---- Groupes ----
 
     public function test_un_groupe_se_cree_avec_ses_membres_et_son_auteur(): void

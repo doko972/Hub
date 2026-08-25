@@ -16,6 +16,7 @@
     <title>ChatBot</title>
     {{-- Markdown, coloration syntaxique et lecteur Lottie : servis depuis
          notre origine (resources/js/chat.js), plus depuis des CDN tiers. --}}
+    @include('partials.notification-boot')
     <meta name="presence-ping" content="{{ route('presence.ping') }}">
     @vite(['resources/js/app.js', 'resources/js/chat.js'])
 
@@ -23,6 +24,7 @@
 </head>
 
 <body class="layout-chat {{ request()->query('embedded') ? 'is-embedded' : '' }}">
+    @include('partials.push-banner')
     <div class="app-container">
         <!-- Overlay mobile -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>

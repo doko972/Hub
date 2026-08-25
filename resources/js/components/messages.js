@@ -839,11 +839,20 @@ function initModal() {
 }
 
 // ---- Pastille de non-lus, titre d'onglet et notification ----
+//
+// Piloté par des balises meta présentes sur tous les gabarits, et non plus par
+// la pastille de la sidebar : cette dernière est absente du chat IA, dont les
+// utilisateurs ne recevaient donc aucune notification.
 function initUnreadBadge() {
-    const badge = document.querySelector('[data-unread-badge]');
-    if (!badge) return;
+    const url = document.querySelector('meta[name="messages-unread-url"]')?.content;
+    if (!url) return;
 
-    const interval = (parseInt(badge.dataset.unreadInterval, 10) || 20) * 1000;
+    const interval = (parseInt(
+        document.querySelector('meta[name="messages-unread-interval"]')?.content, 10
+    ) || 20) * 1000;
+
+    // Facultative : seul le gabarit principal l'affiche.
+    const badge = document.querySelector('[data-unread-badge]');
 
     // Titre d'origine, pour pouvoir le restaurer une fois tout lu.
     const baseTitle = document.title;
@@ -888,7 +897,7 @@ function initUnreadBadge() {
         // passe en arrière-plan : c'est précisément là que le compteur dans le
         // titre rend service.
         try {
-            const response = await fetch(badge.dataset.unreadUrl, {
+            const response = await fetch(url, {
                 headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
             });
 
@@ -896,9 +905,12 @@ function initUnreadBadge() {
 
             const { total, latest } = await response.json();
 
-            badge.textContent = total > 99 ? '99+' : total;
-            badge.hidden = total === 0;
-            badge.classList.toggle('is-pulsing', total > 0);
+            if (badge) {
+                badge.textContent = total > 99 ? '99+' : total;
+                badge.hidden = total === 0;
+                badge.classList.toggle('is-pulsing', total > 0);
+            }
+
             updateTitle(total);
 
             maybeNotify(latest);
