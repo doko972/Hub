@@ -9,7 +9,6 @@ use App\Models\Message;
 use App\Models\User;
 use App\Models\UserMemory;
 use App\Services\GoogleCalendarService;
-use App\Services\ImageQuota;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -28,9 +27,50 @@ class ChatController extends Controller
         'gpt-5-mini' => ['provider' => 'openai', 'name' => 'GPT-5 Mini'],
         'gpt-4o' => ['provider' => 'openai', 'name' => 'GPT-4o'],
         'gpt-4o-mini' => ['provider' => 'openai', 'name' => 'GPT-4o Mini'],
+        // DeepSeek expose une API compatible OpenAI : même client, autre URL.
+        'deepseek-chat' => ['provider' => 'deepseek', 'name' => 'DeepSeek V3'],
+        'deepseek-reasoner' => ['provider' => 'deepseek', 'name' => 'DeepSeek R1'],
         'claude-sonnet-4-20250514' => ['provider' => 'anthropic', 'name' => 'Claude Sonnet 4'],
         'claude-haiku-3-5-20241022' => ['provider' => 'anthropic', 'name' => 'Claude Haiku 3.5'],
     ];
+
+    /**
+     * Client à utiliser pour un modèle donné.
+     *
+     * DeepSeek parle le même protocole qu'OpenAI : seules la clé et l'URL de
+     * base diffèrent. Router ici évite de dupliquer toute la logique d'appel
+     * d'outils, qui représente l'essentiel de ce contrôleur.
+     */
+    private function clientFor(string $model)
+    {
+        $provider = self::$models[$model]['provider'] ?? 'openai';
+
+        if ($provider !== 'deepseek') {
+            return OpenAI::chat();
+        }
+
+        return \OpenAI::factory()
+            ->withApiKey((string) config('services.deepseek.api_key'))
+            ->withBaseUri((string) config('services.deepseek.base_uri'))
+            ->make()
+            ->chat();
+    }
+
+    /**
+     * Modèles réellement utilisables, d'après les clés présentes.
+     *
+     * Proposer un modèle dont le fournisseur n'est pas configuré ne mène qu'à
+     * une erreur incompréhensible pour l'utilisateur.
+     */
+    public static function availableModels(): array
+    {
+        return array_filter(self::$models, fn ($modele) => match ($modele['provider']) {
+            'openai'    => filled(config('openai.api_key')),
+            'deepseek'  => filled(config('services.deepseek.api_key')),
+            'anthropic' => filled(config('services.anthropic.api_key')),
+            default     => false,
+        });
+    }
 
     /**
      * Journalise une exception et renvoie un message présentable.
@@ -68,7 +108,7 @@ class ChatController extends Controller
 
         $messageContent = $validated['content'] ?? '';
         $imageData = $validated['image'] ?? null;
-        $model = $validated['model'] ?? 'gpt-4o';
+        $model = $validated['model'] ?? config('ai.default_model');
 
         // Sauvegarder l'image sur le disque si présente
         $imagePath = null;
@@ -143,7 +183,7 @@ class ChatController extends Controller
 
         $messageContent = $validated['content'] ?? '';
         $imageData = $validated['image'] ?? null;
-        $model = $validated['model'] ?? 'gpt-4o';
+        $model = $validated['model'] ?? config('ai.default_model');
 
         // Sauvegarder l'image sur le disque si présente
         $imagePath = null;
@@ -167,7 +207,7 @@ class ChatController extends Controller
                 ->toArray()
         );
 
-        $systemPrompt = $validated['system_prompt'] ?? 'Tu es un assistant utile et amical. Tu peux générer des images sur demande. Tu réponds en français de manière concise et claire.';
+        $systemPrompt = $validated['system_prompt'] ?? 'Tu es un assistant utile et amical. Tu réponds en français de manière concise et claire.';
 
         $provider = self::$models[$model]['provider'] ?? 'openai';
         $user = $request->user();
@@ -238,7 +278,7 @@ class ChatController extends Controller
             $params['temperature'] = 0.7;
         }
 
-        $response = OpenAI::chat()->create($params);
+        $response = $this->clientFor($model)->create($params);
 
         return $response->choices[0]->message->content;
     }
@@ -292,23 +332,6 @@ class ChatController extends Controller
                             ],
                         ],
                         'required' => ['query'],
-                    ],
-                ],
-            ],
-            [
-                'type' => 'function',
-                'function' => [
-                    'name' => 'generate_image',
-                    'description' => 'Génère une image avec DALL-E 3. À utiliser quand l\'utilisateur demande de créer, dessiner, illustrer ou modifier une image.',
-                    'parameters' => [
-                        'type' => 'object',
-                        'properties' => [
-                            'prompt' => [
-                                'type' => 'string',
-                                'description' => 'Description précise et détaillée de l\'image à générer, en anglais.',
-                            ],
-                        ],
-                        'required' => ['prompt'],
                     ],
                 ],
             ],
@@ -472,7 +495,7 @@ class ChatController extends Controller
         }
 
         try {
-            $stream = OpenAI::chat()->createStreamed($streamParams);
+            $stream = $this->clientFor($model)->createStreamed($streamParams);
         } catch (\Exception $e) {
             $msg = $this->safeError($e, 'Le service d\'IA est momentanément indisponible.');
             echo "data: " . json_encode(['chunk' => '❌ ' . $msg]) . "\n\n";
@@ -553,42 +576,6 @@ class ChatController extends Controller
                             $fullContent = $err;
                             echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
                             ob_flush(); flush();
-                        }
-
-                    // ── GÉNÉRATION D'IMAGE ──────────────────────────────────────────
-                    } elseif ($toolCall['name'] === 'generate_image' && $user) {
-                        $prompt = $args['prompt'] ?? $messageContent;
-
-                        // Même quota que la commande /imagine : sans ce contrôle,
-                        // il suffisait de demander une image en langage naturel
-                        // pour contourner la limite journalière.
-                        if (ImageQuota::exceeded($user->id)) {
-                            $limit = ImageQuota::DAILY_LIMIT;
-                            $err   = "🚫 Limite atteinte ({$limit} images par jour). Réessayez demain !";
-                            $fullContent = $err;
-                            echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
-                            ob_flush(); flush();
-                            continue;
-                        }
-
-                        echo "data: " . json_encode(['generating_image' => true]) . "\n\n";
-                        ob_flush(); flush();
-
-                        try {
-                            $imagePath   = $this->generateImageWithDalle($prompt, $user->id);
-                            $imageUrl    = Storage::url($imagePath);
-                            $fullContent = $prompt;
-
-                            echo "data: " . json_encode([
-                                'image_url'    => $imageUrl,
-                                'image_prompt' => $prompt,
-                            ]) . "\n\n";
-                            ob_flush(); flush();
-                        } catch (\Exception $e) {
-                            $err = "\n\n❌ " . $this->safeError($e, 'Erreur lors de la génération de l\'image.');
-                            echo "data: " . json_encode(['chunk' => $err]) . "\n\n";
-                            ob_flush(); flush();
-                            $fullContent .= $err;
                         }
 
                     // ── LISTE DES ÉVÉNEMENTS ────────────────────────────────────────
@@ -802,7 +789,7 @@ class ChatController extends Controller
                         $followUpParams['temperature'] = 0.7;
                     }
 
-                    $followUpStream = OpenAI::chat()->createStreamed($followUpParams);
+                    $followUpStream = $this->clientFor($model)->createStreamed($followUpParams);
 
                     $fullContent = '';
                     foreach ($followUpStream as $followUpResponse) {
@@ -818,28 +805,6 @@ class ChatController extends Controller
         }
 
         return ['text' => $fullContent, 'image_path' => $imagePath];
-    }
-
-    /**
-     * Générer une image avec DALL-E 3, la télécharger et la sauvegarder
-     */
-    private function generateImageWithDalle(string $prompt, int $userId): string
-    {
-        $response = OpenAI::images()->create([
-            'model' => 'dall-e-3',
-            'prompt' => $prompt,
-            'n' => 1,
-            'size' => '1024x1024',
-            'quality' => 'standard',
-        ]);
-
-        $imageUrl = $response->data[0]->url;
-
-        $imageContent = Http::timeout(60)->get($imageUrl)->body();
-        $path = 'chat-images/' . $userId . '/dalle-' . Str::uuid() . '.png';
-        Storage::disk('public')->put($path, $imageContent);
-
-        return $path;
     }
 
     /**
@@ -1039,8 +1004,10 @@ class ChatController extends Controller
         }
 
         try {
-            $response = OpenAI::chat()->create([
-                'model' => 'gpt-4o-mini',
+            $modeleTitre = config('ai.title_model');
+
+            $response = $this->clientFor($modeleTitre)->create([
+                'model' => $modeleTitre,
                 'messages' => [
                     ['role' => 'system', 'content' => 'Tu génères des titres courts pour des conversations. Réponds uniquement avec le titre, sans guillemets ni ponctuation finale, en 3 à 6 mots maximum.'],
                     ['role' => 'user', 'content' => 'Titre pour : ' . mb_substr($firstUserMessage, 0, 300)],
@@ -1072,9 +1039,9 @@ class ChatController extends Controller
             'system_prompt' => 'nullable|string|max:3000',
         ]);
 
-        $model = $validated['model'] ?? 'gpt-4o-mini';
+        $model = $validated['model'] ?? config('ai.default_model');
         $provider = self::$models[$model]['provider'] ?? 'openai';
-        $systemPrompt = $validated['system_prompt'] ?? 'Tu es un assistant utile et amical. Tu peux générer des images sur demande. Tu réponds en français de manière concise et claire.';
+        $systemPrompt = $validated['system_prompt'] ?? 'Tu es un assistant utile et amical. Tu réponds en français de manière concise et claire.';
         $user = $request->user();
 
         // Supprimer le dernier message assistant

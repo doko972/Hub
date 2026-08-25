@@ -1001,27 +1001,6 @@ body.layout-chat.is-embedded {
     margin-bottom: 0.5rem;
 }
 
-.generated-image {
-    max-width: 400px;
-    border-radius: 12px;
-    margin: 0.5rem 0;
-    cursor: pointer;
-    transition: transform 0.2s;
-    display: block;
-
-    &:hover {
-        transform: scale(1.02);
-    }
-}
-
-.generating-image-note {
-    color: var(--text-muted);
-    font-size: 0.9rem;
-    font-style: italic;
-    margin: 0;
-    animation: pulse-text 1.5s ease-in-out infinite;
-}
-
 // ============================================
 // RÉSULTATS DE RECHERCHE WEB
 // ============================================

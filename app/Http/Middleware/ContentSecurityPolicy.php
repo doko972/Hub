@@ -88,8 +88,8 @@ class ContentSecurityPolicy
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com{$devAssetSrc}",
             "font-src 'self' data: https://fonts.gstatic.com",
 
-            // Les images générées par DALL-E sont affichées depuis leur URL
-            // d'origine avant d'être rapatriées par le proxy.
+            // Les pièces jointes et avatars viennent de notre origine ; https:
+            // couvre les images distantes éventuelles d'un outil tiers.
             "img-src 'self' data: blob: https:",
 
             "connect-src 'self'{$devConnectSrc}",

@@ -16,7 +16,7 @@
     ]
   },
   "resources/js/chat.js": {
-    "file": "assets/chat-pueVzPRh.js",
+    "file": "assets/chat-B7m6nlfo.js",
     "name": "chat",
     "src": "resources/js/chat.js",
     "isEntry": true,
@@ -29,12 +29,12 @@
     ]
   },
   "resources/js/cortex-styles.js": {
-    "file": "assets/cortex-styles-NAtLVWcZ.js",
+    "file": "assets/cortex-styles-zxDncpOj.js",
     "name": "cortex-styles",
     "src": "resources/js/cortex-styles.js",
     "isEntry": true,
     "css": [
-      "assets/cortex-styles-CBBN-X59.css"
+      "assets/cortex-styles-BqlDzrTB.css"
     ]
   }
 }

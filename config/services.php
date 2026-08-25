@@ -73,6 +73,13 @@ return [
         'email' => env('CONTACT_EMAIL'),
     ],
 
+    // Modèle de langage compatible avec l'API OpenAI, mais bien moins cher.
+    // Le protocole étant identique, le même client sert les deux : seules
+    // l'URL de base et la clé changent.
+    'deepseek' => [
+        'api_key'  => env('DEEPSEEK_API_KEY'),
+        'base_uri' => env('DEEPSEEK_BASE_URI', 'api.deepseek.com/v1'),
+    ],
     // Recherche de GIF dans la messagerie (https://developers.giphy.com).
     // Sans clé, l'onglet GIF n'apparaît pas : le reste fonctionne normalement.
     //

@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Log;
  * La clé reste côté serveur : le navigateur ne parle jamais à Giphy, ce qui
  * évite de l'exposer et de laisser fuiter les recherches des utilisateurs vers
  * un tiers. Le GIF choisi est ensuite rapatrié et stocké comme pièce jointe
- * ordinaire — même principe que le proxy DALL-E existant.
+ * ordinaire : le message reste lisible même si Giphy change ses URL.
  */
 class GifSearch
 {

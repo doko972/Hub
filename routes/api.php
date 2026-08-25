@@ -7,7 +7,6 @@ use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\UpdateController;
 use App\Http\Controllers\Api\DocumentController;
-use App\Http\Controllers\Api\ImageController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Api\SystemPromptController;
 use Illuminate\Support\Facades\Route;
@@ -73,9 +72,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Partage de conversation
     Route::post('/conversations/{conversation}/share', [ChatController::class, 'share']);
     Route::delete('/conversations/{conversation}/share', [ChatController::class, 'unshare']);
-    // Génération d'images
-    Route::post('/conversations/{conversation}/imagine', [App\Http\Controllers\Api\ImageController::class, 'generate']);
-    Route::post('/image/proxy', [ImageController::class, 'proxy']);
 
     Route::get('/google/status', [App\Http\Controllers\GoogleAuthController::class, 'status']);
     Route::post('/google/disconnect', [App\Http\Controllers\GoogleAuthController::class, 'disconnect']);

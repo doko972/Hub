@@ -100,12 +100,11 @@
                         🔗
                     </button>
                     <select class="model-selector" id="modelSelector">
-                        <option value="gpt-4o" selected>GPT-4o</option>
-                        <option value="gpt-4o-mini">GPT-4o Mini</option>
-                        <option value="gpt-5-mini">GPT-5 Mini</option>
-                        <option value="gpt-5">GPT-5</option>
-                        {{-- <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
-                        <option value="claude-haiku-3-5-20241022">Claude Haiku 3.5</option> --}}
+                        {{-- Modèles construits depuis le catalogue du contrôleur : une
+                             seule source de vérité, et le sélecteur suit automatiquement. --}}
+                        @foreach(\App\Http\Controllers\Api\ChatController::availableModels() as $id => $modele)
+                            <option value="{{ $id }}" @selected($id === config('ai.default_model'))>{{ $modele['name'] }}</option>
+                        @endforeach
                     </select>
                 </div>
             </header>
@@ -185,11 +184,6 @@
                                 <span class="dropdown-item-label">Joindre un fichier</span>
                             </button>
 
-                            <button class="dropdown-item btn-imagine" id="btnImagine" title="Générer une image">
-                                <span class="dropdown-item-icon">🎨</span>
-                                <span class="dropdown-item-label">Générer une image</span>
-                            </button>
-
                             <button class="dropdown-item" id="btnGoogleCalendar" title="Connecter Google Calendar">
                                 <span class="dropdown-item-icon">📅</span>
                                 <span class="dropdown-item-label">Google Calendar</span>
@@ -225,51 +219,6 @@
                 </div>
             </div>
         </main>
-    </div>
-    <!-- Modal génération image -->
-    <div class="modal-overlay" id="imagineModal">
-        <div class="modal" style="max-width: 500px;">
-            <h3>🎨 Générer une image</h3>
-            <p style="color: var(--bg); font-size: 0.9rem; margin-bottom: 1rem;">
-                Décrivez l'image que vous souhaitez créer avec DALL-E 3
-            </p>
-
-            <textarea id="imaginePrompt" placeholder="Ex: Un chat astronaute sur la lune, style art digital..." rows="3"
-                style="width: 100%; padding: 0.75rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light); font-size: 1rem; resize: vertical; margin-bottom: 1rem;"></textarea>
-
-            <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                <div style="flex: 1;">
-                    <label
-                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Taille</label>
-                    <select id="imagineSize"
-                        style="width: 100%; padding: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light);">
-                        <option value="1024x1024">Carré (1024×1024)</option>
-                        <option value="1792x1024">Paysage (1792×1024)</option>
-                        <option value="1024x1792">Portrait (1024×1792)</option>
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label
-                        style="display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Qualité</label>
-                    <select id="imagineQuality"
-                        style="width: 100%; padding: 0.5rem; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-light);">
-                        <option value="standard">Standard</option>
-                        <option value="hd">HD</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="imagineRemaining" style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">
-                <!-- Quota affiché ici -->
-            </div>
-
-            <div class="modal-actions">
-                <button class="btn-cancel" id="btnCancelImagine">Annuler</button>
-                <button class="btn-confirm" id="btnConfirmImagine">
-                    <span id="imagineButtonText">Générer</span>
-                </button>
-            </div>
-        </div>
     </div>
     <!-- Modal renommer conversation -->
     <div class="modal-overlay" id="renameConversationModal">
@@ -430,37 +379,6 @@
         const documentChipMeta = document.getElementById('documentChipMeta');
         const removeDocumentBtn = document.getElementById('removeDocumentBtn');
         const btnAttach = document.getElementById('btnAttach');
-        const btnImagine = document.getElementById('btnImagine');
-        const imagineModal = document.getElementById('imagineModal');
-        const imaginePrompt = document.getElementById('imaginePrompt');
-        const imagineSize = document.getElementById('imagineSize');
-        const imagineQuality = document.getElementById('imagineQuality');
-        const imagineRemaining = document.getElementById('imagineRemaining');
-        const btnCancelImagine = document.getElementById('btnCancelImagine');
-        const btnConfirmImagine = document.getElementById('btnConfirmImagine');
-        const imagineButtonText = document.getElementById('imagineButtonText');
-        const foldersList = document.getElementById('foldersList');
-        const btnAddFolder = document.getElementById('btnAddFolder');
-        const folderModal = document.getElementById('folderModal');
-        const folderNameInput = document.getElementById('folderNameInput');
-        const btnCancelFolder = document.getElementById('btnCancelFolder');
-        const btnConfirmFolder = document.getElementById('btnConfirmFolder');
-        const moveModal = document.getElementById('moveModal');
-        const moveFoldersList = document.getElementById('moveFoldersList');
-        const btnCancelMove = document.getElementById('btnCancelMove');
-
-        const renameConversationModal = document.getElementById('renameConversationModal');
-        const renameConversationInput = document.getElementById('renameConversationInput');
-        const btnCancelRenameConversation = document.getElementById('btnCancelRenameConversation');
-        const btnConfirmRenameConversation = document.getElementById('btnConfirmRenameConversation');
-
-        const renameFolderModal = document.getElementById('renameFolderModal');
-        const renameFolderInput = document.getElementById('renameFolderInput');
-        const btnCancelRenameFolder = document.getElementById('btnCancelRenameFolder');
-        const btnConfirmRenameFolder = document.getElementById('btnConfirmRenameFolder');
-
-
-
         const btnGoogleCalendar = document.getElementById('btnGoogleCalendar');
         const btnMenuMobile = document.getElementById('btnMenuMobile');
         const btnMic = document.getElementById('btnMic');
@@ -712,14 +630,6 @@
                 recognition.stop();
             }
 
-            // Détecter /imagine
-            if (message.toLowerCase().startsWith('/imagine ')) {
-                imaginePrompt.value = message.substring(9);
-                chatInput.value = '';
-                generateImage();
-                return;
-            }
-
             // Masquer l'écran d'accueil
             emptyChat.style.display = 'none';
 
@@ -859,23 +769,6 @@
                                     contentDiv.innerHTML += `<p class="synthesis-note">✍️ Rédaction de la synthèse…</p>`;
                                     contentDiv.dataset.searchHtml = renderSearchResults(parsed.search_results);
                                     fullContent = '';
-                                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                                }
-                                if (parsed.generating_image) {
-                                    if (firstChunk) {
-                                        contentDiv.innerHTML = '';
-                                        firstChunk = false;
-                                    }
-                                    contentDiv.innerHTML = '<p class="generating-image-note">🎨 Génération de l\'image en cours…</p>';
-                                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                                }
-                                if (parsed.image_url) {
-                                    contentDiv.querySelector('.generating-image-note')?.remove();
-                                    const img = document.createElement('img');
-                                    img.src = parsed.image_url;
-                                    img.className = 'generated-image';
-                                    img.alt = parsed.image_prompt || 'Image générée';
-                                    contentDiv.insertBefore(img, contentDiv.firstChild);
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                                 if (parsed.done && parsed.user_message?.id) {
@@ -1108,171 +1001,6 @@
             });
         });
 
-        // ============================================
-        // GÉNÉRATION D'IMAGES
-        // ============================================
-
-        let isGeneratingImage = false;
-
-        btnImagine.addEventListener('click', () => {
-            imagineModal.classList.add('open');
-            imaginePrompt.value = '';
-            imaginePrompt.focus();
-        });
-
-        btnCancelImagine.addEventListener('click', () => {
-            imagineModal.classList.remove('open');
-        });
-
-        imagineModal.addEventListener('click', (e) => {
-            if (e.target === imagineModal) {
-                imagineModal.classList.remove('open');
-            }
-        });
-
-        btnConfirmImagine.addEventListener('click', () => {
-            generateImage();
-        });
-
-        imaginePrompt.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                generateImage();
-            } else if (e.key === 'Escape') {
-                imagineModal.classList.remove('open');
-            }
-        });
-
-        async function generateImage() {
-            const prompt = imaginePrompt.value.trim();
-            if (!prompt || isGeneratingImage) return;
-
-            isGeneratingImage = true;
-            imagineButtonText.textContent = 'Génération...';
-            btnConfirmImagine.disabled = true;
-
-            // Fermer le modal
-            imagineModal.classList.remove('open');
-
-            // Masquer l'écran d'accueil
-            emptyChat.style.display = 'none';
-
-            // Créer une conversation si nécessaire
-            if (!currentConversationId) {
-                const conv = await createConversation('Image: ' + prompt.substring(0, 40));
-                if (!conv) {
-                    appendMessage('assistant', 'Erreur lors de la création de la conversation.');
-                    resetImagineButton();
-                    return;
-                }
-                chatTitle.textContent = conv.title;
-            }
-
-            // Afficher le message utilisateur
-            appendMessage('user', '/imagine ' + prompt);
-
-            // Afficher le loader
-            const loaderDiv = document.createElement('div');
-            loaderDiv.className = 'message assistant';
-            loaderDiv.innerHTML = `
-        <div class="message-avatar" style="background: var(--bg-message-ai);">
-            <lottie-player 
-                src="/animations/logo.json" 
-                background="transparent" 
-                speed="1"
-                style="width: 36px; height: 36px;" 
-                loop autoplay>
-            </lottie-player>
-        </div>
-        <div class="message-content">
-            <div class="generating-loader">
-                <div class="spinner"></div>
-                <span>Génération de l'image en cours...</span>
-            </div>
-        </div>
-    `;
-            chatMessages.appendChild(loaderDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const response = await fetch(`${API_BASE}/conversations/${currentConversationId}/imagine`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${AUTH_TOKEN}`,
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        prompt: prompt,
-                        size: imagineSize.value,
-                        quality: imagineQuality.value
-                    })
-                });
-
-                // Supprimer le loader
-                loaderDiv.remove();
-
-                if (!response.ok) {
-                    const error = await response.json();
-                    if (response.status === 429) {
-                        appendMessage('assistant', `⚠️ ${error.message}`);
-                    } else {
-                        throw new Error(error.message || 'Erreur de génération');
-                    }
-                    resetImagineButton();
-                    return;
-                }
-
-                const data = await response.json();
-
-                // Afficher l'image générée
-                const imageHtml = `
-            <p>🎨 <strong>Image générée</strong></p>
-            <a href="${data.image_url}" target="_blank">
-                <img src="${data.image_url}" class="generated-image" alt="Image générée">
-            </a>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem;">
-                <em>Prompt : ${escapeHtml(data.revised_prompt || prompt)}</em>
-            </p>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">
-                📊 Images restantes aujourd'hui : ${data.remaining}/${data.limit}
-            </p>
-        `;
-
-                const messageDiv = document.createElement('div');
-                messageDiv.className = 'message assistant';
-                messageDiv.innerHTML = `
-            <div class="message-avatar" style="background: var(--bg-message-ai);">
-                <lottie-player 
-                    src="/animations/logo.json" 
-                    background="transparent" 
-                    speed="1"
-                    style="width: 36px; height: 36px;" 
-                    loop autoplay>
-                </lottie-player>
-            </div>
-            <div class="message-content">${imageHtml}</div>
-        `;
-                chatMessages.appendChild(messageDiv);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-
-                // Recharger les conversations
-                await loadConversations();
-
-            } catch (error) {
-                console.error('Erreur génération:', error);
-                loaderDiv.remove();
-                appendMessage('assistant', '❌ Erreur lors de la génération de l\'image. Veuillez réessayer.');
-            }
-
-            resetImagineButton();
-        }
-
-        function resetImagineButton() {
-            isGeneratingImage = false;
-            imagineButtonText.textContent = 'Générer';
-            btnConfirmImagine.disabled = false;
-        }
         // ============================================
         // GESTION DES DOSSIERS
         // ============================================
@@ -2453,23 +2181,6 @@
                                     contentDiv.innerHTML += `<p class="synthesis-note">✍️ Rédaction de la synthèse…</p>`;
                                     contentDiv.dataset.searchHtml = renderSearchResults(parsed.search_results);
                                     fullContent = '';
-                                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                                }
-                                if (parsed.generating_image) {
-                                    if (firstChunk) {
-                                        contentDiv.innerHTML = '';
-                                        firstChunk = false;
-                                    }
-                                    contentDiv.innerHTML = '<p class="generating-image-note">🎨 Génération de l\'image en cours…</p>';
-                                    chatMessages.scrollTop = chatMessages.scrollHeight;
-                                }
-                                if (parsed.image_url) {
-                                    contentDiv.querySelector('.generating-image-note')?.remove();
-                                    const img = document.createElement('img');
-                                    img.src = parsed.image_url;
-                                    img.className = 'generated-image';
-                                    img.alt = parsed.image_prompt || 'Image générée';
-                                    contentDiv.insertBefore(img, contentDiv.firstChild);
                                     chatMessages.scrollTop = chatMessages.scrollHeight;
                                 }
                             } catch (e) { }
