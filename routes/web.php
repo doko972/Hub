@@ -22,6 +22,7 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\SharedConversationController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
 use App\Http\Controllers\Tools\ImageConverterController;
+use App\Http\Controllers\Tools\PbxServerController;
 use App\Http\Controllers\Tools\QrCodeController;
 
 // ---- Authentification ----
@@ -141,6 +142,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/tools/qr-code/presets',            [QrCodeController::class, 'store'])->name('tools.qr-code.presets.store');
     Route::get('/tools/qr-code/presets/{preset}',    [QrCodeController::class, 'show'])->name('tools.qr-code.presets.show');
     Route::delete('/tools/qr-code/presets/{preset}', [QrCodeController::class, 'destroy'])->name('tools.qr-code.presets.destroy');
+
+    // Centrex FreePBX — annuaire d'accès partagé par tous les utilisateurs
+    Route::prefix('tools/centrex')->name('tools.centrex.')->group(function () {
+        Route::get('/',                  [PbxServerController::class, 'index'])->name('index');
+        Route::post('/',                 [PbxServerController::class, 'store'])->name('store');
+        Route::put('/{centrex}',         [PbxServerController::class, 'update'])->name('update');
+        Route::delete('/{centrex}',      [PbxServerController::class, 'destroy'])->name('destroy');
+
+        // Identifiants servis à la demande : plafonné, comme toute route qui
+        // rend un secret déchiffré.
+        Route::get('/{centrex}/secret',  [PbxServerController::class, 'secret'])
+            ->middleware('throttle:60,1')
+            ->name('secret');
+    });
 
     // Chatbot / Cortex IA
     Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');

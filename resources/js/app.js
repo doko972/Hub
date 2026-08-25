@@ -28,6 +28,7 @@ import { initSortable }           from './components/sortable.js';
 import { initBackgroundRemover }  from './components/backgroundRemover.js';
 import { initImageConverter }     from './components/imageconverter.js';
 import { initQrCode }             from './components/qrcode.js';
+import { initPbx }                from './components/pbx.js';
 import { initCredentials }        from './components/credentials.js';
 import { initChatbot }            from './components/chatbot.js';
 import { initSidebarAccordion }   from './components/sidebarAccordion.js';
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackgroundRemover();
     initImageConverter();
     initQrCode();
+    initPbx();
     initCredentials();
     initChatbot();
     initSidebarAccordion();

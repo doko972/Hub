@@ -27,6 +27,7 @@ class SmokeTest extends TestCase
             'outil QR code'     => ['/tools/qr-code'],
             'convertisseur'     => ['/tools/image-converter'],
             'suppression fond'  => ['/tools/background-remover'],
+            'centrex FreePBX'   => ['/tools/centrex'],
         ];
     }
 

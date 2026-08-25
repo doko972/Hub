@@ -1,0 +1,320 @@
+// =============================================
+// CENTREX FREEPBX — annuaire d'accès
+//
+// Toutes les couleurs passent par les tokens de _variables : la page suit
+// donc les thèmes clairs et sombres sans surcharge dans _dark.
+// =============================================
+
+// ---- Barre de recherche ----
+.pbx-search {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-lg;
+    flex-wrap: wrap;
+
+    &__field {
+        position: relative;
+        flex: 1;
+        min-width: 220px;
+
+        svg {
+            position: absolute;
+            left: $spacing-md;
+            top: 50%;
+            transform: translateY(-50%);
+            color: $color-text-light;
+            pointer-events: none;
+        }
+
+        .form-control {
+            padding-left: 40px;
+        }
+    }
+}
+
+// ---- Grille de fiches ----
+.pbx-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: $spacing-md;
+    margin-bottom: $spacing-lg;
+
+    @media (max-width: $bp-sm) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pbx-card {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-left: 3px solid $color-primary;
+    border-radius: $radius-md;
+    padding: $spacing-md;
+    box-shadow: $shadow-sm;
+    transition: box-shadow $transition-fast, transform $transition-fast;
+
+    &:hover {
+        box-shadow: $shadow-md;
+        transform: translateY(-2px);
+    }
+
+    // Un centrex hors service reste consultable, mais ne doit pas attirer l'œil.
+    &--off {
+        border-left-color: $color-text-light;
+        opacity: 0.7;
+    }
+
+    &__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $spacing-sm;
+    }
+
+    &__identity {
+        min-width: 0;
+    }
+
+    &__name {
+        font-size: $font-size-base;
+        font-weight: 700;
+        color: $color-text;
+        margin: 0;
+        overflow-wrap: anywhere;
+    }
+
+    &__client {
+        display: block;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        margin-top: 2px;
+        overflow-wrap: anywhere;
+    }
+
+    &__state {
+        flex-shrink: 0;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 3px $spacing-sm;
+        border-radius: $radius-full;
+
+        &.is-on {
+            background: var(--success-bg);
+            color: var(--success-fg);
+        }
+
+        &.is-off {
+            background: var(--bg);
+            color: $color-text-muted;
+        }
+    }
+
+    &__host {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        color: $color-text-muted;
+
+        code {
+            font-size: $font-size-xs;
+            font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+            color: $color-text;
+            background: var(--surface-2);
+            border: 1px solid $color-border;
+            border-radius: $radius-sm;
+            padding: 2px $spacing-sm;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    &__copy {
+        border: 0;
+        background: none;
+        padding: 2px;
+        color: $color-text-light;
+        cursor: pointer;
+        display: flex;
+        border-radius: $radius-sm;
+        transition: color $transition-fast;
+
+        &:hover { color: $color-primary; }
+    }
+
+    &__notes {
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        line-height: 1.5;
+        margin: 0;
+        white-space: pre-line;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: $spacing-xs;
+        margin-top: auto;
+        padding-top: $spacing-sm;
+        border-top: 1px solid $color-border;
+
+        form {
+            margin: 0;
+            margin-left: auto;
+        }
+    }
+}
+
+// ---- Modales (formulaire & identifiants) ----
+.pbx-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--overlay);
+    backdrop-filter: blur(2px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-md;
+    opacity: 0;
+    pointer-events: none;
+    overflow-y: auto;
+    transition: opacity $transition-fast;
+
+    &.is-open {
+        opacity: 1;
+        pointer-events: all;
+
+        .pbx-modal {
+            transform: scale(1);
+        }
+    }
+}
+
+.pbx-modal {
+    background: $color-surface;
+    border-radius: $radius-lg;
+    box-shadow: $shadow-lg;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.94);
+    transition: transform $transition-base;
+
+    &--narrow {
+        max-width: 420px;
+    }
+
+    &__header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+        padding: $spacing-md $spacing-lg;
+        border-bottom: 1px solid $color-border;
+    }
+
+    &__title {
+        font-size: $font-size-lg;
+        font-weight: 700;
+        color: $color-text;
+        margin: 0;
+    }
+
+    &__close {
+        border: 0;
+        background: none;
+        color: $color-text-muted;
+        cursor: pointer;
+        padding: $spacing-xs;
+        display: flex;
+        border-radius: $radius-sm;
+        transition: color $transition-fast, background $transition-fast;
+
+        &:hover {
+            color: $color-text;
+            background: var(--surface-2);
+        }
+    }
+
+    &__body {
+        padding: $spacing-lg;
+        overflow-y: auto;
+    }
+
+    &__footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: $spacing-sm;
+        padding: $spacing-md $spacing-lg;
+        border-top: 1px solid $color-border;
+    }
+
+    form {
+        display: contents;
+    }
+}
+
+// Case « effacer le mot de passe », visible en édition seulement
+.pbx-clear {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    cursor: pointer;
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// ---- Fiche d'identifiants ----
+.pbx-secret {
+    &__host {
+        font-size: $font-size-xs;
+        font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+        color: $color-text-muted;
+        margin: 0 0 $spacing-md;
+        overflow-wrap: anywhere;
+    }
+
+    &__field {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+
+        .form-control {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+
+    &__btn {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border: 1.5px solid $color-border;
+        border-radius: $radius-md;
+        background: $color-surface;
+        color: $color-text-muted;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color $transition-fast, border-color $transition-fast;
+
+        &:hover {
+            color: $color-primary;
+            border-color: $color-primary;
+        }
+    }
+}

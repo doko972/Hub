@@ -154,6 +154,17 @@
                 Générateur de QR Code
             </a>
 
+            <a href="{{ route('tools.centrex.index') }}"
+               class="sidebar__link {{ request()->routeIs('tools.centrex.*') ? 'is-active' : '' }}">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="2" y="3"  width="20" height="8" rx="2"/>
+                    <rect x="2" y="13" width="20" height="8" rx="2"/>
+                    <line x1="6" y1="7"  x2="6.01" y2="7"/>
+                    <line x1="6" y1="17" x2="6.01" y2="17"/>
+                </svg>
+                Centrex FreePBX
+            </a>
+
                 </div>
             </div>
 

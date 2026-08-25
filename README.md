@@ -11,6 +11,11 @@ Chaque outil est présenté sous forme de vignette cliquable, avec gestion des a
 ## Fonctionnalités
 
 ### Pour tous les utilisateurs
+- **Centrex FreePBX** : annuaire partagé des centrex hébergés sur VM (nom, client, IP/hôte, port,
+  chemin d'administration, identifiants, notes). Ouverture directe de l'interface FreePBX,
+  copie de l'adresse et des identifiants. Mots de passe chiffrés au repos (cast `encrypted`,
+  AES-256 via `APP_KEY`) et jamais rendus dans le HTML : ils sont servis à la demande par
+  `/tools/centrex/{id}/secret`. Liste consultable et modifiable par tout utilisateur connecté.
 - Grille de vignettes responsive (mobile → tablette → bureau)
 - Tooltip de description au survol / tap mobile
 - Photo de profil personnalisée (upload ou initiales générées)
