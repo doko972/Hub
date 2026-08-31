@@ -18,6 +18,7 @@ class Tool extends Model
         'is_active',
         'is_public',
         'sort_order',
+        'link_type',
         'tool_family_id',
     ];
 
@@ -28,6 +29,17 @@ class Tool extends Model
             'is_public'  => 'boolean',
             'sort_order' => 'integer',
         ];
+    }
+
+    /**
+     * Chemin réseau plutôt qu'adresse web ?
+     *
+     * Les navigateurs refusent d'ouvrir un lien file:// ou UNC déclenché depuis
+     * une page https : la vignette propose alors une copie du chemin.
+     */
+    public function isPath(): bool
+    {
+        return $this->link_type === 'path';
     }
 
     // ---- Relations ----

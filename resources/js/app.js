@@ -36,6 +36,7 @@ import { initPresence }           from './components/presence.js';
 import { initMessages }           from './components/messages.js';
 import { initPushNotifications, initPushBanner } from './components/pushNotifications.js';
 import { initHeartbeat }          from './components/heartbeat.js';
+import { initToolPaths }         from './components/toolPath.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initTheme();
@@ -59,4 +60,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initPushNotifications();
     initPushBanner();
     initHeartbeat();
+    initToolPaths();
 });

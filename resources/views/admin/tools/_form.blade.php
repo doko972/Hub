@@ -64,18 +64,37 @@
 
         </div>
 
-        {{-- URL --}}
+        {{-- Type de destination --}}
+        <div class="form-group">
+            <label class="form-label" for="link_type">Type de destination <span class="required">*</span></label>
+            <select id="link_type" name="link_type" class="form-control" data-link-type>
+                <option value="web" @selected(old("link_type", $tool->link_type ?? "web") === "web")>
+                    Adresse web (http/https)
+                </option>
+                <option value="path" @selected(old("link_type", $tool->link_type ?? "web") === "path")>
+                    Chemin réseau (NAS, dossier partagé)
+                </option>
+            </select>
+            <span class="form-hint">
+                Un chemin réseau ne peut pas être ouvert par le navigateur : la vignette
+                copiera le chemin dans le presse-papier, à coller dans l explorateur.
+            </span>
+        </div>
+
+        {{-- Destination --}}
         <div class="form-group">
             <label class="form-label" for="url">
-                URL <span class="required">*</span>
+                <span data-link-label>URL</span> <span class="required">*</span>
             </label>
-            <input type="url" id="url" name="url"
-                   class="form-control {{ $errors->has('url') ? 'form-control--error' : '' }}"
-                   value="{{ old('url', $tool->url ?? '') }}"
-                   placeholder="https://mon-outil.exemple.com"
+            <input type="text" id="url" name="url"
+                   class="form-control {{ $errors->has("url") ? "form-control--error" : "" }}"
+                   value="{{ old("url", $tool->url ?? "") }}"
+                   data-link-input
+                   data-placeholder-web="https://mon-outil.exemple.com"
+                   data-placeholder-path="\\serveur\HR TELECOMS"
                    required>
-            <span class="form-hint">S'ouvre dans un nouvel onglet.</span>
-            @error('url')
+            <span class="form-hint" data-link-hint></span>
+            @error("url")
                 <span class="form-error">{{ $message }}</span>
             @enderror
         </div>

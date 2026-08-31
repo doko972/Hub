@@ -255,3 +255,12 @@
         color: inherit;
     }
 }
+
+// Vignette pointant vers un chemin réseau : c'est un bouton, pas un lien.
+// Il faut donc neutraliser les styles natifs du bouton.
+.tile--path {
+    border: none;
+    font: inherit;
+    text-align: inherit;
+    cursor: copy;
+}

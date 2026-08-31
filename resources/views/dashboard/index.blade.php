@@ -64,11 +64,20 @@
                     @php $hasCreds = in_array($tool->id, $toolsWithCredentials, true); @endphp
                     <div class="tile-wrap">
 
+                        {{-- Un chemin réseau ne peut pas être ouvert par le navigateur :
+                             la vignette devient un bouton qui copie le chemin. --}}
+                        @if($tool->isPath())
+                        <button type="button"
+                                class="tile tile--{{ $tool->color }} tile--path"
+                                data-copy-path="{{ $tool->url }}"
+                                title="{{ $tool->url }}">
+                        @else
                         <a href="{{ $tool->url }}"
                            target="_blank"
                            rel="noopener noreferrer"
                            class="tile tile--{{ $tool->color }}"
                            title="{{ $tool->title }}">
+                        @endif
 
                             {{-- Image ou icône --}}
                             <div class="tile__image-wrap">
@@ -89,7 +98,7 @@
                                 <span class="tile__tooltip" role="tooltip">{{ $tool->description }}</span>
                             @endif
 
-                        </a>
+                        @if($tool->isPath())</button>@else</a>@endif
 
                         {{-- Bouton credentials --}}
                         @if($tool->url)

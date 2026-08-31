@@ -170,6 +170,10 @@
                 @endif
 
                 <div class="composer-row">
+                    {{-- Pilule : icônes et champ réunis dans un même bloc arrondi.
+                         Seul le bouton d'envoi en sort, comme dans les messageries
+                         mobiles courantes. --}}
+                    <div class="composer-pill">
                     @if(\App\Services\GifSearch::isConfigured())
                         <button type="button" class="composer-btn" data-gif-toggle title="Envoyer un GIF">GIF</button>
                     @endif
@@ -189,7 +193,16 @@
                     <textarea id="message-body" name="body" rows="1" maxlength="5000"
                               placeholder="Écrivez votre message…  (Entrée pour envoyer)"></textarea>
 
-                    <button type="submit" class="btn btn--primary btn--sm">Envoyer</button>
+                    </div>
+
+                    <button type="submit" class="btn btn--primary btn--sm composer-send" title="Envoyer">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             width="18" height="18" aria-hidden="true">
+                            <line x1="22" y1="2" x2="11" y2="13"/>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                        </svg>
+                        <span>Envoyer</span>
+                    </button>
                 </div>
             </form>
         @else

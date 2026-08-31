@@ -702,3 +702,108 @@
     // Transition au retrait : l'apparition doit être franche, l'effacement doux.
     transition: outline-color 1s ease 3s;
 }
+
+// ---- Pilule de saisie ----
+//
+// Icônes et champ réunis dans un bloc arrondi, bouton d'envoi à l'extérieur :
+// disposition éprouvée des messageries mobiles. L'ancienne rangée à plat ne
+// tenait pas dans la largeur d'un téléphone — le bouton d'envoi débordait.
+.composer-pill {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex: 1;
+    // Sans cela, le champ refuse de se comprimer et pousse le bouton dehors.
+    min-width: 0;
+    padding: 3px 6px;
+    border: 1px solid $color-border;
+    border-radius: $radius-xl;
+    background: $color-bg;
+    // Ancre les panneaux flottants (émoticones) ; surtout pas d'overflow
+    // caché, qui les rognerait.
+    position: relative;
+
+    &:focus-within {
+        border-color: $color-primary;
+    }
+
+    // Le champ perd son cadre : c'est la pilule qui le porte désormais.
+    // Sélecteur plus spécifique que .messenger__composer textarea, sinon
+    // l ancienne règle conserverait le cadre et le fond du champ.
+    .messenger__composer & textarea,
+    & textarea {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        background: none;
+        padding: 6px 4px;
+
+        &:focus {
+            outline: none;
+        }
+    }
+
+    // Ordre visuel indépendant du balisage : émoticones à gauche, pièces
+    // jointes et GIF à droite, comme dans les applications de référence.
+    [data-emoji-toggle] { order: 1; }
+    textarea             { order: 2; }
+    [data-gif-toggle]    { order: 3; }
+    .composer-attach     { order: 4; }
+
+    // Les icônes deviennent de simples boutons ronds sans cadre.
+    .composer-btn,
+    .composer-attach {
+        width: 34px;
+        height: 34px;
+        border: 0;
+        border-radius: $radius-full;
+        background: none;
+        flex-shrink: 0;
+
+        &:hover {
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+        }
+    }
+}
+
+// ---- Bouton d'envoi ----
+.composer-send {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    svg { display: none; }
+}
+
+@media (max-width: $bp-md) {
+    .messenger__composer {
+        padding: $spacing-sm;
+    }
+
+    // Sur mobile, le bouton devient un rond à l'icône : le mot « Envoyer »
+    // consommait une largeur qui manquait au champ de saisie.
+    .composer-send {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: $radius-full;
+        justify-content: center;
+
+        svg  { display: block; }
+        span { display: none; }
+    }
+
+    .composer-pill {
+        gap: 0;
+    }
+}
+
+// La bulle du chatbot IA est fixée en bas à droite, exactement là où se trouve
+// le bouton d'envoi sur mobile. Deux points d'entrée de conversation superposés
+// n'ont pas de sens : on masque la bulle sur la page de messagerie.
+@media (max-width: $bp-md) {
+    body:has(.messenger) .chatbot-bubble {
+        display: none;
+    }
+}
