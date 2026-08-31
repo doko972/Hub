@@ -837,19 +837,31 @@
 }
 
 @media (max-width: $bp-md) {
-    // On ne calcule pas la hauteur de la conversation à la main : .page-content
-    // porte déjà une marge haute égale à la navbar et un rembourrage qui change
-    // selon le palier. Soustraire une valeur devinée laissait la saisie sous
-    // l'écran. On borne donc .page-content à la hauteur utile — box-sizing est
-    // en border-box, son rembourrage est compris dedans — et la conversation
-    // prend simplement ce qui reste.
-    body:has(.messenger.has-thread) .page-content {
-        // dvh et non vh : sur mobile la barre d'adresse fait varier la hauteur
-        // utile, et vh la surestime.
-        height: calc(100dvh - #{$navbar-height});
-        display: flex;
-        flex-direction: column;
+    // Dans une conversation, c'est la liste des messages qui défile, jamais la
+    // page : sans cela la zone de saisie se retrouve sous la ligne de flottaison.
+    // On fige donc toute la chaîne d'ancêtres à la hauteur utile de l'écran.
+    // Navbar et sidebar étant en position fixed, les neutraliser ici est sans
+    // effet sur elles.
+    body:has(.messenger.has-thread) {
         overflow: hidden;
+
+        .app-wrapper {
+            // dvh et non vh : sur mobile la barre d'adresse fait varier la
+            // hauteur utile, et vh la surestime — d'où un dépassement.
+            height: 100dvh;
+            min-height: 0;
+        }
+
+        .page-content {
+            // .page-content est un élément flexible de .main-content, en
+            // colonne : son flex-basis de 0 l'emportait sur toute hauteur
+            // déclarée, ce qui rendait le réglage précédent inopérant.
+            flex: none;
+            height: calc(100dvh - #{$navbar-height});
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
     }
 
     .messenger.has-thread {
