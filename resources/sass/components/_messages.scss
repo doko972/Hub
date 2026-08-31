@@ -783,7 +783,11 @@
 
     // Sur mobile, le bouton devient un rond à l'icône : le mot « Envoyer »
     // consommait une largeur qui manquait au champ de saisie.
-    .composer-send {
+    //
+    // Le sélecteur passe par .composer-row à dessein : « components/buttons »
+    // étant importé après ce fichier, .btn gagnait à spécificité égale et
+    // réimposait son padding et son arrondi.
+    .composer-row .composer-send {
         width: 44px;
         height: 44px;
         padding: 0;
@@ -805,5 +809,60 @@
 @media (max-width: $bp-md) {
     body:has(.messenger) .chatbot-bubble {
         display: none;
+    }
+}
+
+// ---- Mobile : une seule vue à la fois ----
+//
+// Empilée, la liste des fils repoussait la conversation — et donc la zone de
+// saisie — sous la ligne de flottaison : il fallait faire défiler la page pour
+// écrire. On adopte le fonctionnement des messageries mobiles : la liste OU la
+// conversation, jamais les deux.
+.messenger__back {
+    display: none;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    align-items: center;
+    justify-content: center;
+    border-radius: $radius-full;
+    color: $color-text;
+    text-decoration: none;
+    font-size: 20px;
+    line-height: 1;
+
+    &:hover {
+        background: $color-bg;
+    }
+}
+
+@media (max-width: $bp-md) {
+    .messenger.has-thread {
+        // dvh et non vh : sur mobile, la barre d'adresse fait varier la hauteur
+        // utile, et vh la surestime — la saisie finissait sous l'écran.
+        height: calc(100dvh - #{$navbar-height} - #{$spacing-lg});
+        min-height: 0;
+
+        .messenger__list {
+            display: none;
+        }
+
+        .messenger__back {
+            display: flex;
+        }
+    }
+
+    // L'en-tête de page occupe une place précieuse : dans une conversation, le
+    // titre du fil suffit à savoir où l'on est.
+    body:has(.messenger.has-thread) .page-header {
+        display: none;
+    }
+
+    // Sans fil ouvert, la liste est le seul contenu de l'écran : le plafond de
+    // 260 px, utile quand la conversation était empilée dessous, ne laissait
+    // voir que trois discussions sur un écran qui en tenait dix.
+    .messenger:not(.has-thread) .messenger__list {
+        max-height: none;
+        height: calc(100dvh - #{$navbar-height} - 150px);
     }
 }

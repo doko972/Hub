@@ -31,7 +31,7 @@
     </div>
 </div>
 
-<div class="messenger">
+<div class="messenger {{ $discussion ? 'has-thread' : '' }}">
 
     {{-- ===== Colonne gauche : les fils ===== --}}
     <aside class="messenger__list" aria-label="Discussions">
@@ -97,6 +97,10 @@
     <section class="messenger__thread">
         @if($discussion)
             <header class="messenger__header">
+                {{-- Sur mobile la liste est masquée quand un fil est ouvert :
+                     ce retour est le seul chemin pour y revenir. --}}
+                <a href="{{ route('messages.index') }}" class="messenger__back" aria-label="Retour aux discussions">←</a>
+
                 <div>
                     <h2>{{ $discussion->titleFor(auth()->id()) }}</h2>
                     <p>
@@ -191,7 +195,7 @@
 
                     <label class="sr-only" for="message-body">Votre message</label>
                     <textarea id="message-body" name="body" rows="1" maxlength="5000"
-                              placeholder="Écrivez votre message…  (Entrée pour envoyer)"></textarea>
+                              placeholder="Écrivez votre message…" title="Entrée pour envoyer, Maj+Entrée pour aller à la ligne"></textarea>
 
                     </div>
 
