@@ -318,3 +318,189 @@
         }
     }
 }
+
+// ---- Modale d'import OVHcloud ----
+.pbx-ovh {
+    &__bar {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+    }
+
+    &__intro {
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    // Hauteur bornée : un compte peut aligner plusieurs dizaines de VPS sans
+    // que la modale déborde de l'écran.
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+        max-height: 46vh;
+        overflow-y: auto;
+    }
+
+    &__state {
+        font-size: $font-size-sm;
+        color: $color-text-muted;
+        text-align: center;
+        padding: $spacing-lg 0;
+        margin: 0;
+
+        &--error {
+            color: $color-danger;
+        }
+    }
+
+    &__item {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        padding: $spacing-sm $spacing-md;
+        border: 1.5px solid $color-border;
+        border-radius: $radius-md;
+        cursor: pointer;
+        transition: border-color $transition-fast, background $transition-fast;
+
+        &:hover {
+            border-color: $color-primary;
+        }
+
+        &:has(input:checked) {
+            border-color: $color-primary;
+            background: var(--surface-2);
+        }
+
+        // VPS déjà référencé ou sans IPv4 : visible, mais pas sélectionnable.
+        &.is-disabled {
+            cursor: default;
+            opacity: 0.6;
+
+            &:hover {
+                border-color: $color-border;
+            }
+        }
+
+        input {
+            flex-shrink: 0;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    &__name {
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text;
+        overflow-wrap: anywhere;
+    }
+
+    &__meta {
+        font-size: 11px;
+        font-family: ui-monospace, 'SFMono-Regular', 'Consolas', monospace;
+        color: $color-text-muted;
+        overflow-wrap: anywhere;
+    }
+
+    &__tag {
+        flex-shrink: 0;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 3px $spacing-sm;
+        border-radius: $radius-full;
+
+        &.is-new {
+            background: var(--success-bg);
+            color: var(--success-fg);
+        }
+
+        &.is-known {
+            background: var(--bg);
+            color: $color-text-muted;
+        }
+
+        &.is-blocked {
+            background: var(--bg);
+            color: $color-warning;
+        }
+    }
+
+    // Poussée à gauche du pied de modale, face aux boutons d'action.
+    &__all {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+        margin-right: auto;
+        font-size: $font-size-xs;
+        color: $color-text-muted;
+        cursor: pointer;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+}
+
+// Avertissements de l'import : source ou projet OVH en échec.
+.pbx-ovh__notes {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid var(--warning);
+    border-radius: $radius-md;
+    background: var(--surface-2);
+
+    p {
+        font-size: $font-size-xs;
+        color: $color-text;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+// Filtre de la liste, au-dessus des machines.
+.pbx-ovh__filter {
+    position: relative;
+    margin-bottom: $spacing-sm;
+
+    svg {
+        position: absolute;
+        left: $spacing-md;
+        top: 50%;
+        transform: translateY(-50%);
+        color: $color-text-light;
+        pointer-events: none;
+    }
+
+    .form-control {
+        padding-left: 40px;
+    }
+
+    &[hidden] {
+        display: none;
+    }
+}
+
+.pbx-ovh__item[hidden] {
+    display: none;
+}

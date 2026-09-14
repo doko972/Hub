@@ -18,6 +18,8 @@ class PbxServer extends Model
         'client',
         'protocol',
         'host',
+        'ovh_service_name',
+        'ovh_project',
         'port',
         'path',
         'login',
@@ -67,6 +69,8 @@ class PbxServer extends Model
      */
     public static function availableProtocols(): array
     {
-        return ['https' => 'HTTPS', 'http' => 'HTTP'];
+        // HTTP en tête : c'est le protocole par défaut des interfaces
+        // d'administration des centrex, rarement exposées en TLS.
+        return ['http' => 'HTTP', 'https' => 'HTTPS'];
     }
 }

@@ -67,10 +67,10 @@ export function initPbx() {
 
             field('name').value     = fiche.name   ?? '';
             field('client').value   = fiche.client ?? '';
-            field('protocol').value = fiche.protocol ?? 'https';
+            field('protocol').value = fiche.protocol ?? 'http';
             field('host').value     = fiche.host   ?? '';
             field('port').value     = fiche.port   ?? '';
-            field('path').value     = fiche.path   ?? '/admin';
+            field('path').value     = fiche.path   ?? '';
             field('login').value    = fiche.login  ?? '';
             field('notes').value    = fiche.notes  ?? '';
             document.getElementById('pbx-active').checked = !!fiche.is_active;
@@ -92,11 +92,10 @@ export function initPbx() {
             // Vidage explicite plutôt que form.reset() : après une erreur de
             // validation, les valeurs par défaut du HTML sont celles de la
             // saisie fautive, que reset() remettrait en place.
-            ['name', 'client', 'host', 'port', 'login', 'password', 'notes']
+            ['name', 'client', 'host', 'port', 'path', 'login', 'password', 'notes']
                 .forEach(nom => { field(nom).value = ''; });
 
-            field('protocol').value = 'https';
-            field('path').value     = '/admin';
+            field('protocol').value = 'http';
             clearCheckbox.checked   = false;
             document.getElementById('pbx-active').checked = true;
 
@@ -155,6 +154,54 @@ export function initPbx() {
     }
 
     // ---------------------------------------------------------------
+    // Redémarrage de la machine
+    // ---------------------------------------------------------------
+
+    /**
+     * Redémarre la machine OVH d'un centrex.
+     *
+     * Confirmation explicite : l'action coupe les communications en cours du
+     * client. Le bouton est ensuite neutralisé le temps de l'appel, pour qu'un
+     * double-clic n'envoie pas deux redémarrages.
+     */
+    async function redemarrer(bouton) {
+        const nom = bouton.dataset.name || 'ce centrex';
+
+        if (!window.confirm(
+            `Redémarrer la machine de « ${nom} » ?\n\n`
+            + 'Les communications en cours sur ce centrex seront coupées.'
+        )) {
+            return;
+        }
+
+        const libelle = bouton.innerHTML;
+        bouton.disabled = true;
+        bouton.textContent = 'Redémarrage…';
+
+        try {
+            const res = await fetch(bouton.dataset.url, {
+                method: 'POST',
+                headers: {
+                    'Accept':           'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN':     document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+                },
+            });
+
+            const data = await res.json().catch(() => ({}));
+
+            if (!res.ok) throw new Error(data.message || 'Le redémarrage a été refusé.');
+
+            showToast(data.message || 'Redémarrage demandé.', 'success');
+        } catch (e) {
+            showToast(e.message || 'Le redémarrage a échoué.', 'error');
+        } finally {
+            bouton.disabled = false;
+            bouton.innerHTML = libelle;
+        }
+    }
+
+    // ---------------------------------------------------------------
     // Ouverture / fermeture des modales
     // ---------------------------------------------------------------
 
@@ -201,6 +248,12 @@ export function initPbx() {
         const secret = e.target.closest('[data-pbx-secret]');
         if (secret) {
             openSecret(secret.closest('[data-pbx]'), secret.dataset.url);
+            return;
+        }
+
+        const reboot = e.target.closest('[data-pbx-reboot]');
+        if (reboot) {
+            redemarrer(reboot);
             return;
         }
 

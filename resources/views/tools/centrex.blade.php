@@ -19,12 +19,23 @@
             {{ $servers->total() }} centrex référencé(s) — accès aux interfaces d'administration
         </p>
     </div>
-    <button type="button" class="btn btn--primary" data-pbx-new>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        Nouveau centrex
-    </button>
+    <div class="page-header__actions">
+        @if($ovhPret)
+            <button type="button" class="btn btn--secondary" data-ovh-open>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                    <path d="M21 12a9 9 0 1 1-6.22-8.56"/>
+                    <polyline points="21 3 21 9 15 9"/>
+                </svg>
+                Importer depuis OVH
+            </button>
+        @endif
+        <button type="button" class="btn btn--primary" data-pbx-new>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nouveau centrex
+        </button>
+    </div>
 </div>
 
 {{-- Recherche --}}
@@ -140,6 +151,21 @@
                         Identifiants
                     </button>
 
+                    {{-- Redémarrage : administrateurs seulement, et seulement
+                         pour les fiches rattachées à une machine OVH. La route
+                         revérifie les deux côté serveur. --}}
+                    @if($peutRedemarrer && $centrex->ovh_service_name)
+                        <button type="button" class="btn btn--warning btn--sm" data-pbx-reboot
+                                data-url="{{ route('tools.centrex.reboot', $centrex) }}"
+                                data-name="{{ $centrex->name }}"
+                                title="Redémarrer la machine">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                                <path d="M21 12a9 9 0 1 1-6.22-8.56"/><polyline points="21 3 21 9 15 9"/>
+                            </svg>
+                            Redémarrer
+                        </button>
+                    @endif
+
                     <button type="button" class="btn btn--ghost btn--sm" data-pbx-edit>
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
@@ -217,7 +243,7 @@
                         <label class="form-label" for="pbx-protocol">Protocole</label>
                         <select id="pbx-protocol" name="protocol" class="form-control">
                             @foreach($protocols as $value => $label)
-                                <option value="{{ $value }}" {{ old('protocol', 'https') === $value ? 'selected' : '' }}>
+                                <option value="{{ $value }}" {{ old('protocol', 'http') === $value ? 'selected' : '' }}>
                                     {{ $label }}
                                 </option>
                             @endforeach
@@ -245,10 +271,10 @@
                     <label class="form-label" for="pbx-path">Chemin d'administration</label>
                     <input type="text" id="pbx-path" name="path" maxlength="120"
                            class="form-control {{ $errors->has('path') ? 'form-control--error' : '' }}"
-                           value="{{ old('path', '/admin') }}" placeholder="/admin">
+                           value="{{ old('path') }}" placeholder="/admin">
                     <span class="form-hint">
-                        Page ouverte par le bouton « Ouvrir ». <code>/admin</code> pour l'interface FreePBX standard,
-                        <code>/ucp</code> pour le portail utilisateur.
+                        Page ouverte par le bouton « Ouvrir ». Laissez vide pour ouvrir la racine du serveur.
+                        <code>/admin</code> pour l'interface FreePBX standard, <code>/ucp</code> pour le portail utilisateur.
                     </span>
                     @error('path')<span class="form-error">{{ $message }}</span>@enderror
                 </div>
@@ -382,5 +408,74 @@
         </div>
     </div>
 </div>
+
+
+{{-- ===================== MODALE : IMPORT OVHCLOUD ===================== --}}
+@if($ovhPret)
+<div class="pbx-overlay" id="pbx-ovh-overlay" aria-hidden="true"
+     data-list-url="{{ route('tools.centrex.ovh.list') }}">
+    <div class="pbx-modal" role="dialog" aria-modal="true" aria-labelledby="pbx-ovh-title">
+
+        <form method="POST" action="{{ route('tools.centrex.ovh.import') }}" id="pbx-ovh-form">
+            @csrf
+
+            <div class="pbx-modal__header">
+                <h2 class="pbx-modal__title" id="pbx-ovh-title">Importer depuis OVHcloud</h2>
+                <button type="button" class="pbx-modal__close" data-pbx-close aria-label="Fermer">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="pbx-modal__body">
+                <div class="pbx-ovh__bar">
+                    <p class="pbx-ovh__intro" id="pbx-ovh-intro">
+                        Les machines de votre compte OVHcloud — instances Public Cloud et VPS.
+                        Cochez celles à référencer : le nom affiché dans le manager et l'IPv4
+                        publique sont repris tels quels.
+                    </p>
+                    <button type="button" class="btn btn--ghost btn--sm" id="pbx-ovh-refresh" title="Recharger depuis OVH">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
+                            <path d="M21 12a9 9 0 1 1-6.22-8.56"/><polyline points="21 3 21 9 15 9"/>
+                        </svg>
+                        Actualiser
+                    </button>
+                </div>
+
+                {{-- Sources ou projets en échec. Un inventaire amputé doit se
+                     voir : sans ça, « il en manque » redevient indétectable. --}}
+                <div class="pbx-ovh__notes" id="pbx-ovh-notes" hidden></div>
+
+                {{-- Un compte peut aligner plusieurs centaines d'instances :
+                     sans filtre, cocher les bonnes relève du défilement. --}}
+                <div class="pbx-ovh__filter" id="pbx-ovh-filter-wrap" hidden>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="search" id="pbx-ovh-filter" class="form-control" autocomplete="off"
+                           placeholder="Filtrer par nom, IP, projet ou région…">
+                </div>
+
+                {{-- Rempli par pbxOvh.js : la liste vient de l'API, pas du rendu Blade. --}}
+                <div class="pbx-ovh__list" id="pbx-ovh-list" aria-live="polite">
+                    <p class="pbx-ovh__state">Chargement de l'inventaire OVHcloud…</p>
+                </div>
+            </div>
+
+            <div class="pbx-modal__footer">
+                <label class="pbx-ovh__all" id="pbx-ovh-all-wrap" hidden>
+                    <input type="checkbox" id="pbx-ovh-all">
+                    <span>Tout sélectionner</span>
+                </label>
+                <button type="button" class="btn btn--secondary" data-pbx-close>Annuler</button>
+                <button type="submit" class="btn btn--primary" id="pbx-ovh-submit" disabled>
+                    Importer la sélection
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+@endif
 
 @endsection

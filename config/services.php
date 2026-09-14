@@ -88,4 +88,36 @@ return [
     'giphy' => [
         'api_key' => env('GIPHY_API_KEY'),
     ],
+
+    // Inventaire des machines OVHcloud, utilisé pour importer les centrex sans
+    // ressaisir les adresses IP (voir App\Services\OvhInventory).
+    //
+    // Le jeton se crée sur https://api.ovh.com/createToken/ en lecture seule :
+    // GET /cloud/project et GET /cloud/project/* pour les instances Public
+    // Cloud, GET /vps et GET /vps/* pour les VPS Bare Metal.
+    //
+    // OVH_CLOUD_PROJECTS restreint l'import à certains projets Public Cloud
+    // (ids séparés par des virgules, celui qui figure dans l'URL du manager).
+    // Vide : tous les projets du compte.
+    'ovh' => [
+        'endpoint'           => env('OVH_ENDPOINT', 'ovh-eu'),
+        'application_key'    => env('OVH_APPLICATION_KEY'),
+        'application_secret' => env('OVH_APPLICATION_SECRET'),
+        'consumer_key'       => env('OVH_CONSUMER_KEY'),
+        'cloud_projects'     => env('OVH_CLOUD_PROJECTS', ''),
+    ],
+
+    // Identifiants d'administration posés sur chaque centrex créé par l'import
+    // OVH : les machines sortent toutes de la même image, avec le même couple
+    // par défaut. Ils sont copiés dans la fiche, pas lus à la volée — le mot de
+    // passe d'une machine finit toujours par diverger, et la fiche doit alors
+    // pouvoir suivre sans toucher à la configuration du serveur.
+    //
+    // Le mot de passe est chiffré au repos dans la fiche (cast 'encrypted').
+    // Ici, il est en clair dans le .env, comme les autres secrets du projet :
+    // ce fichier n'est pas versionné et ne doit pas le devenir.
+    'centrex' => [
+        'default_login'    => env('CENTREX_DEFAULT_LOGIN'),
+        'default_password' => env('CENTREX_DEFAULT_PASSWORD'),
+    ],
 ];

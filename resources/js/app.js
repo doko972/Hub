@@ -29,6 +29,7 @@ import { initBackgroundRemover }  from './components/backgroundRemover.js';
 import { initImageConverter }     from './components/imageconverter.js';
 import { initQrCode }             from './components/qrcode.js';
 import { initPbx }                from './components/pbx.js';
+import { initPbxOvh }             from './components/pbxOvh.js';
 import { initCredentials }        from './components/credentials.js';
 import { initChatbot }            from './components/chatbot.js';
 import { initSidebarAccordion }   from './components/sidebarAccordion.js';
@@ -52,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initImageConverter();
     initQrCode();
     initPbx();
+    initPbxOvh();
     initCredentials();
     initChatbot();
     initSidebarAccordion();

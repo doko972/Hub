@@ -75,6 +75,19 @@
         }
     }
 
+    // Action réversible mais à conséquence — un redémarrage de machine, par
+    // exemple. Entre le neutre et le destructeur, qui reste réservé au rouge.
+    &--warning {
+        background: transparent;
+        color: $color-warning;
+        border-color: $color-warning;
+
+        &:hover {
+            background: $color-warning;
+            color: white;
+        }
+    }
+
     &--success {
         background: $color-secondary;
         color: white;

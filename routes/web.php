@@ -22,6 +22,8 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\SharedConversationController;
 use App\Http\Controllers\Tools\BackgroundRemoverController;
 use App\Http\Controllers\Tools\ImageConverterController;
+use App\Http\Controllers\Tools\PbxActionController;
+use App\Http\Controllers\Tools\PbxOvhImportController;
 use App\Http\Controllers\Tools\PbxServerController;
 use App\Http\Controllers\Tools\QrCodeController;
 
@@ -147,6 +149,15 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('tools/centrex')->name('tools.centrex.')->group(function () {
         Route::get('/',                  [PbxServerController::class, 'index'])->name('index');
         Route::post('/',                 [PbxServerController::class, 'store'])->name('store');
+
+        // Import depuis l'inventaire VPS d'OVHcloud. Déclarées avant les
+        // routes à paramètre : « ovh » ne doit pas être pris pour un id.
+        // La liste est plafonnée — chaque appel non mis en cache déclenche
+        // deux requêtes par VPS chez OVH, qui plafonne de son côté.
+        Route::get('/ovh',               [PbxOvhImportController::class, 'list'])
+            ->middleware('throttle:20,1')
+            ->name('ovh.list');
+        Route::post('/ovh/import',       [PbxOvhImportController::class, 'import'])->name('ovh.import');
         Route::put('/{centrex}',         [PbxServerController::class, 'update'])->name('update');
         Route::delete('/{centrex}',      [PbxServerController::class, 'destroy'])->name('destroy');
 
@@ -155,6 +166,13 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{centrex}/secret',  [PbxServerController::class, 'secret'])
             ->middleware('throttle:60,1')
             ->name('secret');
+
+        // Redémarrage de la machine. Administrateurs uniquement : consulter un
+        // centrex et couper la téléphonie d'un client ne sont pas le même
+        // droit. Plafond serré — un redémarrage en rafale n'a aucun sens.
+        Route::post('/{centrex}/reboot', [PbxActionController::class, 'reboot'])
+            ->middleware(['admin', 'throttle:10,1'])
+            ->name('reboot');
     });
 
     // Chatbot / Cortex IA

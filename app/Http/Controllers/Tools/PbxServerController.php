@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tools;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\PbxServer;
+use App\Services\OvhInventory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,7 +30,8 @@ class PbxServerController extends Controller
                 $query->where(function ($sub) use ($terme) {
                     $sub->where('name', 'like', $terme)
                         ->orWhere('client', 'like', $terme)
-                        ->orWhere('host', 'like', $terme);
+                        ->orWhere('host', 'like', $terme)
+                        ->orWhere('ovh_service_name', 'like', $terme);
                 });
             })
             ->orderBy('name')
@@ -40,6 +42,12 @@ class PbxServerController extends Controller
             'servers'   => $servers,
             'q'         => $q,
             'protocols' => PbxServer::availableProtocols(),
+            // Sans clés OVH, le bouton d'import n'a rien à proposer : autant
+            // ne pas l'afficher du tout.
+            'ovhPret'   => OvhInventory::isConfigured(),
+            // Redémarrer coupe les communications en cours : le bouton est
+            // réservé aux administrateurs, la route le revérifie.
+            'peutRedemarrer' => OvhInventory::isConfigured() && $request->user()->isAdmin(),
         ]);
     }
 
@@ -149,7 +157,10 @@ class PbxServerController extends Controller
             'port.between'  => 'Le port doit être compris entre 1 et 65535.',
         ]);
 
-        $data['path']      = $data['path'] ?: '/admin';
+        // Chemin vide accepté tel quel : le bouton « Ouvrir » vise alors la
+        // racine du serveur, ce que veulent les centrex dont l'interface n'est
+        // pas sous /admin.
+        $data['path']      = $data['path'] ?? '';
         $data['is_active'] = $request->boolean('is_active');
 
         return $data;
