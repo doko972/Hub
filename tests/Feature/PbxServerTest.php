@@ -31,6 +31,34 @@ class PbxServerTest extends TestCase
         ], $attributs));
     }
 
+    /**
+     * Règle de nommage : les machines sont nommées pour l'hébergeur, pas pour
+     * l'écran. Le préfixe IPBX ne distingue rien puisque tout le parc le porte.
+     *
+     * @dataProvider nomsDeMachines
+     */
+    public function test_le_nom_de_machine_devient_lisible(string $brut, string $attendu): void
+    {
+        $this->assertSame($attendu, PbxServer::nomLisible($brut));
+    }
+
+    public static function nomsDeMachines(): array
+    {
+        return [
+            'préfixe retiré'          => ['IPBX_AISCAL', 'AISCAL'],
+            'underscores en espaces'  => ['IPBX_ARMA-TUYAUTERIE_NEW', 'ARMA TUYAUTERIE NEW'],
+            'casse indifférente'      => ['ipbx_test', 'test'],
+            'tirets en espaces'       => ['IPBX_AD-SISTO-CAEN', 'AD SISTO CAEN'],
+            'autre préfixe intact'    => ['VPS_CAEN-KINE-SPORT', 'VPS CAEN KINE SPORT'],
+            'sans préfixe'            => ['HYDROTEK-NEW', 'HYDROTEK NEW'],
+            'chiffres préservés'      => ['IPBX_ATELIER-AUTOMOBILE-61', 'ATELIER AUTOMOBILE 61'],
+            // Ne jamais produire une fiche sans nom : « IPBX » seul reste tel
+            // quel plutôt que de se réduire à une chaîne vide.
+            'préfixe seul conservé'   => ['IPBX', 'IPBX'],
+            'espaces surnuméraires'   => ['IPBX_  DOUBLE   ESPACE ', 'DOUBLE ESPACE'],
+        ];
+    }
+
     public function test_un_visiteur_anonyme_est_renvoye_vers_la_connexion(): void
     {
         $this->get(route('tools.centrex.index'))->assertRedirect('/login');

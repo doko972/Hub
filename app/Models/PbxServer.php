@@ -65,6 +65,27 @@ class PbxServer extends Model
     }
 
     /**
+     * Nom lisible à partir du nom de machine OVH.
+     *
+     * Les instances sont nommées pour l'hébergeur, pas pour l'écran :
+     * « IPBX_ARMA-TUYAUTERIE_NEW » devient « ARMA TUYAUTERIE NEW ». Le préfixe
+     * IPBX ne distingue rien puisque tout le parc le porte, et les underscores
+     * comme les tirets ne sont là que faute de pouvoir mettre des espaces dans
+     * un nom de machine.
+     *
+     * Un nom qui se réduirait à rien est rendu inchangé : mieux vaut
+     * « IPBX » à l'écran qu'une fiche sans nom.
+     */
+    public static function nomLisible(string $brut): string
+    {
+        $nom = preg_replace('/^\s*IPBX[\s_-]+/iu', '', trim($brut)) ?? $brut;
+        $nom = str_replace(['_', '-'], ' ', $nom);
+        $nom = trim(preg_replace('/\s+/u', ' ', $nom) ?? $nom);
+
+        return $nom !== '' ? $nom : trim($brut);
+    }
+
+    /**
      * Protocoles autorisés — un select, pas un champ libre.
      */
     public static function availableProtocols(): array

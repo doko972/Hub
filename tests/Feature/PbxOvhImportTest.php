@@ -178,7 +178,9 @@ class PbxOvhImportTest extends TestCase
         $centrex = PbxServer::firstWhere('ovh_service_name', 'inst-aaa');
 
         $this->assertNotNull($centrex);
-        $this->assertSame('ipbx-durand', $centrex->name);
+        // Le nom de machine est nettoyé à l'import : « ipbx-durand » ne doit
+        // pas arriver tel quel dans l'annuaire.
+        $this->assertSame('durand', $centrex->name);
         $this->assertSame('51.75.10.20', $centrex->host);
         $this->assertSame('http', $centrex->protocol);
         // Aucun chemin imposé par l'import : « Ouvrir » vise la racine.

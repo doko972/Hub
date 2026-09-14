@@ -90,7 +90,9 @@ class PbxOvhImportController extends Controller
             }
 
             $centrex = PbxServer::create([
-                'name'             => mb_substr($machine['name'], 0, 80),
+                // Nom nettoyé avant troncature : sinon les 80 caractères
+                // seraient en partie consommés par un préfixe qu'on retire.
+                'name'             => mb_substr(PbxServer::nomLisible($machine['name']), 0, 80),
                 'protocol'         => 'http',
                 'host'             => $machine['ipv4'],
                 'ovh_service_name' => $machine['ref'],
