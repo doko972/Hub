@@ -101,7 +101,7 @@
                      ce retour est le seul chemin pour y revenir. --}}
                 <a href="{{ route('messages.index') }}" class="messenger__back" aria-label="Retour aux discussions">←</a>
 
-                <div>
+                <div class="messenger__title">
                     <h2>{{ $discussion->titleFor(auth()->id()) }}</h2>
                     <p>
                         @if($discussion->is_group)
@@ -115,13 +115,37 @@
                     </p>
                 </div>
 
-                @can('leave', $discussion)
-                    <form method="POST" action="{{ route('messages.leave', $discussion) }}"
-                          data-confirm="Quitter cette discussion ?">
-                        @csrf
-                        <button type="submit" class="btn btn--ghost btn--sm">Quitter</button>
-                    </form>
-                @endcan
+                <div class="messenger__actions">
+                    @can('leave', $discussion)
+                        <form method="POST" action="{{ route('messages.leave', $discussion) }}"
+                              data-confirm="Quitter cette discussion ?">
+                            @csrf
+                            <button type="submit" class="btn btn--ghost btn--sm">Quitter</button>
+                        </form>
+                    @endcan
+
+                    @can('clear', $discussion)
+                        {{-- Suppression de son côté uniquement : le texte de
+                             confirmation le dit, pour qu'on ne croie pas effacer
+                             la conversation chez ses collègues. --}}
+                        <form method="POST" action="{{ route('messages.clear', $discussion) }}"
+                              data-confirm="Supprimer cette conversation ? Elle disparaîtra de votre liste avec son historique. Les autres participants la conserveront.">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn--ghost btn--sm messenger__delete"
+                                    title="Supprimer la conversation" aria-label="Supprimer la conversation">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     width="16" height="16" aria-hidden="true">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                    <path d="M10 11v6"/><path d="M14 11v6"/>
+                                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+                                </svg>
+                                <span>Supprimer</span>
+                            </button>
+                        </form>
+                    @endcan
+                </div>
             </header>
 
             <div class="messenger__messages"

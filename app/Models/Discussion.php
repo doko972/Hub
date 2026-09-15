@@ -32,7 +32,7 @@ class Discussion extends Model
     public function participants(): BelongsToMany
     {
         return $this->belongsToMany(User::class)
-            ->withPivot('last_read_at')
+            ->withPivot('last_read_at', 'cleared_through_id')
             ->withTimestamps();
     }
 
@@ -116,6 +116,34 @@ class Discussion extends Model
     public function counterpartFor(int $userId): ?User
     {
         return $this->is_group ? null : $this->participants->firstWhere('id', '!=', $userId);
+    }
+
+    // ---- Suppression propre à chaque participant ----
+
+    /**
+     * Identifiant du dernier message effacé de la vue de ce participant
+     * (0 s'il n'a jamais supprimé la conversation).
+     */
+    public function clearedThroughFor(int $userId): int
+    {
+        $participant = $this->relationLoaded('participants')
+            ? $this->participants->firstWhere('id', $userId)
+            : $this->participants()->whereKey($userId)->first();
+
+        return (int) ($participant?->pivot->cleared_through_id ?? 0);
+    }
+
+    /**
+     * Messages que ce participant peut encore voir.
+     *
+     * Toute lecture de messages pour le compte d'un utilisateur doit partir
+     * d'ici plutôt que de messages() : c'est ce qui garantit qu'une
+     * conversation supprimée ne ressurgit ni dans le fil, ni dans le sondage,
+     * ni dans l'historique.
+     */
+    public function visibleMessagesFor(int $userId): HasMany
+    {
+        return $this->messages()->where('discussion_messages.id', '>', $this->clearedThroughFor($userId));
     }
 
     public function hasParticipant(int $userId): bool

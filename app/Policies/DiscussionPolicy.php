@@ -41,6 +41,15 @@ class DiscussionPolicy
         return $discussion->is_group && $this->isParticipant($user, $discussion);
     }
 
+    /**
+     * Supprimer une conversation ne touche que sa propre vue : tout participant
+     * peut donc le faire, à deux comme en groupe.
+     */
+    public function clear(User $user, Discussion $discussion): bool
+    {
+        return $this->isParticipant($user, $discussion);
+    }
+
     private function isParticipant(User $user, Discussion $discussion): bool
     {
         // relationLoaded évite une requête par vérification quand la relation

@@ -892,3 +892,42 @@
         height: calc(100dvh - #{$navbar-height} - 150px);
     }
 }
+
+// ---- En-tête du fil : titre et actions ----
+.messenger__title {
+    // Le titre prend la place disponible et se tronque, plutôt que de pousser
+    // les boutons hors de l'en-tête sur un écran étroit.
+    flex: 1;
+    min-width: 0;
+
+    h2,
+    p {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.messenger__actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    flex-shrink: 0;
+}
+
+.messenger__delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    &:hover {
+        color: $color-danger;
+    }
+}
+
+@media (max-width: $bp-md) {
+    // Sur mobile, l'icône seule : le libellé reste annoncé par aria-label.
+    .messenger__delete span {
+        display: none;
+    }
+}

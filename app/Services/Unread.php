@@ -86,6 +86,9 @@ class Unread
             // Le query builder ne connaît pas la suppression douce d'Eloquent :
             // sans cette condition, un message supprimé resterait comptabilisé.
             ->whereNull('m.deleted_at')
+            // Un message d'une conversation supprimée par ce participant n'est
+            // plus à lire pour lui.
+            ->whereRaw('m.id > COALESCE(p.cleared_through_id, 0)')
             // Ses propres messages ne sont jamais « non lus ».
             ->where(function ($query) use ($userId) {
                 $query->whereNull('m.user_id')->orWhere('m.user_id', '!=', $userId);

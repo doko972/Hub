@@ -75,6 +75,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{discussion}/poll',         [DiscussionController::class, 'poll'])->name('poll');
         Route::get('/{discussion}/history',      [DiscussionController::class, 'history'])->name('history');
         Route::post('/{discussion}/leave',       [DiscussionController::class, 'leave'])->name('leave');
+        Route::delete('/{discussion}',           [DiscussionController::class, 'clear'])->name('clear');
         Route::post('/{discussion}/participants',[DiscussionController::class, 'addParticipants'])->name('participants.add');
 
         Route::patch('/{discussion}/messages/{message}', [DiscussionController::class, 'updateMessage'])

@@ -57,13 +57,13 @@ class DiscussionController extends Controller
             // alors le fil autour de lui plutôt qu'à la fin.
             $focusedId = (int) $request->query('at') ?: null;
 
-            if ($focusedId && !$discussion->messages()->whereKey($focusedId)->exists()) {
+            if ($focusedId && !$discussion->visibleMessagesFor($user->id)->whereKey($focusedId)->exists()) {
                 $focusedId = null;
             }
 
-            $messages = $this->windowFor($discussion, $focusedId);
+            $messages = $this->windowFor($discussion, $user->id, $focusedId);
             $hasOlder = $messages->isNotEmpty()
-                && $discussion->messages()->where('id', '<', $messages->first()->id)->exists();
+                && $discussion->visibleMessagesFor($user->id)->where('id', '<', $messages->first()->id)->exists();
 
             $this->markAsRead($discussion, $user->id);
         }
@@ -408,6 +408,10 @@ class DiscussionController extends Controller
 
         $this->authorize('view', $discussion);
 
+        // Même participant, la pièce jointe d'une conversation qu'il a supprimée
+        // ne lui est plus servie : 404 plutôt que 403, rien n'est à révéler.
+        abort_if($attachment->discussion_message_id <= $discussion->clearedThroughFor($request->user()->id), 404);
+
         if (!Storage::disk(DiscussionAttachment::DISK)->exists($attachment->path)) {
             abort(404);
         }
@@ -475,7 +479,11 @@ class DiscussionController extends Controller
         $motif = "%" . str_replace(["!", "%", "_"], ["!!", "!%", "!_"], $terme) . "%";
 
         $resultats = DiscussionMessage::query()
-            ->whereHas('discussion.participants', fn ($q) => $q->whereKey($userId))
+            // La frontière de suppression se lit sur la ligne de participation :
+            // une conversation supprimée ne doit pas ressortir par la recherche.
+            ->whereHas('discussion.participants', fn ($q) => $q
+                ->whereKey($userId)
+                ->whereRaw('discussion_messages.id > COALESCE(discussion_user.cleared_through_id, 0)'))
             ->whereRaw("body LIKE ? ESCAPE '!'", [$motif])
             ->with(['author:id,name', 'discussion.participants:id,name'])
             ->latest('id')
@@ -529,7 +537,7 @@ class DiscussionController extends Controller
             'before' => ['required', 'integer', 'min:1'],
         ]);
 
-        $messages = $discussion->messages()
+        $messages = $discussion->visibleMessagesFor($request->user()->id)
             ->with(['author:id,name,avatar_path', 'attachments', 'reactions'])
             ->where('id', '<', $validated['before'])
             ->latest('id')
@@ -545,7 +553,7 @@ class DiscussionController extends Controller
                 'messages'  => $messages->map(fn ($m) => $m->toPayload($request->user()->id))->all(),
                 // Sert au client à masquer le bouton une fois le fil épuisé.
                 'has_older' => $plusAncien
-                    ? $discussion->messages()->where('id', '<', $plusAncien)->exists()
+                    ? $discussion->visibleMessagesFor($request->user()->id)->where('id', '<', $plusAncien)->exists()
                     : false,
             ])
             ->header('Cache-Control', 'no-store, private');
@@ -557,9 +565,9 @@ class DiscussionController extends Controller
      * Sans cible : les plus récents. Avec cible : le message visé, entouré de
      * son contexte, afin qu'un résultat de recherche s'ouvre au bon endroit.
      */
-    private function windowFor(Discussion $discussion, ?int $focusedId)
+    private function windowFor(Discussion $discussion, int $userId, ?int $focusedId)
     {
-        $requete = $discussion->messages()->with(['author:id,name,avatar_path', 'attachments']);
+        $requete = $discussion->visibleMessagesFor($userId)->with(['author:id,name,avatar_path', 'attachments']);
 
         if (!$focusedId) {
             return $requete->latest('id')->limit(self::HISTORY_LIMIT)->get()->reverse()->values();
@@ -586,7 +594,7 @@ class DiscussionController extends Controller
             'after' => ['nullable', 'integer', 'min:0'],
         ]);
 
-        $messages = $discussion->messages()
+        $messages = $discussion->visibleMessagesFor($request->user()->id)
             ->with(['author:id,name,avatar_path', 'attachments'])
             ->where('id', '>', $validated['after'] ?? 0)
             ->orderBy('id')
@@ -641,6 +649,33 @@ class DiscussionController extends Controller
     }
 
     /**
+     * Supprime la conversation de son côté.
+     *
+     * Rien n'est effacé pour les autres participants : la conversation disparaît
+     * de la liste et l'historique n'est plus montré, mais un nouveau message la
+     * fait réapparaître, sans ce qui précédait. C'est le comportement attendu
+     * d'une messagerie, et le seul acceptable pour une conversation à deux, que
+     * l'on ne peut pas retirer à l'autre.
+     */
+    public function clear(Request $request, Discussion $discussion)
+    {
+        $discussion->load('participants');
+        $this->authorize('clear', $discussion);
+
+        // withTrashed : la frontière doit couvrir un dernier message supprimé,
+        // sans quoi il resterait du « bon » côté.
+        $frontiere = (int) $discussion->messages()->withTrashed()->max('id');
+
+        $discussion->participants()->updateExistingPivot($request->user()->id, [
+            'cleared_through_id' => $frontiere,
+            'last_read_at'       => now(),
+        ]);
+
+        return redirect()->route('messages.index')
+            ->with('success', 'Conversation « ' . $discussion->titleFor($request->user()->id) . ' » supprimée.');
+    }
+
+    /**
      * Ajoute des personnes à un groupe (réservé à son créateur).
      */
     public function addParticipants(Request $request, Discussion $discussion)
@@ -668,7 +703,18 @@ class DiscussionController extends Controller
     private function rosterFor(int $userId)
     {
         return Discussion::query()
-            ->whereHas('participants', fn ($q) => $q->whereKey($userId))
+            ->whereHas('participants', fn ($q) => $q
+                ->whereKey($userId)
+                // Une conversation supprimée reste masquée tant qu'aucun message
+                // n'est arrivé depuis.
+                ->where(fn ($q) => $q
+                    ->whereNull('discussion_user.cleared_through_id')
+                    ->orWhereExists(fn ($s) => $s
+                        ->selectRaw('1')
+                        ->from('discussion_messages as dm')
+                        ->whereColumn('dm.discussion_id', 'discussion_user.discussion_id')
+                        ->whereColumn('dm.id', '>', 'discussion_user.cleared_through_id')
+                        ->whereNull('dm.deleted_at'))))
             ->with([
                 'participants:id,name,avatar_path,last_seen_at',
                 // Pas de liste de colonnes ici : latestOfMany() ajoute une
@@ -703,7 +749,7 @@ class DiscussionController extends Controller
      */
     private function reactionsFor(Discussion $discussion, int $userId): array
     {
-        $messageIds = $discussion->messages()
+        $messageIds = $discussion->visibleMessagesFor($userId)
             ->latest('id')
             ->limit(self::HISTORY_LIMIT)
             ->pluck('id');
@@ -736,7 +782,7 @@ class DiscussionController extends Controller
      */
     private function revisionsFor(Discussion $discussion, int $userId): array
     {
-        $edited = $discussion->messages()
+        $edited = $discussion->visibleMessagesFor($userId)
             ->whereNotNull('edited_at')
             ->with(['author:id,name,avatar_path', 'attachments', 'reactions'])
             ->latest('edited_at')
@@ -745,7 +791,7 @@ class DiscussionController extends Controller
             ->mapWithKeys(fn (DiscussionMessage $m) => [$m->id => $m->toPayload($userId)])
             ->all();
 
-        $deleted = $discussion->messages()
+        $deleted = $discussion->visibleMessagesFor($userId)
             ->onlyTrashed()
             ->latest('deleted_at')
             ->limit(self::HISTORY_LIMIT)
