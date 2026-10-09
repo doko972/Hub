@@ -176,6 +176,9 @@ Route::middleware(['auth'])->group(function () {
             ->name('reboot');
     });
 
+    // Centrex-HR : page indépendante, réservée aux administrateurs.
+    require __DIR__.'/centrex-hr.php';
+
     // Chatbot / Cortex IA
     Route::get('/chat',             [CortexWebController::class, 'index'])->name('cortex.chat');
     Route::get('/chat/c/{conversation}', [CortexWebController::class, 'show'])->name('cortex.conversation');

@@ -154,6 +154,17 @@
                 Générateur de QR Code
             </a>
 
+            @if(auth()->user()->isAdmin())
+                <a href="{{ route('tools.centrex_hr.index') }}"
+                   class="sidebar__link {{ request()->routeIs('tools.centrex_hr.*') ? 'is-active' : '' }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M4 5h16v14H4z"/>
+                        <path d="M8 9h8M8 13h5"/>
+                    </svg>
+                    Centrex-HR
+                </a>
+            @endif
+
             <a href="{{ route('tools.centrex.index') }}"
                class="sidebar__link {{ request()->routeIs('tools.centrex.*') ? 'is-active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
