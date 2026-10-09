@@ -8,7 +8,8 @@
     left: 0;
     bottom: 0;
     width: $sidebar-width;
-    background: $color-sidebar-bg;
+    background-color: $color-sidebar-bg;
+    background-image: var(--sidebar-image, none);
     display: flex;
     flex-direction: column;
     z-index: 45;

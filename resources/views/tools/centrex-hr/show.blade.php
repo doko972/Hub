@@ -4,7 +4,6 @@
 @section('page-title', 'Outils')
 
 @section('content')
-@include('tools.centrex-hr._styles')
 <div class="chr-app">
 <div class="ops-shell">
   <div class="ops-topbar">

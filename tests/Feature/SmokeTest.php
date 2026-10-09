@@ -67,7 +67,14 @@ class SmokeTest extends TestCase
     {
         $admin = User::factory()->create(['is_active' => true, 'role' => 'admin']);
 
-        foreach (['/admin/tools', '/admin/families', '/admin/users', '/admin/assignments', '/admin/logs'] as $url) {
+        // Centrex HR est réservé aux administrateurs (routes/centrex-hr.php),
+        // il rejoint donc cette liste plutôt que celle des pages ordinaires.
+        $pages = [
+            '/admin/tools', '/admin/families', '/admin/users', '/admin/assignments', '/admin/logs',
+            '/tools/centrex-hr', '/tools/centrex-hr/mises-a-jour',
+        ];
+
+        foreach ($pages as $url) {
             $response = $this->actingAs($admin)->get($url);
 
             $response->assertStatus(200);

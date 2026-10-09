@@ -4,8 +4,7 @@
 @section('page-title', 'Outils')
 
 @section('content')
-@include('tools.centrex-hr._styles')
-<div class="chr-app chr-sidebar-theme"><div class="ops-shell">
+<div class="chr-app"><div class="ops-shell">
   <div class="ops-topbar">
     <a class="ops-brand" href="{{ route('tools.centrex_hr.index') }}"><span class="ops-brand-mark">HR</span><span>Centrex-HR<small>Parc téléphonique</small></span></a>
     <nav class="ops-nav" aria-label="Navigation Centrex"><a href="{{ route('tools.centrex_hr.index') }}">Inventaire</a><a class="active" aria-current="page" href="{{ route('tools.centrex_hr.updates') }}">Mises à jour</a><a href="{{ url('/tools/centrex') }}">Centrex actuel ↗</a></nav>

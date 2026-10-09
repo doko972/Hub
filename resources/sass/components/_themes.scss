@@ -333,3 +333,50 @@ $dark-themes: 'dark', 'nord', 'forest', 'sunset', 'midnight', 'contrast';
 
     --overlay: rgba(0, 0, 0, 0.85);
 }
+
+// =============================================
+// CENTREX — pétrole et turquoise, clair
+//
+// Palette reprise du module de supervision Centrex HR, conçue par un
+// collaborateur, et promue ici en thème disponible pour toute
+// l'application.
+// =============================================
+[data-theme="centrex"] {
+    --primary:            #007F87;
+    --primary-dark:       #08646B;
+    --primary-light:      #E0F2F1;
+    --on-primary:         #FFFFFF;
+
+    --secondary:          #20A27F;
+    --danger:             #C24646;
+    --warning:            #E5A535;
+    --info:               #237CA8;
+
+    --bg:                 #F2F7F8;
+    --surface:            #FFFFFF;
+    --surface-2:          #F3F7F8;
+    --border:             #DCE7EB;
+
+    --text:               #17283B;
+    --text-muted:         #586D7C;
+    --text-light:         #8AA0AC;
+
+    --sidebar-bg:         #0B6575;
+    --sidebar-image:      linear-gradient(160deg, #124464 0%, #0B6575 62%, #0D8B84 100%);
+    --sidebar-text:       #E2F4F4;
+    --sidebar-hover:      rgba(255, 255, 255, 0.14);
+    --sidebar-active:     #7CDEB8;
+
+    --shadow-sm:          0 1px 3px rgba(16, 57, 76, 0.10);
+    --shadow-md:          0 4px 12px rgba(16, 57, 76, 0.13);
+    --shadow-lg:          0 14px 30px rgba(16, 57, 76, 0.15);
+    --shadow-tile:        0 6px 24px rgba(21, 44, 61, 0.08);
+    --shadow-tile-hover:  0 8px 20px rgba(0, 127, 135, 0.25);
+
+    --success-bg: #E2F5EC;  --success-fg: #147455;  --success-border: #BCE6D5;
+    --danger-bg:  #FCE9E7;  --danger-fg:  #AA393B;  --danger-border:  #F3C9C5;
+    --warning-bg: #FFF1D9;  --warning-fg: #80590B;  --warning-border: #F2DCAE;
+    --info-bg:    #EEF7F9;  --info-fg:    #2A5C74;  --info-border:    #C9E2EA;
+
+    --theme-color:        #0B6575;
+}

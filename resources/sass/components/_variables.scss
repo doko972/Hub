@@ -50,6 +50,11 @@
 
     // Sidebar / navbar (sombre par défaut dans les deux modes historiques)
     --sidebar-bg:         #362ad7;
+    // Calque facultatif posé PAR-DESSUS --sidebar-bg (dégradé, motif).
+    // --sidebar-bg doit rester une couleur : _auth.scss l'utilise comme arrêt
+    // de dégradé et _presence.scss comme couleur d'ombre, où une image serait
+    // invalide et ferait tomber la déclaration entière.
+    --sidebar-image:      none;
     --sidebar-text:       #C7D2FE;
     --sidebar-hover:      #312E81;
     --sidebar-active:     #06c;

@@ -4,8 +4,7 @@
 @section('page-title', 'Outils')
 
 @section('content')
-@include('tools.centrex-hr._styles')
-<div class="chr-app chr-sidebar-theme">
+<div class="chr-app">
 <div class="ops-shell">
   <div class="ops-topbar">
     <a class="ops-brand" href="{{ route('tools.centrex_hr.index') }}" aria-label="Centrex-HR, accueil"><span class="ops-brand-mark">HR</span><span>Centrex-HR<small>Parc téléphonique</small></span></a>
@@ -139,5 +138,6 @@
   <footer class="ops-footer">HR Télécoms · Centrex-HR</footer>
 </div>
 </div>
-<script src="{{ asset('centrex-hr/inventory.js') }}?v=20261004c" defer></script>
+<script src="{{ asset('centrex-hr/inventory.js') }}?v=20261004c" defer
+        nonce="{{ \Illuminate\Support\Facades\Vite::cspNonce() }}"></script>
 @endsection

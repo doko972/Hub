@@ -53,6 +53,13 @@ return [
             'swatch' => ['#EDF4FA', '#FFFFFF', '#0369A1'],
         ],
 
+        'centrex' => [
+            'label'  => 'Centrex',
+            'desc'   => 'Pétrole et turquoise, clair',
+            'dark'   => false,
+            'swatch' => ['#F2F7F8', '#FFFFFF', '#007F87'],
+        ],
+
         'nord' => [
             'label'  => 'Nord',
             'desc'   => 'Bleu-gris désaturé, sombre et doux',

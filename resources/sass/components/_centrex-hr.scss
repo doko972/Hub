@@ -1,0 +1,1197 @@
+// =============================================
+// CENTREX HR — module de supervision
+//
+// Repris du style écrit par un collaborateur, qui vivait dans une balise
+// <style> de la vue et portait sa propre palette en dur. Les couleurs sont
+// désormais des tokens : la page suit le thème choisi, comme le reste de
+// l'application. Cette palette d'origine reste disponible pour tous sous le
+// nom de thème « Centrex » (voir _themes.scss).
+//
+// Les dimensions, rayons et typographies propres au module sont conservés
+// tels quels : c'est son identité, et elle ne dépend pas du thème.
+// =============================================
+
+.chr-app {
+    min-height: 60vh;
+    color: $color-text;
+    font-size: 15px;
+
+    // Halo d'accent en haut à droite : teinté par le thème plutôt que figé.
+    background:
+        radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--primary) 14%, transparent) 0, transparent 35rem),
+        $color-bg;
+
+    [hidden] { display: none !important; }
+
+    a { color: $color-primary; }
+
+    :focus-visible {
+        outline: 3px solid $color-primary;
+        outline-offset: 2px;
+    }
+
+    // ---- Ossature ----
+    .ops-shell {
+        max-width: 1480px;
+        margin: 0 auto;
+        padding: 0 clamp(16px, 3vw, 42px) 45px;
+    }
+
+    .ops-topbar {
+        min-height: 86px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .ops-brand {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        text-decoration: none;
+        color: $color-text;
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -.02em;
+        line-height: 1.1;
+
+        small {
+            display: block;
+            margin-top: 4px;
+            color: $color-text-muted;
+            font-size: .68rem;
+            font-weight: 650;
+            letter-spacing: .07em;
+            text-transform: uppercase;
+        }
+    }
+
+    .ops-brand-mark {
+        display: grid;
+        place-items: center;
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: $color-primary;
+        color: var(--on-primary);
+        font-size: .88rem;
+        letter-spacing: .02em;
+        box-shadow: $shadow-md;
+    }
+
+    .ops-nav {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px;
+
+        a {
+            border-radius: 9px;
+            padding: 10px 13px;
+            text-decoration: none;
+            color: $color-text-muted;
+            font-size: .87rem;
+            font-weight: 650;
+
+            &:hover,
+            &:focus-visible,
+            &.active {
+                background: color-mix(in srgb, var(--primary) 10%, transparent);
+                color: $color-primary;
+            }
+        }
+
+        .ops-back-button {
+            background: color-mix(in srgb, var(--primary) 12%, transparent);
+            color: $color-primary;
+            font-weight: 800;
+
+            &:hover { background: color-mix(in srgb, var(--primary) 20%, transparent); }
+        }
+    }
+
+    // ---- Bandeau ----
+    //
+    // Le dégradé est construit à partir de l'accent du thème, et le texte
+    // posé dessus utilise --on-primary : sur un thème à accent clair (Nord),
+    // l'encre devient sombre d'elle-même.
+    .ops-hero {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        gap: 30px;
+        padding: clamp(27px, 4vw, 48px);
+        border-radius: 21px;
+        color: var(--on-primary);
+        background: linear-gradient(
+            115deg,
+            color-mix(in srgb, var(--primary) 60%, #000) 0%,
+            $color-primary 62%,
+            color-mix(in srgb, var(--primary) 65%, var(--secondary)) 100%
+        );
+        box-shadow: $shadow-lg;
+
+        &::before {
+            content: "";
+            position: absolute;
+            width: 320px;
+            height: 320px;
+            right: -90px;
+            top: -190px;
+            border: 1px solid color-mix(in srgb, var(--on-primary) 20%, transparent);
+            border-radius: 50%;
+            box-shadow:
+                0 0 0 55px color-mix(in srgb, var(--on-primary) 5%, transparent),
+                0 0 0 110px color-mix(in srgb, var(--on-primary) 5%, transparent);
+            pointer-events: none;
+        }
+
+        h1 {
+            margin: 14px 0 11px;
+            color: var(--on-primary);
+            font-size: clamp(2.15rem, 3.3vw, 3.25rem);
+            font-weight: 800;
+            letter-spacing: -.045em;
+            line-height: 1.08;
+
+            span {
+                color: color-mix(in srgb, var(--on-primary) 78%, transparent);
+                font-weight: 560;
+            }
+        }
+
+        p {
+            max-width: 750px;
+            margin: 0;
+            color: color-mix(in srgb, var(--on-primary) 88%, transparent);
+            line-height: 1.6;
+        }
+
+        // L'accent du thème sert de fond ici : un contour de la même couleur
+        // serait invisible.
+        :focus-visible { outline-color: var(--on-primary); }
+    }
+
+    .ops-hero-fleet { min-height: 198px; }
+
+    .ops-hero-copy,
+    .ops-hero-aside { position: relative; z-index: 1; }
+
+    .ops-hero-aside {
+        flex: 0 0 min(29%, 290px);
+        padding: 15px 18px;
+        border: 1px solid color-mix(in srgb, var(--on-primary) 25%, transparent);
+        border-radius: 12px;
+        background: color-mix(in srgb, var(--on-primary) 12%, transparent);
+        font-size: .81rem;
+        line-height: 1.5;
+
+        strong,
+        span { display: block; }
+
+        strong {
+            margin-bottom: 7px;
+            color: var(--on-primary);
+            font-size: .9rem;
+        }
+
+        span { color: color-mix(in srgb, var(--on-primary) 82%, transparent); }
+    }
+
+    .ops-kicker {
+        color: color-mix(in srgb, var(--on-primary) 85%, transparent);
+        font-size: .75rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+
+        a {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover { text-decoration: underline; }
+        }
+    }
+
+    .ops-pulse {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        margin-right: 7px;
+        border-radius: 50%;
+        background: $color-secondary;
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--secondary) 25%, transparent);
+    }
+
+    // ---- Cartes de chiffres ----
+    .ops-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 15px;
+        margin: 22px 0;
+    }
+
+    .ops-card,
+    .ops-panel {
+        border: 1px solid $color-border;
+        border-radius: 17px;
+        background: $color-surface;
+        box-shadow: $shadow-tile;
+    }
+
+    .ops-card {
+        position: relative;
+        overflow: hidden;
+        min-height: 137px;
+        padding: 21px 21px 18px;
+
+        &::before {
+            position: absolute;
+            content: "";
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 3px;
+            background: $color-border;
+        }
+
+        &.good::before   { background: $color-secondary; }
+        &.danger::before { background: $color-danger; }
+
+        .label {
+            color: $color-text-muted;
+            font-size: .8rem;
+            font-weight: 750;
+        }
+
+        .number {
+            margin: 9px 0 3px;
+            font-size: clamp(1.75rem, 2.7vw, 2.3rem);
+            line-height: 1.1;
+            font-weight: 850;
+            font-variant-numeric: tabular-nums;
+        }
+
+        &.good .number   { color: var(--success-fg); }
+        &.danger .number { color: var(--danger-fg); }
+
+        .detail {
+            color: $color-text-muted;
+            font-size: .76rem;
+            line-height: 1.5;
+        }
+    }
+
+    // ---- Panneaux ----
+    .ops-panel {
+        margin: 19px 0;
+        padding: clamp(18px, 2.5vw, 29px);
+
+        h2 {
+            margin: 0 0 14px;
+            color: $color-text;
+            font-size: 1.22rem;
+            letter-spacing: -.015em;
+        }
+
+        p { line-height: 1.56; }
+    }
+
+    .ops-fleet-panel { margin-top: 22px; }
+
+    .ops-panel-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 17px;
+
+        h2 {
+            margin: 5px 0 4px;
+            font-size: clamp(1.38rem, 2vw, 1.72rem);
+            letter-spacing: -.035em;
+        }
+
+        p {
+            margin: 0;
+            color: $color-text-muted;
+            font-size: .84rem;
+        }
+    }
+
+    .ops-eyebrow {
+        color: $color-primary;
+        font-size: .68rem;
+        letter-spacing: .12em;
+        font-weight: 850;
+    }
+
+    .ops-total {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 6px;
+        border-radius: 12px;
+        padding: 9px 14px;
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+        color: $color-primary;
+        font-size: 1.25rem;
+        font-weight: 850;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+
+        small {
+            font-size: .74rem;
+            font-weight: 650;
+        }
+    }
+
+    .ops-note {
+        border-left: 3px solid $color-info;
+        border-radius: 7px;
+        padding: 11px 14px;
+        background: var(--info-bg);
+        color: var(--info-fg);
+        font-size: .86rem;
+    }
+
+    .ops-warn {
+        border-left-color: $color-warning;
+        background: var(--warning-bg);
+        color: var(--warning-fg);
+    }
+
+    .ops-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        border-radius: 9px;
+        padding: 10px 14px;
+        background: color-mix(in srgb, var(--primary) 12%, transparent);
+        color: $color-primary;
+        text-decoration: none;
+        font-size: .86rem;
+        font-weight: 800;
+
+        &:hover { background: color-mix(in srgb, var(--primary) 20%, transparent); }
+    }
+
+    // ---- Barres d'outils et filtres ----
+    .ops-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 11px;
+        margin: 17px 0 20px;
+
+        label {
+            display: grid;
+            gap: 6px;
+            color: $color-text-muted;
+            font-size: .8rem;
+            font-weight: 750;
+        }
+
+        input,
+        select {
+            height: 44px;
+            max-width: 100%;
+            border: 1px solid $color-border;
+            border-radius: 9px;
+            padding: 9px 12px;
+            background: $color-surface;
+            color: $color-text;
+            font: inherit;
+
+            &:focus { border-color: $color-primary; }
+        }
+
+        input { width: min(370px, 84vw); }
+    }
+
+    .ops-fleet-toolbar {
+        display: flex;
+        align-items: end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 14px 0 20px;
+        padding: 16px;
+        border: 1px solid $color-border;
+        border-radius: 14px;
+        background: var(--surface-2);
+    }
+
+    .ops-fleet-filters {
+        margin: 0;
+
+        .ops-search-control input {
+            width: min(390px, 75vw);
+            padding-right: 100px;
+        }
+
+        select[name="tri"]    { min-width: 218px; }
+        select[name="taille"] { min-width: 96px; }
+    }
+
+    .ops-search-field {
+        position: relative;
+        display: grid;
+        gap: 6px;
+        color: $color-text-muted;
+        font-size: .8rem;
+        font-weight: 750;
+    }
+
+    .ops-search-control {
+        position: relative;
+
+        input::-webkit-search-cancel-button { display: none; }
+    }
+
+    .ops-search-clear {
+        position: absolute;
+        right: 5px;
+        top: 5px;
+        min-height: 34px;
+        display: inline-flex;
+        align-items: center;
+        border-radius: 6px;
+        padding: 3px 7px;
+        background: color-mix(in srgb, var(--primary) 10%, transparent);
+        color: $color-primary;
+        text-decoration: none;
+        font-size: .75rem;
+        font-weight: 750;
+
+        &:hover { background: color-mix(in srgb, var(--primary) 18%, transparent); }
+    }
+
+    .ops-suggestions {
+        position: absolute;
+        top: calc(100% + 5px);
+        left: 0;
+        z-index: 10;
+        width: 100%;
+        max-height: 280px;
+        overflow: auto;
+        border: 1px solid $color-border;
+        border-radius: 10px;
+        padding: 5px;
+        background: $color-surface;
+        box-shadow: $shadow-lg;
+    }
+
+    .ops-suggestion {
+        display: block;
+        width: 100%;
+        border: 0;
+        border-radius: 6px;
+        padding: 9px 10px;
+        background: transparent;
+        color: $color-text;
+        text-align: left;
+        font: inherit;
+        font-size: .81rem;
+        font-weight: 650;
+        cursor: pointer;
+        overflow-wrap: anywhere;
+
+        &:hover,
+        &.is-active {
+            background: color-mix(in srgb, var(--primary) 10%, transparent);
+            color: $color-primary;
+        }
+    }
+
+    .ops-sync {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: $color-text-muted;
+        font-size: .72rem;
+        white-space: nowrap;
+
+        span {
+            display: block;
+            border-left: 1px solid $color-border;
+            padding-left: 12px;
+        }
+
+        strong {
+            color: $color-text;
+            font-variant-numeric: tabular-nums;
+        }
+
+        form { margin: 0; }
+    }
+
+    .ops-action.ops-refresh {
+        min-height: 44px;
+        border: 1px solid $color-border;
+        padding: 10px 14px;
+        font: inherit;
+        font-size: .83rem;
+        font-weight: 780;
+        white-space: nowrap;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: .66;
+            cursor: wait;
+        }
+    }
+
+    .ops-date-hint {
+        margin: 0 0 13px;
+        color: $color-text-muted;
+        font-size: .77rem;
+    }
+
+    .ops-btn {
+        min-height: 44px;
+        border: 0;
+        border-radius: 9px;
+        padding: 10px 17px;
+        background: $color-primary;
+        color: var(--on-primary);
+        font: inherit;
+        font-size: .85rem;
+        font-weight: 800;
+        cursor: pointer;
+
+        &:hover { background: color-mix(in srgb, var(--primary) 85%, #000); }
+    }
+
+    .ops-reset {
+        align-self: center;
+        font-size: .83rem;
+        font-weight: 650;
+    }
+
+    // ---- Tableaux ----
+    .ops-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+
+        th {
+            padding: 12px;
+            background: var(--surface-2);
+            color: $color-text-muted;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            font-size: .7rem;
+        }
+
+        td {
+            padding: 14px 12px;
+            border-bottom: 1px solid $color-border;
+            vertical-align: top;
+            overflow-wrap: anywhere;
+            font-size: .84rem;
+            line-height: 1.45;
+        }
+
+        tr:last-child td { border-bottom: 0; }
+
+        tbody tr:hover { background: var(--surface-2); }
+
+        code {
+            display: inline-block;
+            border-radius: 5px;
+            padding: 2px 6px;
+            background: var(--surface-2);
+            color: $color-text;
+            font-size: .79rem;
+        }
+    }
+
+    .ops-table-scroll {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .ops-fleet-table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 1200px;
+
+        .ops-instance-column { width: 37.5%; }
+        .ops-ip-column       { width: 34.5%; }
+        .ops-state-column    { width: 13%; }
+        .ops-week-column     { width: 15%; }
+
+        td[colspan] { width: 100%; }
+
+        th,
+        td {
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        th + th,
+        td + td { border-left: 1px solid $color-border; }
+
+        tbody tr:nth-child(even) { background: color-mix(in srgb, var(--primary) 3%, transparent); }
+        tbody tr:hover           { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+    }
+
+    // ---- Adresses IP et copie ----
+    .ops-ip-content { display: grid; gap: 4px; }
+
+    .ops-ip-actions {
+        display: grid;
+        grid-template-columns: 140px 90px 105px;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ops-ip-link {
+        code {
+            color: $color-primary;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        &:hover code { background: color-mix(in srgb, var(--primary) 12%, transparent); }
+    }
+
+    .ops-copy {
+        width: 100%;
+        min-height: 34px;
+        border: 1px solid $color-border;
+        border-radius: 7px;
+        padding: 5px 8px;
+        background: var(--surface-2);
+        color: $color-primary;
+        font: inherit;
+        font-size: .72rem;
+        font-weight: 750;
+        white-space: nowrap;
+        cursor: pointer;
+
+        &:hover { background: color-mix(in srgb, var(--primary) 12%, transparent); }
+    }
+
+    .ops-copy-status {
+        color: $color-text-muted;
+        font-size: .72rem;
+
+        &:empty { display: none; }
+    }
+
+    .ops-manual-copy {
+        width: min(100%, 390px);
+        border: 1px solid $color-border;
+        border-radius: 7px;
+        padding: 7px 9px;
+        background: $color-surface;
+        color: $color-text;
+        font: inherit;
+        font-size: .8rem;
+    }
+
+    .ops-main {
+        display: block;
+        max-width: 100%;
+        color: $color-text;
+        font-weight: 800;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .ops-instance-link {
+        text-decoration: underline;
+        text-decoration-color: color-mix(in srgb, var(--primary) 45%, transparent);
+        text-underline-offset: 3px;
+
+        &:hover {
+            color: $color-primary;
+            text-decoration-color: currentColor;
+        }
+    }
+
+    .ops-instance-panel {
+        padding: 22px;
+        margin-top: 8px;
+    }
+
+    .ops-instance-history { min-width: 700px; }
+
+    // ---- Disponibilité (ping) ----
+    .ops-ping-periods {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin: 16px 0 18px;
+    }
+
+    .ops-ping-period {
+        display: grid;
+        gap: 5px;
+        border: 1px solid $color-border;
+        border-radius: 10px;
+        padding: 13px;
+        background: var(--surface-2);
+
+        strong {
+            color: $color-text;
+            font-size: .8rem;
+        }
+
+        span {
+            color: $color-primary;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        small {
+            color: $color-text-muted;
+            line-height: 1.4;
+        }
+    }
+
+    .ops-ping-timeline-title {
+        margin: 18px 0 9px;
+        color: $color-text;
+        font-size: .9rem;
+
+        small {
+            margin-left: 8px;
+            color: $color-text-muted;
+            font-size: .74rem;
+            font-weight: 500;
+        }
+    }
+
+    .ops-ping-scroll {
+        max-width: 100%;
+        overflow-x: auto;
+    }
+
+    .ops-ping-bars {
+        display: grid;
+        grid-template-columns: repeat(60, minmax(6px, 1fr));
+        gap: 3px;
+        min-width: 570px;
+        height: 48px;
+    }
+
+    .ops-ping-minute {
+        display: block;
+        border-radius: 3px;
+        background: $color-border;
+
+        &.up   { background: $color-secondary; }
+        &.down { background: $color-danger; }
+    }
+
+    .ops-ping-week {
+        display: grid;
+        grid-template-columns: repeat(7, 18px);
+        gap: 3px;
+        width: max-content;
+    }
+
+    .ops-ping-week-day {
+        display: grid;
+        gap: 4px;
+        justify-items: center;
+        color: $color-text-muted;
+        cursor: help;
+
+        small {
+            font-size: .59rem;
+            line-height: 1;
+        }
+    }
+
+    .ops-ping-week-square,
+    .ops-ping-week-legend i {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        background: $color-border;
+        border: 1px solid color-mix(in srgb, var(--text-muted) 40%, transparent);
+
+        &.ok       { background: $color-secondary; border-color: color-mix(in srgb, var(--secondary) 80%, #000); }
+        &.partial  { background: $color-info;      border-color: color-mix(in srgb, var(--info) 80%, #000); }
+        &.watch    { background: $color-warning;   border-color: color-mix(in srgb, var(--warning) 80%, #000); }
+        &.incident { background: $color-danger;    border-color: color-mix(in srgb, var(--danger) 80%, #000); }
+    }
+
+    .ops-ping-week-legend {
+        display: flex;
+        gap: 9px 16px;
+        flex-wrap: wrap;
+        margin-top: 14px;
+        color: $color-text-muted;
+        font-size: .72rem;
+
+        span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        i {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    }
+
+    // ---- États, badges, divers ----
+    .ops-ovh-state {
+        display: inline-block;
+        border-radius: 7px;
+        padding: 5px 8px;
+        background: var(--surface-2);
+        color: $color-text-muted;
+        font-size: .74rem;
+        font-weight: 750;
+        line-height: 1.4;
+
+        &.good   { background: var(--success-bg); color: var(--success-fg); }
+        &.danger { background: var(--danger-bg);  color: var(--danger-fg); }
+    }
+
+    .ops-zone {
+        color: $color-text;
+        font-size: .8rem;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+    }
+
+    .ops-ovh-hint {
+        margin: 12px 0 0;
+        color: $color-text-muted;
+        font-size: .75rem;
+        line-height: 1.45;
+    }
+
+    .ops-machine-date {
+        display: block;
+        margin-top: 3px;
+        color: $color-text-muted;
+        font-size: .72rem;
+    }
+
+    .ops-muted {
+        color: $color-text-muted;
+        font-size: .79rem;
+    }
+
+    .ops-badge {
+        display: inline-block;
+        margin: 2px 3px 2px 0;
+        border-radius: 6px;
+        padding: 5px 8px;
+        background: var(--surface-2);
+        color: $color-text-muted;
+        font-size: .73rem;
+        font-weight: 750;
+        line-height: 1.3;
+
+        &.ok        { background: var(--success-bg); color: var(--success-fg); }
+        &.bad       { background: var(--danger-bg);  color: var(--danger-fg); }
+        &.attention { background: var(--warning-bg); color: var(--warning-fg); }
+    }
+
+    .ops-foot {
+        margin: 14px 0 0;
+        color: $color-text-muted;
+        font-size: .78rem;
+        line-height: 1.5;
+    }
+
+    .ops-history {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+
+        a {
+            display: inline-block;
+            border: 1px solid $color-border;
+            border-radius: 10px;
+            padding: 11px 14px;
+            background: var(--surface-2);
+            text-decoration: none;
+            line-height: 1.5;
+
+            &:hover {
+                border-color: $color-primary;
+                background: color-mix(in srgb, var(--primary) 8%, transparent);
+            }
+        }
+    }
+
+    .ops-components {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    .ops-component {
+        padding: 16px;
+        border: 1px solid $color-border;
+        border-radius: 11px;
+        background: var(--surface-2);
+        line-height: 1.5;
+
+        h3 {
+            margin: 0 0 8px;
+            color: $color-text;
+            font-size: .98rem;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 12px;
+            font-size: .81rem;
+            font-weight: 700;
+        }
+    }
+
+    .ops-component-count {
+        margin-bottom: 7px;
+        font-size: .84rem;
+    }
+
+    .ops-step + .ops-step { margin-top: 7px; }
+
+    .ops-detail {
+        padding-top: 8px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: $color-text-muted;
+        font-size: .78rem;
+    }
+
+    details summary {
+        cursor: pointer;
+        color: $color-primary;
+        font-weight: 700;
+    }
+
+    .ops-pagination {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 16px;
+
+        a,
+        .disabled {
+            border: 1px solid $color-border;
+            border-radius: 8px;
+            padding: 8px 12px;
+            text-decoration: none;
+            font-size: .78rem;
+            font-weight: 700;
+        }
+
+        .disabled {
+            color: $color-text-light;
+            background: var(--surface-2);
+        }
+    }
+
+    .ops-page-count {
+        margin: 0 6px;
+        color: $color-text-muted;
+        font-size: .8rem;
+    }
+
+    .ops-footer {
+        margin-top: 30px;
+        color: $color-text-muted;
+        text-align: center;
+        font-size: .74rem;
+    }
+}
+
+// =============================================
+// Paliers — repris tels quels du style d'origine
+// =============================================
+@media (max-width: 1500px) {
+    .chr-app {
+        .ops-fleet-toolbar { align-items: stretch; }
+        .ops-sync          { flex-wrap: wrap; }
+        .ops-ip-actions    { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ops-ip-link       { grid-column: 1 / -1; }
+    }
+}
+
+@media (max-width: 980px) {
+    .chr-app {
+        .ops-grid       { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ops-hero-aside { flex-basis: 35%; }
+    }
+}
+
+@media (max-width: 700px) {
+    .chr-app {
+        .ops-shell { padding: 0 12px 35px; }
+
+        .ops-topbar {
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 15px 0 12px;
+            gap: 12px;
+        }
+
+        .ops-nav {
+            width: 100%;
+
+            a {
+                padding: 7px 10px;
+                font-size: .78rem;
+            }
+        }
+
+        .ops-hero {
+            display: block;
+            padding: 25px 20px;
+            border-radius: 13px;
+        }
+
+        .ops-hero-aside { margin-top: 20px; }
+
+        .ops-panel-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .ops-fleet-toolbar { padding: 12px; }
+
+        .ops-fleet-filters {
+            width: 100%;
+
+            label,
+            .ops-search-field,
+            input,
+            select {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .ops-search-control input { width: 100%; }
+
+            select[name="tri"],
+            select[name="taille"] { min-width: 0; }
+        }
+
+        .ops-sync {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 7px;
+            white-space: normal;
+
+            span {
+                border-left: 0;
+                padding-left: 0;
+            }
+        }
+
+        .ops-grid {
+            gap: 9px;
+            margin: 14px 0;
+        }
+
+        .ops-card {
+            min-height: 128px;
+            padding: 16px 13px;
+
+            .detail { font-size: .69rem; }
+        }
+
+        // Le tableau se déplie en fiches : chaque cellule porte son intitulé
+        // via data-label.
+        .ops-table,
+        .ops-table tbody,
+        .ops-table tr,
+        .ops-table td {
+            display: block;
+            width: 100%;
+        }
+
+        .ops-table {
+            thead { display: none; }
+
+            tr {
+                margin: 9px 0;
+                border: 1px solid $color-border;
+                border-radius: 9px;
+                padding: 6px;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                gap: 10px;
+                border-bottom: 1px solid $color-border;
+                text-align: right;
+                padding: 8px 5px;
+
+                &::before {
+                    content: attr(data-label);
+                    flex: 0 0 35%;
+                    text-align: left;
+                    color: $color-text-muted;
+                    font-size: .72rem;
+                    font-weight: 750;
+                }
+
+                &[colspan]::before { content: none; }
+            }
+
+            tr:last-child td { border-bottom: 0; }
+        }
+
+        .ops-ip-content {
+            min-width: 0;
+            text-align: right;
+        }
+
+        .ops-ip-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            padding-left: 0;
+        }
+
+        .ops-ip-link {
+            grid-column: 1 / -1;
+            justify-self: end;
+        }
+
+        .ops-fleet-table {
+            min-width: 0;
+
+            td:first-child { width: 100%; }
+            colgroup       { display: none; }
+            td + td        { border-left: 0; }
+        }
+
+        .ops-pagination {
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+    }
+}
+
+@media (max-width: 620px) {
+    .chr-app .ops-ping-periods { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 420px) {
+    .chr-app {
+        .ops-ip-actions { grid-template-columns: minmax(0, 1fr); }
+        .ops-ip-link    { grid-column: 1; }
+    }
+}
