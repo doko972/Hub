@@ -12,9 +12,6 @@
     </div>
 </div>
 
-{{-- Configurations enregistrées.
-     Seuls les noms sont rendus ici : la charge utile contient les mots de passe
-     SIP et n'est demandée au serveur qu'au moment du chargement. --}}
 <div class="qr-presets"
      data-qr-presets
      data-store-url="{{ route('tools.qr-code.presets.store') }}"
@@ -97,6 +94,13 @@
                         <button type="button" class="qr-pw-toggle" id="qr-toggle-admin-pw" title="Afficher / masquer">👁</button>
                     </div>
                 </div>
+
+            <div class="qr-field">
+                <label class="qr-label" for="sip-logo">Logo (URL)</label>
+                <input class="qr-input" id="sip-logo" type="url"
+                       placeholder="https://hrtelecoms.fr/marques/clientA.png">
+                <p class="qr-hint">Facultatif. Laissé vide, la clé « logo » n'apparaît pas dans le JSON.</p>
+            </div>
 
             <button class="qr-btn-clear" id="qr-clear-sip">Vider les champs</button>
         </div>

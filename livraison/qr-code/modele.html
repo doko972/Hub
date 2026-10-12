@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Générateur de QR Code</title>
+
+<!--
+    Générateur de QR Code — page autonome.
+
+    Tout est contenu dans ce seul fichier : il s'ouvre par double-clic, sans
+    serveur, sans installation et sans connexion internet. Aucune donnée saisie
+    ne quitte votre navigateur.
+
+    Ne pas modifier ce fichier à la main : il est assemblé par
+    livraison/qr-code/assembler.cjs à partir de modele.html.
+-->
+
+<style>
+:root {
+    --primary:      #362ad7;
+    --primary-dark: #2a1fb0;
+    --primary-soft: #EDE9FE;
+    --info:         #3B82F6;
+    --danger:       #EF4444;
+
+    --bg:          #F3F4F6;
+    --surface:     #FFFFFF;
+    --border:      #E5E7EB;
+    --text:        #1F2937;
+    --text-muted:  #6B7280;
+
+    --warn-bg:     #FFFBEB;
+    --warn-border: #FDE68A;
+    --warn-text:   #92400E;
+
+    --radius:      8px;
+    --radius-lg:   12px;
+}
+
+/* La page suit le réglage clair/sombre du système : elle sera lue aussi bien
+   sur un poste bureautique que sur un téléphone en soirée. */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary:      #8B7CF6;
+        --primary-dark: #7C6AF0;
+        --primary-soft: #2A2145;
+        --info:         #60A5FA;
+        --danger:       #F87171;
+
+        --bg:          #0F172A;
+        --surface:     #1E293B;
+        --border:      #334155;
+        --text:        #F1F5F9;
+        --text-muted:  #94A3B8;
+
+        --warn-bg:     #2A2112;
+        --warn-border: #5A4A1E;
+        --warn-text:   #FCD34D;
+    }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 24px 16px 48px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.page { max-width: 1100px; margin: 0 auto; }
+
+.page-header { margin-bottom: 24px; }
+.page-header h1 { margin: 0 0 4px; font-size: 24px; font-weight: 700; }
+.page-header p  { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+/* ---- Bandeau de confidentialité ----
+   Le formulaire reçoit des mots de passe : il faut dire où ils vont. */
+.privacy {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.privacy strong { color: var(--text); }
+
+/* ---- Configurations ---- */
+.configs {
+    margin-bottom: 24px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+}
+.configs__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+.configs__title { font-size: 14px; font-weight: 600; }
+.configs__actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.configs__hint { margin: 10px 0 0; color: var(--text-muted); font-size: 12px; }
+
+.btn-soft {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.btn-soft:hover { background: var(--border); }
+
+/* ---- Disposition ---- */
+.qr-tool {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+@media (max-width: 860px) {
+    .qr-tool { grid-template-columns: 1fr; }
+}
+
+/* ---- Onglets ---- */
+.qr-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 24px;
+    grid-column: 1 / -1;
+}
+.qr-tab {
+    flex: 1;
+    padding: 12px 16px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.qr-tab:hover { color: var(--text); }
+.qr-tab.is-active { color: var(--primary); border-bottom-color: var(--primary); }
+
+.qr-panel { display: none; }
+.qr-panel.is-active { display: block; }
+
+.qr-subtabs { display: flex; gap: 4px; margin-bottom: 16px; }
+.qr-subtab {
+    flex: 1;
+    padding: 6px 12px;
+    background: var(--bg);
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+.qr-subtab.is-active { background: var(--primary-soft); color: var(--primary); }
+
+.qr-subpanel { display: none; }
+.qr-subpanel.is-active { display: block; }
+
+/* ---- Champs ---- */
+.qr-field { margin-bottom: 16px; }
+
+.qr-label {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.qr-input, .qr-select, .qr-textarea {
+    width: 100%;
+    padding: 0.65rem 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+}
+.qr-input:focus, .qr-select:focus, .qr-textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent);
+}
+
+.qr-textarea { resize: vertical; min-height: 100px; }
+
+.qr-hint { margin-top: 4px; color: var(--text-muted); font-size: 12px; }
+
+.qr-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .qr-grid-2 { grid-template-columns: 1fr; } }
+
+.qr-pw-wrap { position: relative; }
+.qr-pw-wrap .qr-input { padding-right: 2.75rem; }
+.qr-pw-toggle {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 4px 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-muted);
+}
+
+/* ---- Favoris ---- */
+.qr-contact-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+@media (max-width: 560px) {
+    .qr-contact-row { grid-template-columns: 1fr auto auto; }
+    .qr-contact-row .qr-input:first-child { grid-column: 1 / -1; }
+}
+.qr-contact-row .qr-input { padding: 4px 0.7rem; }
+
+.qr-blf-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+.qr-blf-wrap input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
+.qr-btn-remove {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--danger) 12%, transparent);
+    color: var(--danger);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+}
+.qr-btn-remove:hover { background: color-mix(in srgb, var(--danger) 22%, transparent); }
+
+.qr-btn-add {
+    width: 100%;
+    margin-top: 4px;
+    padding: 0.65rem;
+    border: 1px dashed color-mix(in srgb, var(--primary) 45%, transparent);
+    border-radius: var(--radius);
+    background: var(--primary-soft);
+    color: var(--primary);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.qr-btn-add:hover { background: color-mix(in srgb, var(--primary) 20%, transparent); }
+
+.qr-btn-clear {
+    width: 100%;
+    margin-top: 16px;
+    padding: 0.65rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.qr-btn-clear:hover { background: var(--border); }
+
+/* ---- Aperçu ---- */
+.qr-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+}
+
+.qr-canvas-box {
+    width: 100%;
+    min-height: 220px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg);
+}
+
+.qr-placeholder { text-align: center; color: var(--text-muted); font-size: 14px; }
+.qr-placeholder svg { display: block; margin: 0 auto 16px; opacity: 0.3; }
+
+canvas.qr-canvas {
+    display: none;
+    width: 280px;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    /* Fond blanc permanent : un QR sombre sur fond sombre est illisible par
+       les lecteurs, et la vignette téléchargée doit rester scannable. */
+    background: #FFFFFF;
+}
+
+.qr-warning {
+    display: none;
+    width: 100%;
+    margin: 0;
+    padding: 12px 16px;
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius);
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    font-size: 12px;
+}
+
+.qr-actions { display: none; flex-wrap: wrap; gap: 12px; width: 100%; }
+
+.qr-btn-download, .qr-btn-qr {
+    flex: 1;
+    min-width: 45%;
+    padding: 0.65rem;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--primary), var(--info));
+    color: #fff;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.qr-btn-download:hover, .qr-btn-qr:hover { opacity: 0.88; }
+.qr-btn-download:disabled, .qr-btn-qr:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.qr-btn-copy {
+    flex-basis: 100%;
+    padding: 0.65rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+}
+.qr-btn-copy:hover { background: var(--border); }
+
+.qr-data-box {
+    display: none;
+    width: 100%;
+    max-height: 160px;
+    margin: 0;
+    padding: 12px 16px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* ---- Messages ---- */
+.toasts {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.toast {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--primary);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.toast--error { border-left-color: var(--danger); }
+
+.footer {
+    margin-top: 40px;
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+    <div class="page-header">
+        <h1>Générateur de QR Code</h1>
+        <p>Configurations SIP, favoris, contacts et liens.</p>
+    </div>
+
+    <p class="privacy">
+        <span aria-hidden="true">🔒</span>
+        <span>
+            <strong>Tout reste sur votre poste.</strong>
+            Cette page fonctionne sans connexion : rien de ce que vous saisissez,
+            mots de passe compris, n'est transmis où que ce soit. Les
+            configurations ne sont pas conservées entre deux ouvertures —
+            enregistrez-les dans un fichier pour les retrouver.
+        </span>
+    </p>
+
+    <div class="configs">
+        <div class="configs__header">
+            <span class="configs__title">Mes configurations</span>
+            <div class="configs__actions">
+                <button type="button" class="btn-soft" id="cfg-save">💾 Enregistrer dans un fichier</button>
+                <button type="button" class="btn-soft" id="cfg-load">📂 Charger un fichier</button>
+                <input type="file" id="cfg-file" accept="application/json,.json" hidden>
+            </div>
+        </div>
+        <p class="configs__hint">
+            Le fichier enregistré contient l'ensemble du formulaire. Conservez-le
+            en lieu sûr : il renferme les mots de passe saisis.
+        </p>
+    </div>
+
+    <div class="qr-tool">
+
+        <div class="qr-tabs">
+            <button class="qr-tab is-active" data-tab="sip">📞 Configuration SIP</button>
+            <button class="qr-tab" data-tab="favoris">⭐ Favoris</button>
+            <button class="qr-tab" data-tab="qr">🔲 QR Code libre</button>
+        </div>
+
+        <div class="qr-inputs">
+
+            <!-- Panneau SIP -->
+            <div class="qr-panel is-active" id="qr-panel-sip">
+                <div class="qr-grid-2">
+                    <div class="qr-field">
+                        <label class="qr-label" for="sip-username">Identifiant (username)</label>
+                        <input class="qr-input" id="sip-username" type="text" placeholder="1002">
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="sip-password">Mot de passe</label>
+                        <div class="qr-pw-wrap">
+                            <input class="qr-input" id="sip-password" type="password" placeholder="motdepasse">
+                            <button type="button" class="qr-pw-toggle" id="qr-toggle-pw"
+                                    title="Afficher / masquer" aria-label="Afficher ou masquer le mot de passe">👁</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-domain">Domaine / IP du serveur</label>
+                    <input class="qr-input" id="sip-domain" type="text" placeholder="51.91.145.39">
+                </div>
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-display">Nom affiché (display)</label>
+                    <input class="qr-input" id="sip-display" type="text" placeholder="Jean Dupont">
+                </div>
+                <div class="qr-grid-2">
+                    <div class="qr-field">
+                        <label class="qr-label" for="sip-transport">Transport</label>
+                        <select class="qr-select" id="sip-transport">
+                            <option value="udp">UDP</option>
+                            <option value="tcp">TCP</option>
+                            <option value="tls">TLS</option>
+                        </select>
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="sip-port">Port</label>
+                        <input class="qr-input" id="sip-port" type="number" min="1" max="65535" placeholder="5060">
+                    </div>
+                </div>
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-admin-password">Mot de passe admin</label>
+                    <div class="qr-pw-wrap">
+                        <input class="qr-input" id="sip-admin-password" type="password" placeholder="MonMotDePasseAdmin2024">
+                        <button type="button" class="qr-pw-toggle" id="qr-toggle-admin-pw"
+                                title="Afficher / masquer" aria-label="Afficher ou masquer le mot de passe admin">👁</button>
+                    </div>
+                </div>
+
+                <button class="qr-btn-clear" id="qr-clear-sip">Vider les champs</button>
+            </div>
+
+            <!-- Panneau Favoris -->
+            <div class="qr-panel" id="qr-panel-favoris">
+                <label class="qr-label">Contacts</label>
+                <div id="qr-contacts-list"></div>
+                <button class="qr-btn-add" id="qr-add-contact">＋ Ajouter un contact</button>
+                <p class="qr-hint">BLF (Busy Lamp Field) affiche l'état de la ligne en temps réel sur le softphone.</p>
+                <button class="qr-btn-clear" id="qr-clear-favoris">Vider les contacts</button>
+            </div>
+
+            <!-- Panneau QR Code libre -->
+            <div class="qr-panel" id="qr-panel-qr">
+                <div class="qr-subtabs">
+                    <button class="qr-subtab is-active" data-subtab="url">🔗 URL</button>
+                    <button class="qr-subtab" data-subtab="text">💬 Texte</button>
+                    <button class="qr-subtab" data-subtab="contact">👤 Contact</button>
+                </div>
+
+                <div class="qr-subpanel is-active" id="qr-subpanel-url">
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-url">URL du site</label>
+                        <input class="qr-input" id="qr-url" type="text" placeholder="example.com ou https://example.com">
+                        <p class="qr-hint">Le protocole https:// sera ajouté automatiquement si absent.</p>
+                    </div>
+                </div>
+
+                <div class="qr-subpanel" id="qr-subpanel-text">
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-text">Contenu textuel</label>
+                        <textarea class="qr-input qr-textarea" id="qr-text" placeholder="Saisissez n'importe quel texte…"></textarea>
+                    </div>
+                </div>
+
+                <div class="qr-subpanel" id="qr-subpanel-contact">
+                    <div class="qr-grid-2">
+                        <div class="qr-field">
+                            <label class="qr-label" for="qr-c-first">Prénom</label>
+                            <input class="qr-input" id="qr-c-first" type="text" placeholder="Jean">
+                        </div>
+                        <div class="qr-field">
+                            <label class="qr-label" for="qr-c-last">Nom</label>
+                            <input class="qr-input" id="qr-c-last" type="text" placeholder="Dupont">
+                        </div>
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-c-phone">Téléphone</label>
+                        <input class="qr-input" id="qr-c-phone" type="tel" placeholder="+33 6 12 34 56 78">
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-c-email">Email</label>
+                        <input class="qr-input" id="qr-c-email" type="email" placeholder="jean.dupont@exemple.fr">
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-c-org">Organisation</label>
+                        <input class="qr-input" id="qr-c-org" type="text" placeholder="Nom de l'entreprise">
+                    </div>
+                    <div class="qr-field">
+                        <label class="qr-label" for="qr-c-url">Site web</label>
+                        <input class="qr-input" id="qr-c-url" type="url" placeholder="https://exemple.fr">
+                    </div>
+                </div>
+
+                <button class="qr-btn-clear" id="qr-clear-free">Vider les champs</button>
+            </div>
+
+        </div>
+
+        <div class="qr-preview">
+
+            <div class="qr-canvas-box">
+                <div class="qr-placeholder" id="qr-placeholder">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/>
+                        <rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/>
+                        <rect x="18" y="18" width="3" height="3"/>
+                    </svg>
+                    Remplissez le formulaire pour prévisualiser
+                </div>
+                <canvas class="qr-canvas" id="qr-canvas"></canvas>
+            </div>
+
+            <p class="qr-warning" id="qr-warning"></p>
+
+            <div class="qr-actions" id="qr-actions">
+                <button class="qr-btn-download" id="qr-btn-download">⬇ Télécharger le JSON</button>
+                <button class="qr-btn-qr" id="qr-btn-qr">📱 Télécharger le QR code</button>
+                <button class="qr-btn-copy" id="qr-btn-copy">📋 Copier le JSON</button>
+            </div>
+
+            <pre class="qr-data-box" id="qr-data-box"></pre>
+
+        </div>
+
+    </div>
+
+    <p class="footer">
+        Générateur de QR Code — page autonome, fonctionne hors connexion.<br>
+        Encodage : QR Code Generator for JavaScript, © 2009 Kazuhiko Arase, licence MIT.
+    </p>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+/* <<<BIBLIOTHEQUE_QR>>> */
+</script>
+
+<script>
+(function () {
+    'use strict';
+
+    // Sans cette ligne la bibliothèque encode en latin1 : « é » ressortirait
+    // cassé dans les vCard et les noms affichés.
+    qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+
+    var canvas        = document.getElementById('qr-canvas');
+    var placeholder   = document.getElementById('qr-placeholder');
+    var actions       = document.getElementById('qr-actions');
+    var dataBox       = document.getElementById('qr-data-box');
+    var warningBox    = document.getElementById('qr-warning');
+    var btnDownload   = document.getElementById('qr-btn-download');
+    var btnDownloadQr = document.getElementById('qr-btn-qr');
+    var btnCopy       = document.getElementById('qr-btn-copy');
+    var contactsList  = document.getElementById('qr-contacts-list');
+
+    var activeTab    = 'sip';
+    var qrSubTab     = 'url';
+    var qrReady      = false;
+    var contactRowId = 0;
+
+    // ---- Messages ----
+    function showToast(message, type) {
+        var zone = document.getElementById('toasts');
+        var el   = document.createElement('div');
+        el.className   = 'toast' + (type === 'error' ? ' toast--error' : '');
+        el.textContent = message;
+        zone.appendChild(el);
+        setTimeout(function () { el.remove(); }, 4000);
+    }
+
+    // ---- Onglets ----
+    document.querySelectorAll('.qr-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            document.querySelectorAll('.qr-tab').forEach(function (t) { t.classList.remove('is-active'); });
+            document.querySelectorAll('.qr-panel').forEach(function (p) { p.classList.remove('is-active'); });
+            tab.classList.add('is-active');
+            activeTab = tab.dataset.tab;
+            document.getElementById('qr-panel-' + activeTab).classList.add('is-active');
+            updatePreview();
+        });
+    });
+
+    document.querySelectorAll('.qr-subtab').forEach(function (sub) {
+        sub.addEventListener('click', function () {
+            document.querySelectorAll('.qr-subtab').forEach(function (s) { s.classList.remove('is-active'); });
+            document.querySelectorAll('.qr-subpanel').forEach(function (p) { p.classList.remove('is-active'); });
+            sub.classList.add('is-active');
+            qrSubTab = sub.dataset.subtab;
+            document.getElementById('qr-subpanel-' + qrSubTab).classList.add('is-active');
+            updatePreview();
+        });
+    });
+
+    // ---- SIP ----
+    document.getElementById('qr-toggle-pw').addEventListener('click', function () {
+        var pw = document.getElementById('sip-password');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+
+    document.getElementById('qr-toggle-admin-pw').addEventListener('click', function () {
+        var pw = document.getElementById('sip-admin-password');
+        pw.type = pw.type === 'password' ? 'text' : 'password';
+    });
+
+    var SIP_FIELDS = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
+                      'sip-transport', 'sip-port', 'sip-admin-password'];
+
+    var FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
+                       'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
+
+    SIP_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('qr-clear-sip').addEventListener('click', function () {
+        SIP_FIELDS.forEach(function (id) {
+            if (id !== 'sip-transport') document.getElementById(id).value = '';
+        });
+        document.getElementById('sip-transport').value = 'udp';
+        updatePreview();
+    });
+
+    // ---- Favoris ----
+    function addContactRow(name, phone, blf) {
+        var row = document.createElement('div');
+        row.className  = 'qr-contact-row';
+        row.dataset.id = 'qr-c-' + (contactRowId++);
+
+        var nameInput = document.createElement('input');
+        nameInput.className     = 'qr-input';
+        nameInput.type          = 'text';
+        nameInput.placeholder   = 'Nom (ex: Jean Dupont)';
+        nameInput.value         = name || '';
+        nameInput.dataset.field = 'name';
+
+        var phoneInput = document.createElement('input');
+        phoneInput.className     = 'qr-input';
+        phoneInput.type          = 'text';
+        phoneInput.placeholder   = 'Numéro (ex: 1002)';
+        phoneInput.value         = phone || '';
+        phoneInput.dataset.field = 'phone';
+
+        var blfLabel = document.createElement('label');
+        blfLabel.className = 'qr-blf-wrap';
+        var blfInput = document.createElement('input');
+        blfInput.type          = 'checkbox';
+        blfInput.dataset.field = 'blf';
+        blfInput.checked       = Boolean(blf);
+        blfLabel.appendChild(blfInput);
+        blfLabel.appendChild(document.createTextNode(' BLF'));
+
+        var removeBtn = document.createElement('button');
+        removeBtn.type        = 'button';
+        removeBtn.className   = 'qr-btn-remove';
+        removeBtn.title       = 'Supprimer';
+        removeBtn.setAttribute('aria-label', 'Supprimer ce contact');
+        removeBtn.textContent = '✕';
+
+        row.append(nameInput, phoneInput, blfLabel, removeBtn);
+
+        row.querySelectorAll('input').forEach(function (el) {
+            el.addEventListener('input', updatePreview);
+            el.addEventListener('change', updatePreview);
+        });
+
+        removeBtn.addEventListener('click', function () { row.remove(); updatePreview(); });
+
+        contactsList.appendChild(row);
+    }
+
+    document.getElementById('qr-add-contact').addEventListener('click', function () {
+        addContactRow();
+        updatePreview();
+    });
+
+    document.getElementById('qr-clear-favoris').addEventListener('click', function () {
+        contactsList.innerHTML = '';
+        addContactRow();
+        updatePreview();
+    });
+
+    addContactRow();
+    addContactRow();
+
+    // ---- QR libre ----
+    document.querySelectorAll('#qr-panel-qr .qr-input, #qr-panel-qr .qr-textarea').forEach(function (el) {
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('qr-clear-free').addEventListener('click', function () {
+        document.querySelectorAll('#qr-panel-qr .qr-input, #qr-panel-qr .qr-textarea')
+            .forEach(function (el) { el.value = ''; });
+        updatePreview();
+    });
+
+    // ---- Enregistrement et chargement d'une configuration ----
+    //
+    // La version interne garde les configurations sur le serveur, chiffrées,
+    // parce qu'elles contiennent les mots de passe SIP et administrateur. Hors
+    // ligne il n'y a pas de serveur, et les déposer dans le navigateur les
+    // laisserait en clair sur le poste, à l'insu de l'utilisateur. On passe
+    // donc par un fichier : il est visible, se range où l'on veut et se
+    // supprime d'un geste.
+
+    function readField(id) {
+        var el = document.getElementById(id);
+        return el ? el.value : '';
+    }
+
+    function collectState() {
+        var sip = {}, free = {}, contacts = [];
+
+        SIP_FIELDS.forEach(function (id) { sip[id] = readField(id); });
+        FREE_FIELDS.forEach(function (id) { free[id] = readField(id); });
+
+        contactsList.querySelectorAll('.qr-contact-row').forEach(function (row) {
+            contacts.push({
+                name:  row.querySelector('[data-field="name"]').value,
+                phone: row.querySelector('[data-field="phone"]').value,
+                blf:   row.querySelector('[data-field="blf"]').checked
+            });
+        });
+
+        return { version: 1, tab: activeTab, subTab: qrSubTab, sip: sip, free: free, contacts: contacts };
+    }
+
+    function applyState(state) {
+        if (!state || typeof state !== 'object') throw new Error('format');
+
+        Object.keys(state.sip || {}).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && SIP_FIELDS.indexOf(id) !== -1) el.value = state.sip[id];
+        });
+
+        Object.keys(state.free || {}).forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && FREE_FIELDS.indexOf(id) !== -1) el.value = state.free[id];
+        });
+
+        contactsList.innerHTML = '';
+        (state.contacts || []).forEach(function (c) {
+            addContactRow(c.name, c.phone, c.blf);
+        });
+        if (!contactsList.children.length) addContactRow();
+
+        // On rejoue le clic plutôt que de dupliquer la logique d'affichage.
+        var sub = document.querySelector('.qr-subtab[data-subtab="' + state.subTab + '"]');
+        if (sub) sub.click();
+        var tab = document.querySelector('.qr-tab[data-tab="' + state.tab + '"]');
+        if (tab) tab.click();
+
+        updatePreview();
+    }
+
+    function telecharger(contenu, nom, type) {
+        var blob = new Blob([contenu], { type: type });
+        var url  = URL.createObjectURL(blob);
+        var a    = document.createElement('a');
+        a.download = nom;
+        a.href     = url;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('cfg-save').addEventListener('click', function () {
+        var nom = window.prompt('Nom de la configuration :', 'configuration');
+        if (!nom || !nom.trim()) return;
+
+        var propre = nom.trim().replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '') || 'configuration';
+
+        telecharger(JSON.stringify(collectState(), null, 2), propre + '.json', 'application/json');
+        showToast('Configuration enregistrée dans « ' + propre + '.json ».');
+    });
+
+    var champFichier = document.getElementById('cfg-file');
+
+    document.getElementById('cfg-load').addEventListener('click', function () {
+        champFichier.click();
+    });
+
+    champFichier.addEventListener('change', function () {
+        var fichier = champFichier.value && champFichier.files[0];
+        if (!fichier) return;
+
+        var lecteur = new FileReader();
+
+        lecteur.onload = function () {
+            try {
+                applyState(JSON.parse(lecteur.result));
+                showToast('Configuration chargée.');
+            } catch (e) {
+                showToast("Ce fichier n'est pas une configuration valide.", 'error');
+            }
+        };
+
+        lecteur.onerror = function () {
+            showToast('Lecture du fichier impossible.', 'error');
+        };
+
+        lecteur.readAsText(fichier);
+
+        // Permet de recharger deux fois de suite le même fichier.
+        champFichier.value = '';
+    });
+
+    // ---- Construction des données ----
+    function buildSipData() {
+        var username  = document.getElementById('sip-username').value.trim();
+        var password  = document.getElementById('sip-password').value;
+        var domain    = document.getElementById('sip-domain').value.trim();
+        var display   = document.getElementById('sip-display').value.trim();
+        var transport = document.getElementById('sip-transport').value;
+        var portRaw   = document.getElementById('sip-port').value.trim();
+        var adminPw   = document.getElementById('sip-admin-password').value;
+
+        if (!username && !password && !domain && !display && !portRaw && !adminPw) return null;
+
+        var data = {
+            username: username,
+            password: password,
+            domain: domain,
+            display: display,
+            transport: transport,
+            port: portRaw ? parseInt(portRaw, 10) : 5060
+        };
+
+        if (adminPw) data.admin_password = adminPw;
+
+        return data;
+    }
+
+    function buildFavData() {
+        var contacts = [];
+
+        contactsList.querySelectorAll('.qr-contact-row').forEach(function (row) {
+            var name  = row.querySelector('[data-field="name"]').value.trim();
+            var phone = row.querySelector('[data-field="phone"]').value.trim();
+            var blf   = row.querySelector('[data-field="blf"]').checked;
+            if (!name && !phone) return;
+            contacts.push({ name: name, phone: phone, blf: blf });
+        });
+
+        return contacts.length ? { contacts: contacts } : null;
+    }
+
+    function buildGenericQrData() {
+        if (qrSubTab === 'url') {
+            var url = document.getElementById('qr-url').value.trim();
+            if (!url) return null;
+            if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+            return url;
+        }
+
+        if (qrSubTab === 'text') {
+            return document.getElementById('qr-text').value.trim() || null;
+        }
+
+        if (qrSubTab === 'contact') {
+            var f = function (id) { return document.getElementById(id).value.trim(); };
+            var first = f('qr-c-first'), last = f('qr-c-last'),
+                phone = f('qr-c-phone'), email = f('qr-c-email'),
+                org   = f('qr-c-org'),   url   = f('qr-c-url');
+
+            if (!first && !last && !phone && !email) return null;
+
+            return 'BEGIN:VCARD\nVERSION:3.0\nFN:' + first + ' ' + last
+                 + '\nN:' + last + ';' + first + ';;;'
+                 + '\nORG:' + org + '\nTEL:' + phone + '\nEMAIL:' + email
+                 + '\nURL:' + url + '\nEND:VCARD';
+        }
+
+        return null;
+    }
+
+    function buildPayload() {
+        if (activeTab === 'sip' || activeTab === 'favoris') {
+            var data = activeTab === 'sip' ? buildSipData() : buildFavData();
+            if (!data) return null;
+
+            return {
+                preview: JSON.stringify(data, null, 2),
+                qrValue: JSON.stringify(data),
+                downloadName: activeTab === 'sip' ? 'sip-config.json' : 'favoris.json',
+                downloadMime: 'application/json',
+                downloadContent: JSON.stringify(data, null, 2),
+                downloadLabel: '⬇ Télécharger le JSON',
+                copyLabel: '📋 Copier le JSON'
+            };
+        }
+
+        var value = buildGenericQrData();
+        if (!value) return null;
+
+        var names = { url: 'qrcode-url.txt', text: 'qrcode-texte.txt', contact: 'contact.vcf' };
+        var mimes = { url: 'text/plain', text: 'text/plain', contact: 'text/vcard' };
+
+        return {
+            preview: value,
+            qrValue: value,
+            downloadName: names[qrSubTab],
+            downloadMime: mimes[qrSubTab],
+            downloadContent: value,
+            downloadLabel: qrSubTab === 'contact' ? '⬇ Télécharger le .vcf' : '⬇ Télécharger le .txt',
+            copyLabel: '📋 Copier'
+        };
+    }
+
+    // ---- Dessin du QR code ----
+    //
+    // La bibliothèque ne dessine pas elle-même : elle expose une grille de
+    // modules que l'on peint ici. On vise une toile d'environ 560 px pour que
+    // l'image téléchargée reste nette à l'impression, l'affichage étant réduit
+    // à 280 px par la feuille de style.
+    function drawQr(texte) {
+        var qr = qrcode(0, 'M');
+        qr.addData(texte);
+        qr.make();
+
+        var modules = qr.getModuleCount();
+        var marge   = 4;  // zone silencieuse exigée par la norme
+        var cote    = Math.max(2, Math.ceil(560 / (modules + marge * 2)));
+        var taille  = (modules + marge * 2) * cote;
+
+        canvas.width  = taille;
+        canvas.height = taille;
+
+        var ctx = canvas.getContext('2d');
+
+        // Fond blanc explicite : sans lui, le PNG exporté serait transparent et
+        // deviendrait illisible sur un support sombre.
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, taille, taille);
+
+        ctx.fillStyle = '#000000';
+        for (var r = 0; r < modules; r++) {
+            for (var c = 0; c < modules; c++) {
+                if (qr.isDark(r, c)) {
+                    ctx.fillRect((c + marge) * cote, (r + marge) * cote, cote, cote);
+                }
+            }
+        }
+    }
+
+    // ---- Aperçu ----
+    function updatePreview() {
+        var payload = buildPayload();
+
+        if (!payload) {
+            canvas.style.display      = 'none';
+            placeholder.style.display = 'block';
+            actions.style.display     = 'none';
+            dataBox.style.display     = 'none';
+            warningBox.style.display  = 'none';
+            qrReady = false;
+            return;
+        }
+
+        dataBox.style.display   = 'block';
+        dataBox.textContent     = payload.preview;
+        actions.style.display   = 'flex';
+        placeholder.style.display = 'none';
+        btnDownload.textContent = payload.downloadLabel;
+        btnCopy.textContent     = payload.copyLabel;
+
+        var octets = new Blob([payload.qrValue]).size;
+
+        if (octets > 1800) {
+            warningBox.style.display = 'block';
+            warningBox.textContent   = '⚠ Les données sont volumineuses (' + octets
+                + ' octets). Le QR code risque d\'être difficile à scanner : préférez le téléchargement du fichier.';
+            canvas.style.display   = 'none';
+            btnDownloadQr.disabled = true;
+            qrReady = false;
+            return;
+        }
+
+        try {
+            drawQr(payload.qrValue);
+            warningBox.style.display = 'none';
+            canvas.style.display     = 'block';
+            btnDownloadQr.disabled   = false;
+            qrReady = true;
+        } catch (e) {
+            warningBox.style.display = 'block';
+            warningBox.textContent   = '⚠ Impossible de générer le QR code pour ces données. Téléchargez le fichier à la place.';
+            canvas.style.display     = 'none';
+            btnDownloadQr.disabled   = true;
+            qrReady = false;
+        }
+    }
+
+    // ---- Téléchargements ----
+    btnDownload.addEventListener('click', function () {
+        var payload = buildPayload();
+        if (!payload) return;
+        telecharger(payload.downloadContent, payload.downloadName, payload.downloadMime);
+    });
+
+    btnDownloadQr.addEventListener('click', function () {
+        var payload = buildPayload();
+        if (!payload || !qrReady) return;
+
+        var a = document.createElement('a');
+        a.download = payload.downloadName.replace(/\.(json|txt|vcf)$/, '') + '-qrcode.png';
+        a.href     = canvas.toDataURL('image/png');
+        a.click();
+    });
+
+    // ---- Copie ----
+    //
+    // navigator.clipboard n'existe que dans un contexte sécurisé : ouvert par
+    // double-clic (file://), le navigateur ne le fournit pas. D'où la méthode
+    // de repli, sans laquelle le bouton resterait sans effet.
+    function copier(texte) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(texte);
+        }
+
+        return new Promise(function (resolve, reject) {
+            var zone = document.createElement('textarea');
+            zone.value = texte;
+            zone.setAttribute('readonly', '');
+            zone.style.position = 'fixed';
+            zone.style.top      = '-1000px';
+            document.body.appendChild(zone);
+            zone.select();
+
+            try {
+                document.execCommand('copy') ? resolve() : reject();
+            } catch (e) {
+                reject(e);
+            } finally {
+                zone.remove();
+            }
+        });
+    }
+
+    btnCopy.addEventListener('click', function () {
+        var payload = buildPayload();
+        if (!payload) return;
+
+        var label = payload.copyLabel;
+
+        copier(payload.preview).then(function () {
+            btnCopy.textContent = '✅ Copié !';
+            setTimeout(function () { btnCopy.textContent = label; }, 2000);
+        }).catch(function () {
+            showToast('Copie impossible : sélectionnez le texte ci-dessous.', 'error');
+        });
+    });
+
+    updatePreview();
+})();
+</script>
+
+</body>
+</html>

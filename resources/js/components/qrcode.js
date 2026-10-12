@@ -65,14 +65,14 @@ export function initQrCode() {
     });
 
     // ── SIP: mise à jour en temps réel ──
-    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port', 'sip-admin-password'].forEach(id => {
+    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo'].forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', updatePreview);
     });
 
     document.getElementById('qr-clear-sip').addEventListener('click', () => {
-        ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port', 'sip-admin-password'].forEach(id => {
+        ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port', 'sip-admin-password', 'sip-logo'].forEach(id => {
             document.getElementById(id).value = '';
         });
         document.getElementById('sip-transport').value = 'udp';
@@ -156,7 +156,7 @@ export function initQrCode() {
     // (il contient les mots de passe SIP et administrateur).
 
     const SIP_FIELDS  = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
-                         'sip-transport', 'sip-port', 'sip-admin-password'];
+                         'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo'];
     const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                          'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
 
@@ -189,6 +189,16 @@ export function initQrCode() {
     /** Rejoue un état enregistré dans le formulaire. */
     function applyState(state) {
         if (!state || typeof state !== 'object') return;
+
+        // On repart d'un formulaire vide : une configuration enregistrée avant
+        // l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage la
+        // valeur précédemment affichée resterait, mêlée à la configuration
+        // chargée.
+        [...SIP_FIELDS, ...FREE_FIELDS].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+        document.getElementById('sip-transport').value = 'udp';
 
         Object.entries(state.sip ?? {}).forEach(([id, valeur]) => {
             const el = document.getElementById(id);
@@ -335,11 +345,17 @@ export function initQrCode() {
         const transport      = document.getElementById('sip-transport').value;
         const portRaw        = document.getElementById('sip-port').value.trim();
         const admin_password = document.getElementById('sip-admin-password').value;
+        const logo           = document.getElementById('sip-logo').value.trim();
 
-        if (!username && !password && !domain && !display && !portRaw && !admin_password) return null;
+        if (!username && !password && !domain && !display && !portRaw && !admin_password && !logo) return null;
 
         const data = { username, password, domain, display, transport, port: portRaw ? parseInt(portRaw, 10) : 5060 };
+
+        // Champs facultatifs : absents du JSON plutôt que vides, pour ne pas
+        // imposer une clé que le poste n'attend pas forcément.
         if (admin_password) data.admin_password = admin_password;
+        if (logo) data.logo = logo;
+
         return data;
     }
 
