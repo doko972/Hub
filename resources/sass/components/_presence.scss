@@ -8,16 +8,39 @@
     padding: 0;
 
     &__item {
-        display: flex;
-        align-items: center;
-        gap: $spacing-sm;
-        padding: 6px $spacing-md;
+        // La mise en forme de la ligne vit sur &__row : selon qu'on puisse ou
+        // non écrire à la personne, c'est un bouton ou un simple bloc, et les
+        // deux doivent occuper la ligne entière pour que le survol la couvre.
+        display: block;
         // Les personnes hors ligne s'effacent sans disparaître.
         opacity: 0.45;
         transition: opacity $transition-fast;
 
         &.is-online {
             opacity: 1;
+        }
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        width: 100%;
+        padding: 6px $spacing-md;
+    }
+
+    // Ligne cliquable : ouvre la conversation avec la personne.
+    button#{&}__row {
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        text-align: left;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            background: $color-sidebar-hover;
         }
     }
 

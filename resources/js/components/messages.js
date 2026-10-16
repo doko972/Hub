@@ -252,13 +252,33 @@ function initThread() {
         renderFiles();
     }
 
-    fileInput?.addEventListener('change', () => {
-        // Contrôles côté client pour un retour immédiat ; le serveur revalide
-        // de toute façon, c'est lui qui fait foi.
-        for (const file of fileInput.files) {
+    const allowedExtensions = (composer.dataset.allowedExtensions ?? '')
+        .split(',')
+        .map((ext) => ext.trim().toLowerCase())
+        .filter(Boolean);
+
+    function extensionOf(name) {
+        const point = name.lastIndexOf('.');
+        return point === -1 ? '' : name.slice(point + 1).toLowerCase();
+    }
+
+    /**
+     * Ajoute des fichiers à la liste d'envoi.
+     *
+     * Contrôles côté client pour un retour immédiat ; le serveur revalide de
+     * toute façon, c'est lui qui fait foi. Partagé par le sélecteur et le
+     * glisser-déposer : l'attribut accept du premier ne filtre pas le second.
+     */
+    function addFiles(files) {
+        for (const file of files) {
             if (pending.length >= maxFiles) {
                 showToast(`Pas plus de ${maxFiles} fichiers par message.`, 'warning');
                 break;
+            }
+
+            if (allowedExtensions.length && !allowedExtensions.includes(extensionOf(file.name))) {
+                showToast(`« ${file.name} » n'est pas un type de fichier autorisé.`, 'warning');
+                continue;
             }
 
             if (file.size > maxBytes) {
@@ -269,8 +289,66 @@ function initThread() {
             pending.push(file);
         }
 
-        fileInput.value = '';
         renderFiles();
+    }
+
+    fileInput?.addEventListener('change', () => {
+        addFiles(fileInput.files);
+        fileInput.value = '';
+    });
+
+    // ---- Glisser-déposer ----
+    //
+    // La zone couvre toute la conversation, et pas seulement le composeur :
+    // c'est sur les messages que le regard se porte quand on fait glisser un
+    // fichier.
+    const dropZone = composer.closest('.messenger__thread') ?? composer;
+
+    // dragenter et dragleave se déclenchent aussi au passage d'un enfant à
+    // l'autre : sans ce compteur, la surbrillance clignoterait.
+    let dragDepth = 0;
+
+    function isFileDrag(event) {
+        return Array.from(event.dataTransfer?.types ?? []).includes('Files');
+    }
+
+    dropZone.addEventListener('dragenter', (event) => {
+        if (!isFileDrag(event)) return;
+        event.preventDefault();
+        dragDepth += 1;
+        dropZone.classList.add('is-dropping');
+    });
+
+    dropZone.addEventListener('dragover', (event) => {
+        if (!isFileDrag(event)) return;
+        // Sans preventDefault ici, le navigateur refuse purement et simplement
+        // le dépôt : l'évènement drop n'arriverait jamais.
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+    });
+
+    dropZone.addEventListener('dragleave', (event) => {
+        if (!isFileDrag(event)) return;
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (dragDepth === 0) dropZone.classList.remove('is-dropping');
+    });
+
+    dropZone.addEventListener('drop', (event) => {
+        if (!isFileDrag(event)) return;
+        event.preventDefault();
+        dragDepth = 0;
+        dropZone.classList.remove('is-dropping');
+
+        addFiles(event.dataTransfer.files);
+        textarea.focus();
+    });
+
+    // Un fichier lâché à côté de la zone serait ouvert par le navigateur, qui
+    // quitterait la page et ferait perdre le message en cours de rédaction.
+    ['dragover', 'drop'].forEach((type) => {
+        document.addEventListener(type, (event) => {
+            if (isFileDrag(event) && !dropZone.contains(event.target)) event.preventDefault();
+        });
     });
 
     function append(messages) {

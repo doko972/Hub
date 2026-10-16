@@ -31,25 +31,28 @@
         <ul class="presence" data-presence-list
             data-presence-url="{{ route('presence.index') }}"
             data-presence-interval="{{ (int) config('presence.poll_seconds', 30) }}"
+            data-direct-url="{{ route('messages.direct', '__ID__') }}"
             aria-live="polite">
             @forelse($roster as $person)
                 <li class="presence__item {{ $person['is_online'] ? 'is-online' : '' }}">
-                    <span class="presence__avatar">
-                        @if($person['avatar'])
-                            <img src="{{ $person['avatar'] }}" alt="">
-                        @else
-                            {{ $person['initials'] }}
-                        @endif
-                        <span class="presence__dot" aria-hidden="true"></span>
-                    </span>
-                    <span class="presence__body">
-                        <span class="presence__name">
-                            {{ $person['name'] }}@if($person['is_self']) <em>(vous)</em>@endif
-                        </span>
-                        @unless($person['is_online'])
-                            <span class="presence__meta">{{ $person['seen_ago'] }}</span>
-                        @endunless
-                    </span>
+                    {{-- Le contenu de la ligne est identique dans les deux cas ;
+                         seule l'enveloppe change, car on ne s'écrit pas à
+                         soi-même. --}}
+                    @php
+                        $contenu = view('partials.presence-row', ['person' => $person]);
+                    @endphp
+
+                    @if($person['is_self'])
+                        <span class="presence__row">{!! $contenu !!}</span>
+                    @else
+                        {{-- POST et non lien : ouvrir une conversation peut la
+                             créer, ce qui n'a pas sa place dans un GET. --}}
+                        <form method="POST" action="{{ route('messages.direct', $person['id']) }}">
+                            @csrf
+                            <button type="submit" class="presence__row"
+                                    title="Écrire à {{ $person['name'] }}">{!! $contenu !!}</button>
+                        </form>
+                    @endif
                 </li>
             @empty
                 <li class="presence__empty" data-presence-empty>Personne d'autre pour l'instant.</li>

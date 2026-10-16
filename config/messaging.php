@@ -43,6 +43,9 @@ return [
         'allowed_extensions' => [
             'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp',
             'pdf', 'txt', 'csv', 'md', 'rtf',
+            // Fichiers de configuration échangés entre techniciens. Inoffensifs
+            // ici : rien n'est exécuté, et tout est servi en téléchargement.
+            'conf',
             'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
             'odt', 'ods', 'odp',
             'zip',

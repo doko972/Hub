@@ -179,7 +179,10 @@
 
             <form class="messenger__composer" data-composer
                   data-max-files="{{ (int) config('messaging.attachments.max_files') }}"
-                  data-max-size-kb="{{ (int) config('messaging.attachments.max_size_kb') }}">
+                  data-max-size-kb="{{ (int) config('messaging.attachments.max_size_kb') }}"
+                  {{-- Sert au retour immédiat lors d'un glisser-déposer :
+                       l'attribut accept du sélecteur ne filtre pas les dépôts. --}}
+                  data-allowed-extensions="{{ implode(',', config('messaging.attachments.allowed_extensions')) }}">
                 @csrf
 
                 {{-- Fichiers choisis, avant envoi --}}

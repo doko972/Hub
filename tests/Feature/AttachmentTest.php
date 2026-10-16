@@ -52,6 +52,37 @@ class AttachmentTest extends TestCase
         $this->assertFileDoesNotExist(public_path('storage/' . $attachment->path));
     }
 
+    public function test_un_fichier_de_configuration_est_accepte(): void
+    {
+        [$alice, , $discussion] = $this->conversation();
+
+        // Un .conf est du texte : la vérification de contenu le voit comme tel,
+        // et c'est la liste blanche d'extensions qui décide de l'accepter.
+        $fichier = UploadedFile::fake()->createWithContent(
+            'extensions.conf',
+            "[general]\nstatic=yes\nwriteprotect=no\n"
+        );
+
+        $this->actingAs($alice)
+            ->postJson(route('messages.send', $discussion), ['attachments' => [$fichier]])
+            ->assertCreated();
+
+        $this->assertDatabaseHas('discussion_attachments', ['original_name' => 'extensions.conf']);
+    }
+
+    public function test_une_extension_hors_liste_blanche_reste_refusee(): void
+    {
+        [$alice, , $discussion] = $this->conversation();
+
+        $fichier = UploadedFile::fake()->createWithContent('script.sh', "#!/bin/sh\nrm -rf /\n");
+
+        $this->actingAs($alice)
+            ->postJson(route('messages.send', $discussion), ['attachments' => [$fichier]])
+            ->assertStatus(422);
+
+        $this->assertDatabaseCount('discussion_attachments', 0);
+    }
+
     public function test_un_message_peut_n_etre_qu_une_piece_jointe(): void
     {
         [$alice, , $discussion] = $this->conversation();

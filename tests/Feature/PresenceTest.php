@@ -135,4 +135,31 @@ class PresenceTest extends TestCase
             ->assertSee('data-sidebar-section="presence"', false)
             ->assertSee('data-presence-list', false);
     }
+
+    public function test_le_panneau_propose_d_ecrire_a_un_collegue(): void
+    {
+        // last_seen_at est indispensable : le panneau écarte les absents de
+        // longue date, un compte jamais vu n'y figurerait pas.
+        $moi      = User::factory()->create(['is_active' => true, 'name' => 'Alice', 'last_seen_at' => now()]);
+        $collegue = User::factory()->create(['is_active' => true, 'name' => 'Bob', 'last_seen_at' => now()]);
+
+        $this->actingAs($moi)->get('/')
+            ->assertSee(route('messages.direct', $collegue), false)
+            ->assertSee('Écrire à Bob', false)
+            // Pas de bouton vers soi-même : on ne s'écrit pas.
+            ->assertDontSee(route('messages.direct', $moi), false);
+    }
+
+    public function test_ecrire_depuis_le_panneau_ouvre_la_conversation(): void
+    {
+        $moi      = User::factory()->create(['is_active' => true]);
+        $collegue = User::factory()->create(['is_active' => true]);
+
+        $reponse = $this->actingAs($moi)->post(route('messages.direct', $collegue));
+
+        $discussion = \App\Models\Discussion::firstOrFail();
+
+        $reponse->assertRedirect(route('messages.show', $discussion));
+        $this->assertTrue($discussion->participants->contains('id', $collegue->id));
+    }
 }

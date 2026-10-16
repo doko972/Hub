@@ -32,10 +32,7 @@ function buildAvatar(person) {
     return avatar;
 }
 
-function buildItem(person) {
-    const item = document.createElement('li');
-    item.className = 'presence__item' + (person.is_online ? ' is-online' : '');
-
+function buildBody(person) {
     const body = document.createElement('span');
     body.className = 'presence__body';
 
@@ -58,7 +55,50 @@ function buildItem(person) {
         body.appendChild(meta);
     }
 
-    item.append(buildAvatar(person), body);
+    return body;
+}
+
+/**
+ * Enveloppe de la ligne : un bouton qui ouvre la conversation, ou un simple
+ * bloc quand il s'agit de soi.
+ *
+ * POST et non lien : ouvrir une conversation peut la créer, ce qui n'a pas sa
+ * place dans un GET. Doit rester en phase avec partials/presence-row.blade.php.
+ */
+function buildRow(person, directUrl, csrf) {
+    const contenu = [buildAvatar(person), buildBody(person)];
+
+    if (person.is_self || !directUrl || !csrf) {
+        const row = document.createElement('span');
+        row.className = 'presence__row';
+        row.append(...contenu);
+        return row;
+    }
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = directUrl.replace('__ID__', person.id);
+
+    const token = document.createElement('input');
+    token.type  = 'hidden';
+    token.name  = '_token';
+    token.value = csrf;
+
+    const button = document.createElement('button');
+    button.type      = 'submit';
+    button.className = 'presence__row';
+    button.title     = `Écrire à ${person.name}`;
+    button.append(...contenu);
+
+    form.append(token, button);
+
+    return form;
+}
+
+function buildItem(person, directUrl, csrf) {
+    const item = document.createElement('li');
+    item.className = 'presence__item' + (person.is_online ? ' is-online' : '');
+    item.appendChild(buildRow(person, directUrl, csrf));
 
     return item;
 }
@@ -72,7 +112,10 @@ function render(list, data) {
         empty.textContent = "Personne d'autre pour l'instant.";
         fragment.appendChild(empty);
     } else {
-        data.users.forEach((person) => fragment.appendChild(buildItem(person)));
+        const directUrl = list.dataset.directUrl;
+        const csrf      = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        data.users.forEach((person) => fragment.appendChild(buildItem(person, directUrl, csrf)));
     }
 
     list.replaceChildren(fragment);
