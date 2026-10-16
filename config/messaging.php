@@ -37,19 +37,29 @@ return [
         // de PHP, sinon le serveur rejette la requête avant Laravel.
         'max_size_kb' => (int) env('MESSAGING_MAX_SIZE_KB', 10240),
 
-        // Liste blanche : tout ce qui n'y figure pas est refusé. Volontairement
-        // sans svg, html, ni exécutables — un fichier déposé ici est
-        // téléchargeable par tous les participants du fil.
-        'allowed_extensions' => [
-            'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp',
-            'pdf', 'txt', 'csv', 'md', 'rtf',
-            // Fichiers de configuration échangés entre techniciens. Inoffensifs
-            // ici : rien n'est exécuté, et tout est servi en téléchargement.
-            'conf',
-            'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-            'odt', 'ods', 'odp',
-            'zip',
+        // Liste de REFUS, et non liste blanche : une liste blanche obligeait à
+        // la compléter à chaque nouveau besoin, et refusait sans raison des
+        // fichiers techniques courants (.conf, .xml, .json…).
+        //
+        // L'ouverture est sans danger pour le Hub : les pièces jointes vivent
+        // hors du dossier public, ne sont servies que par une route
+        // authentifiée, toujours avec Content-Disposition: attachment (sauf
+        // les images listées plus bas) et sous X-Content-Type-Options: nosniff.
+        // Un .html ou un .php déposé ici est téléchargé, jamais exécuté.
+        //
+        // Ce qui reste refusé, c'est ce qu'un double-clic lance sous Windows :
+        // la messagerie ne doit pas pouvoir servir à diffuser un programme à
+        // toute l'entreprise depuis un compte de confiance.
+        'blocked_extensions' => [
+            'exe', 'com', 'scr', 'pif', 'msi', 'msp', 'app', 'gadget',
+            'bat', 'cmd', 'hta', 'vbs', 'vbe', 'wsf', 'wsh',
+            'ps1', 'psm1', 'ps1xml',
+            'cpl', 'msc', 'inf', 'reg', 'lnk', 'jar', 'dll', 'sys',
         ],
+
+        // Un fichier annoncé comme image doit réellement en être une : c'est ce
+        // qui empêche de faire passer un script pour une photo.
+        'image_extensions' => ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'],
 
         // Seuls ces types sont affichés dans le fil ; le reste est proposé au
         // téléchargement, avec Content-Disposition: attachment.

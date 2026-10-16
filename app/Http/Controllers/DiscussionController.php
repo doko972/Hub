@@ -7,6 +7,7 @@ use App\Models\Discussion;
 use App\Models\DiscussionAttachment;
 use App\Models\DiscussionMessage;
 use App\Models\User;
+use App\Rules\SafeAttachment;
 use App\Services\GifSearch;
 use App\Services\Typing;
 use App\Services\Unread;
@@ -140,30 +141,23 @@ class DiscussionController extends Controller
         $discussion->load('participants');
         $this->authorize('send', $discussion);
 
-        $config     = config('messaging.attachments');
-        $extensions = implode(',', $config['allowed_extensions']);
+        $config = config('messaging.attachments');
 
         $validated = $request->validate([
             // Un message peut n'être qu'une pièce jointe, mais pas être vide
             // des deux côtés.
             'body'          => ['nullable', 'string', 'max:5000', 'required_without:attachments'],
             'attachments'   => ['nullable', 'array', 'max:' . $config['max_files']],
-            // mimes vérifie le contenu réel, extensions le nom annoncé : les
-            // deux ensemble arrêtent un script renommé en .jpg comme une image
-            // renommée en .php.
             'attachments.*' => [
                 'file',
                 'max:' . $config['max_size_kb'],
-                'mimes:' . $extensions,
-                'extensions:' . $extensions,
+                new SafeAttachment(),
             ],
         ], [
             'body.required_without' => 'Écrivez un message ou joignez un fichier.',
             'body.max'              => 'Le message ne doit pas dépasser 5000 caractères.',
             'attachments.max'       => 'Pas plus de ' . $config['max_files'] . ' fichiers par message.',
             'attachments.*.max'     => 'Chaque fichier doit rester sous ' . round($config['max_size_kb'] / 1024) . ' Mo.',
-            'attachments.*.mimes'   => 'Ce type de fichier n\'est pas autorisé.',
-            'attachments.*.extensions' => 'Ce type de fichier n\'est pas autorisé.',
         ]);
 
         $message = $discussion->messages()->create([

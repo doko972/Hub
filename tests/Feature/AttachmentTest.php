@@ -70,19 +70,6 @@ class AttachmentTest extends TestCase
         $this->assertDatabaseHas('discussion_attachments', ['original_name' => 'extensions.conf']);
     }
 
-    public function test_une_extension_hors_liste_blanche_reste_refusee(): void
-    {
-        [$alice, , $discussion] = $this->conversation();
-
-        $fichier = UploadedFile::fake()->createWithContent('script.sh', "#!/bin/sh\nrm -rf /\n");
-
-        $this->actingAs($alice)
-            ->postJson(route('messages.send', $discussion), ['attachments' => [$fichier]])
-            ->assertStatus(422);
-
-        $this->assertDatabaseCount('discussion_attachments', 0);
-    }
-
     public function test_un_message_peut_n_etre_qu_une_piece_jointe(): void
     {
         [$alice, , $discussion] = $this->conversation();
@@ -106,31 +93,81 @@ class AttachmentTest extends TestCase
 
     // ---- Contrôles de sécurité ----
 
-    public function test_un_script_php_est_refuse_meme_deguise_en_image(): void
+    public function test_un_fichier_qui_s_annonce_image_doit_en_etre_une(): void
     {
         [$alice, , $discussion] = $this->conversation();
 
-        // Extension interdite.
+        // Un script renommé en .jpg s'afficherait comme une photo dans le fil :
+        // c'est le seul cas où le contenu réel est confronté au nom annoncé.
+        //
+        // Vrai fichier, et non UploadedFile::fake() : sur un fichier factice le
+        // type est déduit du NOM, ce qui ne prouverait rien ici — c'est
+        // justement le nom qui ment.
+        $chemin = tempnam(sys_get_temp_dir(), 'piece');
+        file_put_contents($chemin, '<?php system($_GET["c"]); ?>');
+
         $this->actingAs($alice)->postJson(route('messages.send', $discussion), [
-            'attachments' => [UploadedFile::fake()->create('shell.php', 10, 'application/x-php')],
+            'attachments' => [new UploadedFile($chemin, 'shell.jpg', null, null, true)],
         ])->assertStatus(422);
 
-        // Extension autorisée, mais contenu qui ne correspond pas.
+        // Le même déguisement, avec un type annoncé explicitement.
         $this->actingAs($alice)->postJson(route('messages.send', $discussion), [
             'attachments' => [UploadedFile::fake()->create('shell.jpg', 10, 'application/x-php')],
         ])->assertStatus(422);
 
         $this->assertDatabaseCount('discussion_attachments', 0);
+
+        @unlink($chemin);
     }
 
-    public function test_un_svg_est_refuse(): void
+    public function test_les_fichiers_techniques_passent_et_restent_telecharges(): void
+    {
+        [$alice, $bob, $discussion] = $this->conversation();
+
+        // Rien de tout cela ne peut s'exécuter : les fichiers vivent hors du
+        // dossier public et ne sont servis qu'en téléchargement.
+        foreach (['notes.xml', 'donnees.json', 'script.js', 'page.html', 'logo.svg', 'requete.sql'] as $nom) {
+            $this->actingAs($alice)
+                ->postJson(route('messages.send', $discussion), [
+                    'attachments' => [UploadedFile::fake()->createWithContent($nom, 'contenu')],
+                ])
+                ->assertCreated();
+        }
+
+        $this->assertDatabaseCount('discussion_attachments', 6);
+
+        // Aucun n'est rendu par le navigateur, quel que soit son type.
+        foreach (DiscussionAttachment::all() as $piece) {
+            $reponse = $this->actingAs($bob)->get(route('messages.attachment', $piece));
+
+            $this->assertStringContainsString(
+                'attachment;',
+                $reponse->headers->get('Content-Disposition'),
+                "{$piece->original_name} devrait être téléchargé, jamais affiché."
+            );
+        }
+    }
+
+    public function test_un_executable_est_refuse(): void
     {
         [$alice, , $discussion] = $this->conversation();
 
-        // Un SVG est un document XML : il peut porter du script.
-        $this->actingAs($alice)->postJson(route('messages.send', $discussion), [
-            'attachments' => [UploadedFile::fake()->create('logo.svg', 5, 'image/svg+xml')],
-        ])->assertStatus(422);
+        foreach (['installeur.exe', 'tache.bat', 'outil.ps1', 'archive.jar'] as $nom) {
+            $this->actingAs($alice)
+                ->postJson(route('messages.send', $discussion), [
+                    'attachments' => [UploadedFile::fake()->createWithContent($nom, 'MZ...')],
+                ])
+                ->assertStatus(422);
+        }
+
+        // Seule la dernière extension compte : le déguisement classique.
+        $this->actingAs($alice)
+            ->postJson(route('messages.send', $discussion), [
+                'attachments' => [UploadedFile::fake()->createWithContent('facture.pdf.exe', 'MZ...')],
+            ])
+            ->assertStatus(422);
+
+        $this->assertDatabaseCount('discussion_attachments', 0);
     }
 
     public function test_les_limites_de_taille_et_de_nombre_sont_appliquees(): void

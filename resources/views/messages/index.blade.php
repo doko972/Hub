@@ -181,8 +181,8 @@
                   data-max-files="{{ (int) config('messaging.attachments.max_files') }}"
                   data-max-size-kb="{{ (int) config('messaging.attachments.max_size_kb') }}"
                   {{-- Sert au retour immédiat lors d'un glisser-déposer :
-                       l'attribut accept du sélecteur ne filtre pas les dépôts. --}}
-                  data-allowed-extensions="{{ implode(',', config('messaging.attachments.allowed_extensions')) }}">
+                       un dépôt n'est filtré par aucun attribut du sélecteur. --}}
+                  data-blocked-extensions="{{ implode(',', config('messaging.attachments.blocked_extensions')) }}">
                 @csrf
 
                 {{-- Fichiers choisis, avant envoi --}}
@@ -216,8 +216,10 @@
                             <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
                         </svg>
                         <span class="sr-only">Joindre un fichier</span>
-                        <input type="file" name="attachments[]" multiple data-file-input
-                               accept=".{{ implode(',.', config('messaging.attachments.allowed_extensions')) }}">
+                        {{-- Pas d'attribut accept : presque tout est autorisé,
+                             seuls les exécutables sont écartés, et accept ne
+                             sait pas exprimer une exclusion. --}}
+                        <input type="file" name="attachments[]" multiple data-file-input>
                     </label>
 
                     <label class="sr-only" for="message-body">Votre message</label>

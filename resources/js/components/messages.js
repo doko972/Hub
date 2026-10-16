@@ -252,7 +252,7 @@ function initThread() {
         renderFiles();
     }
 
-    const allowedExtensions = (composer.dataset.allowedExtensions ?? '')
+    const blockedExtensions = (composer.dataset.blockedExtensions ?? '')
         .split(',')
         .map((ext) => ext.trim().toLowerCase())
         .filter(Boolean);
@@ -276,8 +276,8 @@ function initThread() {
                 break;
             }
 
-            if (allowedExtensions.length && !allowedExtensions.includes(extensionOf(file.name))) {
-                showToast(`« ${file.name} » n'est pas un type de fichier autorisé.`, 'warning');
+            if (blockedExtensions.includes(extensionOf(file.name))) {
+                showToast(`« ${file.name} » est un programme : impossible de l'envoyer ici.`, 'warning');
                 continue;
             }
 
