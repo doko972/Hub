@@ -61,7 +61,7 @@
                     <label class="qr-label" for="sip-password">Mot de passe</label>
                     <div class="qr-pw-wrap">
                         <input class="qr-input" id="sip-password" type="password" placeholder="motdepasse">
-                        <button type="button" class="qr-pw-toggle" id="qr-toggle-pw" title="Afficher / masquer">👁</button>
+                        <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-password" title="Afficher / masquer">👁</button>
                     </div>
                 </div>
             </div>
@@ -91,7 +91,7 @@
                     <label class="qr-label" for="sip-admin-password">Mot de passe admin</label>
                     <div class="qr-pw-wrap">
                         <input class="qr-input" id="sip-admin-password" type="password" placeholder="MonMotDePasseAdmin2024">
-                        <button type="button" class="qr-pw-toggle" id="qr-toggle-admin-pw" title="Afficher / masquer">👁</button>
+                        <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-admin-password" title="Afficher / masquer">👁</button>
                     </div>
                 </div>
 
@@ -100,6 +100,40 @@
                 <input class="qr-input" id="sip-logo" type="url"
                        placeholder="https://hrtelecoms.fr/marques/clientA.png">
                 <p class="qr-hint">Facultatif. Laissé vide, la clé « logo » n'apparaît pas dans le JSON.</p>
+            </div>
+
+            <div class="qr-field">
+                <label class="qr-label" for="sip-file-server">Serveur de fichiers</label>
+                {{-- Prérempli : c'est le même pour tous les postes. Reste
+                     modifiable, et « Vider les champs » le remet à cette valeur. --}}
+                <input class="qr-input" id="sip-file-server" type="url"
+                       value="{{ config('qrcode.file_server') }}"
+                       placeholder="https://fichiers.hrtelecoms.fr">
+            </div>
+
+            <div class="qr-field">
+                <label class="qr-label" for="sip-file-key">Clé du serveur de fichiers</label>
+                <div class="qr-pw-wrap">
+                    <input class="qr-input" id="sip-file-key" type="password" placeholder="LA_CLE">
+                    <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-file-key"
+                            title="Afficher / masquer">👁</button>
+                </div>
+                <p class="qr-hint">À saisir pour chaque client. Facultatif : vide, la clé « file_key » n'apparaît pas.</p>
+            </div>
+
+            <div class="qr-field">
+                <label class="qr-label">Fonctions du poste</label>
+                {{-- Cochées par défaut. Contrairement aux champs texte, ces
+                     clés figurent toujours dans le JSON : décocher doit
+                     désactiver la fonction, pas laisser le poste décider. --}}
+                <label class="qr-check">
+                    <input type="checkbox" id="sip-video" checked>
+                    <span>Appel vidéo</span>
+                </label>
+                <label class="qr-check">
+                    <input type="checkbox" id="sip-messaging" checked>
+                    <span>Messagerie instantanée</span>
+                </label>
             </div>
 
             <button class="qr-btn-clear" id="qr-clear-sip">Vider les champs</button>

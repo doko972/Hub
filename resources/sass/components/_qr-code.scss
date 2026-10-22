@@ -116,6 +116,24 @@
     margin-top: $spacing-xs;
 }
 
+// ── Case à cocher d'une fonction du poste ──
+.qr-check {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-top: $spacing-xs;
+    font-size: $font-size-sm;
+    color: $color-text;
+    cursor: pointer;
+
+    input[type="checkbox"] {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: $color-primary;
+        cursor: pointer;
+    }
+}
+
 .qr-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;

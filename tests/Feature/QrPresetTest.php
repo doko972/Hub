@@ -86,6 +86,20 @@ class QrPresetTest extends TestCase
             ->assertDontSee('AdminTelephone2024');
     }
 
+    public function test_le_serveur_de_fichiers_est_prerempli_depuis_la_configuration(): void
+    {
+        $user = User::factory()->create(['is_active' => true]);
+
+        config(['qrcode.file_server' => 'https://fichiers.exemple.test']);
+
+        // Prérempli dans le champ, et non codé en dur dans la vue : un
+        // changement de domaine doit se faire par la configuration.
+        $this->actingAs($user)->get(route('tools.qr-code'))
+            ->assertStatus(200)
+            ->assertSee('value="https://fichiers.exemple.test"', false)
+            ->assertSee('id="sip-file-key"', false);
+    }
+
     public function test_enregistrer_sous_un_nom_existant_met_a_jour(): void
     {
         $user = User::factory()->create(['is_active' => true]);

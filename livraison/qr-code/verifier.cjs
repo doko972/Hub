@@ -115,6 +115,24 @@ verifier(
     && doc.getElementById('qr-actions').style.display === 'none'
 );
 
+const SERVEUR_FICHIERS = 'https://fichiers.hrtelecoms.fr';
+
+verifier(
+    'le serveur de fichiers est prérempli',
+    doc.getElementById('sip-file-server').value === SERVEUR_FICHIERS,
+    doc.getElementById('sip-file-server').value
+);
+
+verifier(
+    'les fonctions vidéo et messagerie sont actives par défaut',
+    doc.getElementById('sip-video').checked && doc.getElementById('sip-messaging').checked
+);
+
+verifier(
+    'la clé du serveur de fichiers est masquée',
+    doc.getElementById('sip-file-key').type === 'password'
+);
+
 // ---- 2. Configuration SIP -------------------------------------------------
 saisir('sip-username', '1002');
 saisir('sip-password', 'M0tDeP4sse!');
@@ -122,8 +140,32 @@ saisir('sip-domain', '51.91.145.39');
 saisir('sip-display', 'Benoît Lefèvre');
 saisir('sip-port', '5060');
 saisir('sip-admin-password', 'Admin2024');
+saisir('sip-logo', 'https://hrtelecoms.fr/marques/clientA.png');
+saisir('sip-file-key', 'LA_CLE');
 
 const sip = JSON.parse(apercu());
+
+verifier(
+    'la structure du JSON est celle attendue par les postes',
+    JSON.stringify(Object.keys(sip)) === JSON.stringify([
+        'username', 'password', 'domain', 'display', 'transport', 'port',
+        'admin_password', 'logo', 'file_server', 'file_key', 'video', 'messaging',
+    ]),
+    Object.keys(sip).join(', ')
+);
+
+verifier(
+    'logo, serveur de fichiers et clé sont repris tels quels',
+    sip.logo === 'https://hrtelecoms.fr/marques/clientA.png'
+    && sip.file_server === SERVEUR_FICHIERS
+    && sip.file_key === 'LA_CLE',
+    JSON.stringify(sip)
+);
+
+verifier(
+    'les deux fonctions sont des booléens',
+    sip.video === true && sip.messaging === true
+);
 
 verifier(
     'la configuration SIP reprend fidèlement la saisie',
@@ -169,8 +211,15 @@ telecharges[0].text().then((contenu) => {
         etat.version === 1
         && etat.sip['sip-username'] === '1002'
         && etat.sip['sip-admin-password'] === 'Admin2024'
+        && etat.sip['sip-file-key'] === 'LA_CLE'
         && Array.isArray(etat.contacts),
         JSON.stringify(etat).slice(0, 120)
+    );
+
+    verifier(
+        'les cases sont enregistrées par leur état, pas par la chaîne « on »',
+        etat.sip['sip-video'] === true && etat.sip['sip-messaging'] === true,
+        JSON.stringify({ video: etat.sip['sip-video'], messaging: etat.sip['sip-messaging'] })
     );
 
     // ---- 4. Onglet « QR Code libre », sous-onglet Contact -----------------
@@ -230,13 +279,36 @@ telecharges[0].text().then((contenu) => {
     );
 
     // ---- 7. Chargement d'une configuration -------------------------------
-    doc.getElementById('qr-clear-sip').click();
     doc.querySelector('.qr-tab[data-tab="sip"]').click();
+
+    // Décocher doit écrire false, et non retirer la clé : sans cela, le poste
+    // appliquerait son propre réglage et décocher n'aurait aucun effet.
+    doc.getElementById('sip-video').checked = false;
+    doc.getElementById('sip-video').dispatchEvent(new window.Event('change', { bubbles: true }));
+
+    const decoche = JSON.parse(apercu());
+
+    verifier(
+        'décocher une fonction écrit false plutôt que de retirer la clé',
+        'video' in decoche && decoche.video === false && decoche.messaging === true,
+        apercu()
+    );
+
+    doc.getElementById('qr-clear-sip').click();
 
     verifier(
         'le bouton « Vider » remet bien les champs à zéro',
         doc.getElementById('sip-username').value === ''
         && doc.getElementById('sip-admin-password').value === ''
+        && doc.getElementById('sip-file-key').value === ''
+    );
+
+    verifier(
+        '« Vider » restaure le préremplissage, au lieu de tout effacer',
+        doc.getElementById('sip-file-server').value === SERVEUR_FICHIERS
+        && doc.getElementById('sip-video').checked
+        && doc.getElementById('sip-messaging').checked
+        && doc.getElementById('sip-transport').value === 'udp'
     );
 
     // On rejoue le fichier enregistré plus haut, comme le ferait un chargement.

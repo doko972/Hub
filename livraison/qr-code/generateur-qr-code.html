@@ -212,6 +212,21 @@ body {
 
 .qr-hint { margin-top: 4px; color: var(--text-muted); font-size: 12px; }
 
+.qr-check {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.qr-check input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
 .qr-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 480px) { .qr-grid-2 { grid-template-columns: 1fr; } }
 
@@ -487,7 +502,7 @@ canvas.qr-canvas {
                         <label class="qr-label" for="sip-password">Mot de passe</label>
                         <div class="qr-pw-wrap">
                             <input class="qr-input" id="sip-password" type="password" placeholder="motdepasse">
-                            <button type="button" class="qr-pw-toggle" id="qr-toggle-pw"
+                            <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-password"
                                     title="Afficher / masquer" aria-label="Afficher ou masquer le mot de passe">👁</button>
                         </div>
                     </div>
@@ -518,9 +533,50 @@ canvas.qr-canvas {
                     <label class="qr-label" for="sip-admin-password">Mot de passe admin</label>
                     <div class="qr-pw-wrap">
                         <input class="qr-input" id="sip-admin-password" type="password" placeholder="MonMotDePasseAdmin2024">
-                        <button type="button" class="qr-pw-toggle" id="qr-toggle-admin-pw"
+                        <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-admin-password"
                                 title="Afficher / masquer" aria-label="Afficher ou masquer le mot de passe admin">👁</button>
                     </div>
+                </div>
+
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-logo">Logo (URL)</label>
+                    <input class="qr-input" id="sip-logo" type="url"
+                           placeholder="https://hrtelecoms.fr/marques/clientA.png">
+                    <p class="qr-hint">Facultatif. Laissé vide, la clé « logo » n'apparaît pas dans le JSON.</p>
+                </div>
+
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-file-server">Serveur de fichiers</label>
+                    <!-- Prérempli : c'est le même pour tous les postes. Reste
+                         modifiable, et « Vider les champs » le remet ici. -->
+                    <input class="qr-input" id="sip-file-server" type="url"
+                           value="https://fichiers.hrtelecoms.fr"
+                           placeholder="https://fichiers.hrtelecoms.fr">
+                </div>
+
+                <div class="qr-field">
+                    <label class="qr-label" for="sip-file-key">Clé du serveur de fichiers</label>
+                    <div class="qr-pw-wrap">
+                        <input class="qr-input" id="sip-file-key" type="password" placeholder="LA_CLE">
+                        <button type="button" class="qr-pw-toggle" data-pw-toggle="sip-file-key"
+                                title="Afficher / masquer" aria-label="Afficher ou masquer la clé">👁</button>
+                    </div>
+                    <p class="qr-hint">À saisir pour chaque client. Facultatif : vide, la clé « file_key » n'apparaît pas.</p>
+                </div>
+
+                <div class="qr-field">
+                    <label class="qr-label">Fonctions du poste</label>
+                    <!-- Cochées par défaut. Contrairement aux champs texte, ces
+                         clés figurent toujours dans le JSON : décocher doit
+                         désactiver la fonction, pas laisser le poste décider. -->
+                    <label class="qr-check">
+                        <input type="checkbox" id="sip-video" checked>
+                        <span>Appel vidéo</span>
+                    </label>
+                    <label class="qr-check">
+                        <input type="checkbox" id="sip-messaging" checked>
+                        <span>Messagerie instantanée</span>
+                    </label>
                 </div>
 
                 <button class="qr-btn-clear" id="qr-clear-sip">Vider les champs</button>
@@ -2987,18 +3043,16 @@ var qrcode = function() {
     });
 
     // ---- SIP ----
-    document.getElementById('qr-toggle-pw').addEventListener('click', function () {
-        var pw = document.getElementById('sip-password');
-        pw.type = pw.type === 'password' ? 'text' : 'password';
-    });
-
-    document.getElementById('qr-toggle-admin-pw').addEventListener('click', function () {
-        var pw = document.getElementById('sip-admin-password');
-        pw.type = pw.type === 'password' ? 'text' : 'password';
+    document.querySelectorAll('[data-pw-toggle]').forEach(function (bouton) {
+        bouton.addEventListener('click', function () {
+            var champ = document.getElementById(bouton.dataset.pwToggle);
+            if (champ) champ.type = champ.type === 'password' ? 'text' : 'password';
+        });
     });
 
     var SIP_FIELDS = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
-                      'sip-transport', 'sip-port', 'sip-admin-password'];
+                      'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo',
+                      'sip-file-server', 'sip-file-key', 'sip-video', 'sip-messaging'];
 
     var FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                        'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
@@ -3009,11 +3063,37 @@ var qrcode = function() {
         el.addEventListener('change', updatePreview);
     });
 
-    document.getElementById('qr-clear-sip').addEventListener('click', function () {
-        SIP_FIELDS.forEach(function (id) {
-            if (id !== 'sip-transport') document.getElementById(id).value = '';
+    /**
+     * Remet des champs dans leur état d'origine.
+     *
+     * On repart de la valeur du balisage plutôt que du vide : le serveur de
+     * fichiers est prérempli, les deux fonctions sont cochées et le transport
+     * vaut « udp ». Les relire évite de redire ces valeurs par défaut ici, où
+     * elles finiraient par diverger du formulaire.
+     */
+    function resetFields(ids) {
+        ids.forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+
+            if (el.type === 'checkbox') {
+                el.checked = el.defaultChecked;
+                return;
+            }
+
+            if (el.tagName === 'SELECT') {
+                var parDefaut = Array.prototype.slice.call(el.options)
+                    .filter(function (o) { return o.defaultSelected; })[0] || el.options[0];
+                el.value = parDefaut ? parDefaut.value : '';
+                return;
+            }
+
+            el.value = el.defaultValue;
         });
-        document.getElementById('sip-transport').value = 'udp';
+    }
+
+    document.getElementById('qr-clear-sip').addEventListener('click', function () {
+        resetFields(SIP_FIELDS);
         updatePreview();
     });
 
@@ -3102,7 +3182,11 @@ var qrcode = function() {
 
     function readField(id) {
         var el = document.getElementById(id);
-        return el ? el.value : '';
+        if (!el) return '';
+
+        // Une case à cocher vaut toujours « on » dans .value : c'est son état
+        // coché qu'il faut enregistrer, sinon toute case relue serait active.
+        return el.type === 'checkbox' ? el.checked : el.value;
     }
 
     function collectState() {
@@ -3125,15 +3209,27 @@ var qrcode = function() {
     function applyState(state) {
         if (!state || typeof state !== 'object') throw new Error('format');
 
-        Object.keys(state.sip || {}).forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el && SIP_FIELDS.indexOf(id) !== -1) el.value = state.sip[id];
-        });
+        // On repart du formulaire d'origine : une configuration enregistrée
+        // avant l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage
+        // la valeur précédemment affichée resterait, mêlée à celle chargée.
+        resetFields(SIP_FIELDS.concat(FREE_FIELDS));
 
-        Object.keys(state.free || {}).forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el && FREE_FIELDS.indexOf(id) !== -1) el.value = state.free[id];
-        });
+        var appliquer = function (connus, source) {
+            return function (id) {
+                var el = document.getElementById(id);
+                if (!el || connus.indexOf(id) === -1) return;
+
+                if (el.type === 'checkbox') {
+                    el.checked = Boolean(source[id]);
+                    return;
+                }
+
+                el.value = source[id];
+            };
+        };
+
+        Object.keys(state.sip || {}).forEach(appliquer(SIP_FIELDS, state.sip));
+        Object.keys(state.free || {}).forEach(appliquer(FREE_FIELDS, state.free));
 
         contactsList.innerHTML = '';
         (state.contacts || []).forEach(function (c) {
@@ -3209,9 +3305,15 @@ var qrcode = function() {
         var display   = document.getElementById('sip-display').value.trim();
         var transport = document.getElementById('sip-transport').value;
         var portRaw   = document.getElementById('sip-port').value.trim();
-        var adminPw   = document.getElementById('sip-admin-password').value;
+        var adminPw    = document.getElementById('sip-admin-password').value;
+        var logo       = document.getElementById('sip-logo').value.trim();
+        var fileServer = document.getElementById('sip-file-server').value.trim();
+        var fileKey    = document.getElementById('sip-file-key').value;
 
-        if (!username && !password && !domain && !display && !portRaw && !adminPw) return null;
+        // Le serveur de fichiers est prérempli : il ne suffit pas, à lui seul,
+        // à considérer que le formulaire est rempli.
+        if (!username && !password && !domain && !display && !portRaw
+            && !adminPw && !logo && !fileKey) return null;
 
         var data = {
             username: username,
@@ -3222,7 +3324,18 @@ var qrcode = function() {
             port: portRaw ? parseInt(portRaw, 10) : 5060
         };
 
+        // Champs facultatifs : absents du JSON plutôt que vides, pour ne pas
+        // imposer une clé que le poste n'attend pas forcément.
         if (adminPw) data.admin_password = adminPw;
+        if (logo) data.logo = logo;
+        if (fileServer) data.file_server = fileServer;
+        if (fileKey) data.file_key = fileKey;
+
+        // Toujours présentes, à la différence des champs texte : une case
+        // décochée doit désactiver la fonction sur le poste, et non laisser
+        // celui-ci appliquer son propre réglage.
+        data.video     = document.getElementById('sip-video').checked;
+        data.messaging = document.getElementById('sip-messaging').checked;
 
         return data;
     }

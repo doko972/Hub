@@ -53,29 +53,58 @@ export function initQrCode() {
         });
     });
 
-    // ── SIP: affichage/masquage mot de passe ──
-    document.getElementById('qr-toggle-pw').addEventListener('click', () => {
-        const pw = document.getElementById('sip-password');
-        pw.type  = pw.type === 'password' ? 'text' : 'password';
-    });
-
-    document.getElementById('qr-toggle-admin-pw').addEventListener('click', () => {
-        const pw = document.getElementById('sip-admin-password');
-        pw.type  = pw.type === 'password' ? 'text' : 'password';
+    // ── SIP: affichage/masquage des champs masqués ──
+    document.querySelectorAll('[data-pw-toggle]').forEach((bouton) => {
+        bouton.addEventListener('click', () => {
+            const champ = document.getElementById(bouton.dataset.pwToggle);
+            if (champ) champ.type = champ.type === 'password' ? 'text' : 'password';
+        });
     });
 
     // ── SIP: mise à jour en temps réel ──
-    ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo'].forEach(id => {
+    const SIP_FIELDS  = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
+                         'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo',
+                         'sip-file-server', 'sip-file-key', 'sip-video', 'sip-messaging'];
+
+    const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
+                         'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
+
+    /**
+     * Remet des champs dans l'état rendu par le serveur.
+     *
+     * On repart de la valeur d'origine du balisage plutôt que du vide : le
+     * serveur de fichiers est prérempli et le transport vaut « udp ». Lire le
+     * balisage évite de redire ces valeurs par défaut ici, où elles finiraient
+     * par diverger de la vue.
+     */
+    function resetFields(ids) {
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+
+            if (el.type === 'checkbox') {
+                el.checked = el.defaultChecked;
+                return;
+            }
+
+            if (el.tagName === 'SELECT') {
+                const parDefaut = [...el.options].find(o => o.defaultSelected) ?? el.options[0];
+                el.value = parDefaut?.value ?? '';
+                return;
+            }
+
+            el.value = el.defaultValue;
+        });
+    }
+
+    SIP_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', updatePreview);
     });
 
     document.getElementById('qr-clear-sip').addEventListener('click', () => {
-        ['sip-username', 'sip-password', 'sip-domain', 'sip-display', 'sip-port', 'sip-admin-password', 'sip-logo'].forEach(id => {
-            document.getElementById(id).value = '';
-        });
-        document.getElementById('sip-transport').value = 'udp';
+        resetFields(SIP_FIELDS);
         updatePreview();
     });
 
@@ -155,15 +184,15 @@ export function initQrCode() {
     // faisait perdre toute la saisie. L'état part au serveur, où il est chiffré
     // (il contient les mots de passe SIP et administrateur).
 
-    const SIP_FIELDS  = ['sip-username', 'sip-password', 'sip-domain', 'sip-display',
-                         'sip-transport', 'sip-port', 'sip-admin-password', 'sip-logo'];
-    const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
-                         'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
-
     const presetsRoot = document.querySelector('[data-qr-presets]');
 
     function readField(id) {
-        return document.getElementById(id)?.value ?? '';
+        const el = document.getElementById(id);
+        if (!el) return '';
+
+        // Une case à cocher vaut toujours « on » dans .value : c'est son état
+        // coché qu'il faut enregistrer, sinon toute case relue serait active.
+        return el.type === 'checkbox' ? el.checked : el.value;
     }
 
     /** État complet du formulaire, tel qu'il sera enregistré. */
@@ -190,25 +219,26 @@ export function initQrCode() {
     function applyState(state) {
         if (!state || typeof state !== 'object') return;
 
-        // On repart d'un formulaire vide : une configuration enregistrée avant
-        // l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage la
-        // valeur précédemment affichée resterait, mêlée à la configuration
-        // chargée.
-        [...SIP_FIELDS, ...FREE_FIELDS].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.value = '';
-        });
-        document.getElementById('sip-transport').value = 'udp';
+        // On repart du formulaire d'origine : une configuration enregistrée
+        // avant l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage
+        // la valeur précédemment affichée resterait, mêlée à la configuration
+        // chargée. Les champs préremplis retrouvent leur valeur par défaut.
+        resetFields([...SIP_FIELDS, ...FREE_FIELDS]);
 
-        Object.entries(state.sip ?? {}).forEach(([id, valeur]) => {
+        const appliquer = ([id, valeur]) => {
             const el = document.getElementById(id);
-            if (el) el.value = valeur;
-        });
+            if (!el) return;
 
-        Object.entries(state.free ?? {}).forEach(([id, valeur]) => {
-            const el = document.getElementById(id);
-            if (el) el.value = valeur;
-        });
+            if (el.type === 'checkbox') {
+                el.checked = Boolean(valeur);
+                return;
+            }
+
+            el.value = valeur;
+        };
+
+        Object.entries(state.sip ?? {}).forEach(appliquer);
+        Object.entries(state.free ?? {}).forEach(appliquer);
 
         // Les lignes de contacts sont dynamiques : on les reconstruit.
         contactsList.innerHTML = '';
@@ -346,8 +376,13 @@ export function initQrCode() {
         const portRaw        = document.getElementById('sip-port').value.trim();
         const admin_password = document.getElementById('sip-admin-password').value;
         const logo           = document.getElementById('sip-logo').value.trim();
+        const file_server    = document.getElementById('sip-file-server').value.trim();
+        const file_key       = document.getElementById('sip-file-key').value;
 
-        if (!username && !password && !domain && !display && !portRaw && !admin_password && !logo) return null;
+        // Le serveur de fichiers est prérempli : il ne suffit pas, à lui seul,
+        // à considérer que le formulaire est rempli.
+        if (!username && !password && !domain && !display && !portRaw
+            && !admin_password && !logo && !file_key) return null;
 
         const data = { username, password, domain, display, transport, port: portRaw ? parseInt(portRaw, 10) : 5060 };
 
@@ -355,6 +390,14 @@ export function initQrCode() {
         // imposer une clé que le poste n'attend pas forcément.
         if (admin_password) data.admin_password = admin_password;
         if (logo) data.logo = logo;
+        if (file_server) data.file_server = file_server;
+        if (file_key) data.file_key = file_key;
+
+        // Toujours présentes, à la différence des champs texte : une case
+        // décochée doit désactiver la fonction sur le poste, et non laisser
+        // celui-ci appliquer son propre réglage par défaut.
+        data.video     = document.getElementById('sip-video').checked;
+        data.messaging = document.getElementById('sip-messaging').checked;
 
         return data;
     }
