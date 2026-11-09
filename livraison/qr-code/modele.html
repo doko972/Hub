@@ -212,14 +212,6 @@ body {
 
 .qr-hint { margin-top: 4px; color: var(--text-muted); font-size: 12px; }
 
-.qr-directory-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 12px;
-}
-.qr-directory-row .qr-input { padding: 4px 0.7rem; }
 
 .qr-check {
     display: flex;
@@ -603,20 +595,23 @@ canvas.qr-canvas {
 
             <!-- Panneau Annuaire -->
             <div class="qr-panel" id="qr-panel-annuaire">
+                <p class="qr-hint">
+                    Lien vers l'annuaire que l'application de téléphonie doit charger.
+                </p>
+
                 <div class="qr-field">
-                    <label class="qr-label" for="dir-url">Annuaire principal</label>
+                    <label class="qr-label" for="dir-url">Annuaire</label>
                     <input class="qr-input" id="dir-url" type="url"
                            placeholder="https://centrex.hrtelecoms.fr/annuaire/JETON">
                     <p class="qr-hint">Obligatoire : sans lui, aucun QR code n'est produit.</p>
                 </div>
 
-                <label class="qr-label">Annuaires supplémentaires</label>
-                <div id="qr-directory-list"></div>
-                <button class="qr-btn-add" id="qr-add-directory">＋ Ajouter un annuaire</button>
-                <p class="qr-hint">
-                    Facultatif. Les lignes vides sont ignorées ; sans aucune,
-                    la clé « directory_extra » n'apparaît pas dans le JSON.
-                </p>
+                <div class="qr-field">
+                    <label class="qr-label" for="dir-url-2">Second annuaire</label>
+                    <input class="qr-input" id="dir-url-2" type="url"
+                           placeholder="https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON">
+                    <p class="qr-hint">Facultatif. Vide, la clé « directory_extra » n'apparaît pas dans le JSON.</p>
+                </div>
 
                 <button class="qr-btn-clear" id="qr-clear-annuaire">Vider les champs</button>
             </div>
@@ -790,7 +785,7 @@ canvas.qr-canvas {
     var FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                        'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
 
-    var DIR_FIELDS = ['dir-url'];
+    var DIR_FIELDS = ['dir-url', 'dir-url-2'];
 
     SIP_FIELDS.forEach(function (id) {
         var el = document.getElementById(id);
@@ -896,49 +891,16 @@ canvas.qr-canvas {
 
     // ---- Annuaire ----
     //
-    // Un annuaire principal, et autant d'annuaires secondaires que voulu. Les
-    // lignes sont dynamiques comme les contacts des favoris.
-    var directoryList = document.getElementById('qr-directory-list');
-
-    function addDirectoryRow(url) {
-        var row = document.createElement('div');
-        row.className = 'qr-directory-row';
-
-        var input = document.createElement('input');
-        input.className     = 'qr-input';
-        input.type          = 'url';
-        input.placeholder   = 'https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON';
-        input.value         = url || '';
-        input.dataset.field = 'url';
-        input.addEventListener('input', updatePreview);
-        input.addEventListener('change', updatePreview);
-
-        var remove = document.createElement('button');
-        remove.type        = 'button';
-        remove.className   = 'qr-btn-remove';
-        remove.title       = 'Supprimer';
-        remove.setAttribute('aria-label', 'Supprimer cet annuaire');
-        remove.textContent = '✕';
-        remove.addEventListener('click', function () { row.remove(); updatePreview(); });
-
-        row.append(input, remove);
-        directoryList.appendChild(row);
-    }
-
+    // Deux liens : celui que l'application de téléphonie doit charger, et un
+    // second si besoin.
     DIR_FIELDS.forEach(function (id) {
         var el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', updatePreview);
     });
 
-    document.getElementById('qr-add-directory').addEventListener('click', function () {
-        addDirectoryRow();
-        updatePreview();
-    });
-
     document.getElementById('qr-clear-annuaire').addEventListener('click', function () {
         resetFields(DIR_FIELDS);
-        directoryList.replaceChildren();
         updatePreview();
     });
 
@@ -973,15 +935,11 @@ canvas.qr-canvas {
     }
 
     function collectState() {
-        var sip = {}, free = {}, dir = {}, contacts = [], directories = [];
+        var sip = {}, free = {}, dir = {}, contacts = [];
 
         SIP_FIELDS.forEach(function (id) { sip[id] = readField(id); });
         FREE_FIELDS.forEach(function (id) { free[id] = readField(id); });
         DIR_FIELDS.forEach(function (id) { dir[id] = readField(id); });
-
-        directoryList.querySelectorAll('.qr-directory-row').forEach(function (row) {
-            directories.push(row.querySelector('[data-field="url"]').value);
-        });
 
         contactsList.querySelectorAll('.qr-contact-row').forEach(function (row) {
             contacts.push({
@@ -993,7 +951,7 @@ canvas.qr-canvas {
 
         return {
             version: 1, tab: activeTab, subTab: qrSubTab,
-            sip: sip, free: free, contacts: contacts, dir: dir, directories: directories
+            sip: sip, free: free, contacts: contacts, dir: dir
         };
     }
 
@@ -1022,10 +980,6 @@ canvas.qr-canvas {
         Object.keys(state.sip || {}).forEach(appliquer(SIP_FIELDS, state.sip));
         Object.keys(state.free || {}).forEach(appliquer(FREE_FIELDS, state.free));
         Object.keys(state.dir || {}).forEach(appliquer(DIR_FIELDS, state.dir));
-
-        // Les annuaires supplémentaires sont dynamiques : on les reconstruit.
-        directoryList.replaceChildren();
-        (state.directories || []).forEach(function (url) { addDirectoryRow(url); });
 
         contactsList.innerHTML = '';
         (state.contacts || []).forEach(function (c) {
@@ -1152,21 +1106,18 @@ canvas.qr-canvas {
 
     function buildDirectoryData() {
         var principal = document.getElementById('dir-url').value.trim();
+        var second    = document.getElementById('dir-url-2').value.trim();
 
-        // L'annuaire principal commande : sans lui, les annuaires
-        // supplémentaires n'auraient rien à compléter.
+        // Le premier annuaire commande : sans lui, le second n'aurait rien à
+        // compléter.
         if (!principal) return null;
-
-        var supplementaires = [];
-        directoryList.querySelectorAll('.qr-directory-row').forEach(function (row) {
-            var url = row.querySelector('[data-field="url"]').value.trim();
-            if (url) supplementaires.push(url);
-        });
 
         var data = { directory_url: principal };
 
-        // Absente plutôt que vide, comme les autres champs facultatifs.
-        if (supplementaires.length) data.directory_extra = supplementaires;
+        // Un tableau, même pour un seul lien : c'est la forme attendue, et
+        // elle laisse la place à d'autres annuaires sans rien changer au
+        // format. Absente plutôt que vide, comme les champs facultatifs.
+        if (second) data.directory_extra = [second];
 
         return data;
     }

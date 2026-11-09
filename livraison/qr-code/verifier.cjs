@@ -285,23 +285,29 @@ telecharges[0].text().then((contenu) => {
     doc.querySelector('.qr-tab[data-tab="annuaire"]').click();
 
     verifier(
-        'l\'onglet Annuaire s\'ouvre sans annuaire supplémentaire',
+        'l\'onglet Annuaire propose ses deux champs',
         doc.getElementById('qr-panel-annuaire').classList.contains('is-active')
-        && doc.querySelectorAll('.qr-directory-row').length === 0
+        && !!doc.getElementById('dir-url') && !!doc.getElementById('dir-url-2')
     );
 
+    // Le second ne se suffit pas à lui-même : il n'aurait rien à compléter.
+    saisir('dir-url-2', AUTRE);
+
+    verifier(
+        'le second annuaire seul ne produit aucun QR',
+        doc.getElementById('qr-actions').style.display === 'none'
+    );
+
+    saisir('dir-url-2', '');
     saisir('dir-url', ANNUAIRE);
 
     verifier(
-        'l\'annuaire principal seul ne produit pas « directory_extra »',
+        'l\'annuaire seul ne produit pas « directory_extra »',
         !('directory_extra' in JSON.parse(apercu())),
         apercu()
     );
 
-    doc.getElementById('qr-add-directory').click();
-    const ligne = doc.querySelector('.qr-directory-row input');
-    ligne.value = AUTRE;
-    ligne.dispatchEvent(new window.Event('input', { bubbles: true }));
+    saisir('dir-url-2', AUTRE);
 
     const annuaire = JSON.parse(apercu());
 
@@ -316,7 +322,7 @@ telecharges[0].text().then((contenu) => {
 
     // Ces URL sont longues : mieux vaut confirmer que le QR reste lisible.
     etatToile.rects = [];
-    ligne.dispatchEvent(new window.Event('input', { bubbles: true }));
+    saisir('dir-url-2', AUTRE);
 
     verifier(
         'le QR d\'annuaire est relu à l\'identique par un décodeur',
@@ -327,9 +333,9 @@ telecharges[0].text().then((contenu) => {
     doc.getElementById('qr-clear-annuaire').click();
 
     verifier(
-        '« Vider les champs » efface l\'annuaire et ses lignes',
+        '« Vider les champs » efface les deux annuaires',
         doc.getElementById('dir-url').value === ''
-        && doc.querySelectorAll('.qr-directory-row').length === 0
+        && doc.getElementById('dir-url-2').value === ''
     );
 
     // ---- 7. Chargement d'une configuration -------------------------------

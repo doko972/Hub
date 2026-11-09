@@ -116,17 +116,6 @@
     margin-top: $spacing-xs;
 }
 
-// ── Ligne d'annuaire supplémentaire ──
-.qr-directory-row {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: $spacing-sm;
-    align-items: center;
-    margin-bottom: $spacing-sm;
-
-    .qr-input { padding: $spacing-xs 0.7rem; }
-}
-
 // ── Case à cocher d'une fonction du poste ──
 .qr-check {
     display: flex;

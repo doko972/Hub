@@ -69,7 +69,7 @@ export function initQrCode() {
     const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                          'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
 
-    const DIR_FIELDS  = ['dir-url'];
+    const DIR_FIELDS  = ['dir-url', 'dir-url-2'];
 
     /**
      * Remet des champs dans l'état rendu par le serveur.
@@ -171,49 +171,16 @@ export function initQrCode() {
 
     // ── Annuaire ──
     //
-    // Un annuaire principal, et autant d'annuaires secondaires que voulu. Les
-    // lignes sont dynamiques comme les contacts des favoris.
-    const directoryList = document.getElementById('qr-directory-list');
-
-    function addDirectoryRow(url = '') {
-        const row = document.createElement('div');
-        row.className = 'qr-directory-row';
-
-        const input = document.createElement('input');
-        input.className     = 'qr-input';
-        input.type          = 'url';
-        input.placeholder   = 'https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON';
-        input.value         = url;
-        input.dataset.field = 'url';
-        input.addEventListener('input', updatePreview);
-        input.addEventListener('change', updatePreview);
-
-        const remove = document.createElement('button');
-        remove.type        = 'button';
-        remove.className   = 'qr-btn-remove';
-        remove.title       = 'Supprimer';
-        remove.setAttribute('aria-label', 'Supprimer cet annuaire');
-        remove.textContent = '✕';
-        remove.addEventListener('click', () => { row.remove(); updatePreview(); });
-
-        row.append(input, remove);
-        directoryList.appendChild(row);
-    }
-
+    // Deux liens : celui que l'application de téléphonie doit charger, et un
+    // second si besoin.
     DIR_FIELDS.forEach(id => {
         const el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
         el.addEventListener('change', updatePreview);
     });
 
-    document.getElementById('qr-add-directory').addEventListener('click', () => {
-        addDirectoryRow();
-        updatePreview();
-    });
-
     document.getElementById('qr-clear-annuaire').addEventListener('click', () => {
         resetFields(DIR_FIELDS);
-        directoryList.replaceChildren();
         updatePreview();
     });
 
@@ -255,11 +222,6 @@ export function initQrCode() {
         FREE_FIELDS.forEach(id => { free[id] = readField(id); });
         DIR_FIELDS.forEach(id => { dir[id] = readField(id); });
 
-        const directories = [];
-        directoryList.querySelectorAll('.qr-directory-row').forEach(row => {
-            directories.push(row.querySelector('[data-field="url"]').value);
-        });
-
         const contacts = [];
         contactsList.querySelectorAll('.qr-contact-row').forEach(row => {
             contacts.push({
@@ -269,7 +231,7 @@ export function initQrCode() {
             });
         });
 
-        return { version: 1, tab: activeTab, subTab: qrSubTab, sip, free, contacts, dir, directories };
+        return { version: 1, tab: activeTab, subTab: qrSubTab, sip, free, contacts, dir };
     }
 
     /** Rejoue un état enregistré dans le formulaire. */
@@ -297,10 +259,6 @@ export function initQrCode() {
         Object.entries(state.sip ?? {}).forEach(appliquer);
         Object.entries(state.free ?? {}).forEach(appliquer);
         Object.entries(state.dir ?? {}).forEach(appliquer);
-
-        // Les annuaires supplémentaires sont dynamiques : on les reconstruit.
-        directoryList.replaceChildren();
-        (state.directories ?? []).forEach(url => addDirectoryRow(url));
 
         // Les lignes de contacts sont dynamiques : on les reconstruit.
         contactsList.innerHTML = '';
@@ -478,21 +436,18 @@ export function initQrCode() {
 
     function buildDirectoryData() {
         const principal = document.getElementById('dir-url').value.trim();
+        const second    = document.getElementById('dir-url-2').value.trim();
 
-        // L'annuaire principal commande : sans lui, les annuaires
-        // supplémentaires n'auraient rien à compléter.
+        // Le premier annuaire commande : sans lui, le second n'aurait rien à
+        // compléter.
         if (!principal) return null;
-
-        const supplementaires = [];
-        directoryList.querySelectorAll('.qr-directory-row').forEach(row => {
-            const url = row.querySelector('[data-field="url"]').value.trim();
-            if (url) supplementaires.push(url);
-        });
 
         const data = { directory_url: principal };
 
-        // Absente plutôt que vide, comme les autres champs facultatifs.
-        if (supplementaires.length) data.directory_extra = supplementaires;
+        // Un tableau, même pour un seul lien : c'est la forme attendue, et
+        // elle laisse la place à d'autres annuaires sans rien changer au
+        // format. Absente plutôt que vide, comme les champs facultatifs.
+        if (second) data.directory_extra = [second];
 
         return data;
     }

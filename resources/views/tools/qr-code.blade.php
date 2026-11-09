@@ -151,20 +151,23 @@
 
         {{-- Panneau Annuaire --}}
         <div class="qr-panel" id="qr-panel-annuaire" style="display:none">
+            <p class="qr-hint">
+                Lien vers l'annuaire que l'application de téléphonie doit charger.
+            </p>
+
             <div class="qr-field">
-                <label class="qr-label" for="dir-url">Annuaire principal</label>
+                <label class="qr-label" for="dir-url">Annuaire</label>
                 <input class="qr-input" id="dir-url" type="url"
                        placeholder="https://centrex.hrtelecoms.fr/annuaire/JETON">
                 <p class="qr-hint">Obligatoire : sans lui, aucun QR code n'est produit.</p>
             </div>
 
-            <label class="qr-label">Annuaires supplémentaires</label>
-            <div id="qr-directory-list"></div>
-            <button class="qr-btn-add" id="qr-add-directory">＋ Ajouter un annuaire</button>
-            <p class="qr-hint">
-                Facultatif. Les lignes vides sont ignorées ; sans aucune,
-                la clé « directory_extra » n'apparaît pas dans le JSON.
-            </p>
+            <div class="qr-field">
+                <label class="qr-label" for="dir-url-2">Second annuaire</label>
+                <input class="qr-input" id="dir-url-2" type="url"
+                       placeholder="https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON">
+                <p class="qr-hint">Facultatif. Vide, la clé « directory_extra » n'apparaît pas dans le JSON.</p>
+            </div>
 
             <button class="qr-btn-clear" id="qr-clear-annuaire">Vider les champs</button>
         </div>
