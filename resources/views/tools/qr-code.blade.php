@@ -44,6 +44,7 @@
     <div class="qr-tabs">
         <button class="qr-tab is-active" data-tab="sip">📞 Configuration SIP</button>
         <button class="qr-tab" data-tab="favoris">⭐ Favoris</button>
+        <button class="qr-tab" data-tab="annuaire">📒 Annuaire</button>
         <button class="qr-tab" data-tab="qr">🔲 QR Code libre</button>
     </div>
 
@@ -98,7 +99,7 @@
             <div class="qr-field">
                 <label class="qr-label" for="sip-logo">Logo (URL)</label>
                 <input class="qr-input" id="sip-logo" type="url"
-                       placeholder="https://hrtelecoms.fr/marques/clientA.png">
+                       placeholder="https://dashboard.hrtelecoms.fr/images/logo.png">
                 <p class="qr-hint">Facultatif. Laissé vide, la clé « logo » n'apparaît pas dans le JSON.</p>
             </div>
 
@@ -146,6 +147,26 @@
             <button class="qr-btn-add" id="qr-add-contact">＋ Ajouter un contact</button>
             <p class="qr-hint">BLF (Busy Lamp Field) affiche l'état de la ligne en temps réel sur le softphone.</p>
             <button class="qr-btn-clear" id="qr-clear-favoris">Vider les contacts</button>
+        </div>
+
+        {{-- Panneau Annuaire --}}
+        <div class="qr-panel" id="qr-panel-annuaire" style="display:none">
+            <div class="qr-field">
+                <label class="qr-label" for="dir-url">Annuaire principal</label>
+                <input class="qr-input" id="dir-url" type="url"
+                       placeholder="https://centrex.hrtelecoms.fr/annuaire/JETON">
+                <p class="qr-hint">Obligatoire : sans lui, aucun QR code n'est produit.</p>
+            </div>
+
+            <label class="qr-label">Annuaires supplémentaires</label>
+            <div id="qr-directory-list"></div>
+            <button class="qr-btn-add" id="qr-add-directory">＋ Ajouter un annuaire</button>
+            <p class="qr-hint">
+                Facultatif. Les lignes vides sont ignorées ; sans aucune,
+                la clé « directory_extra » n'apparaît pas dans le JSON.
+            </p>
+
+            <button class="qr-btn-clear" id="qr-clear-annuaire">Vider les champs</button>
         </div>
 
         {{-- Panneau QR Code libre --}}

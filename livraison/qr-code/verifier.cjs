@@ -278,6 +278,60 @@ telecharges[0].text().then((contenu) => {
         qrAffiche() && doc.getElementById('qr-btn-qr').disabled === false
     );
 
+    // ---- 6 bis. Onglet Annuaire ------------------------------------------
+    const ANNUAIRE = 'https://centrex.hrtelecoms.fr/annuaire/J8orL237CBd4kZzadH7rJNUt1QtRzBheevXpIukE';
+    const AUTRE    = 'https://centrex.hrtelecoms.fr/annuaire/K9prM348DCe5lAabI8sKOVu2RuSAiCfffWqYjvlF';
+
+    doc.querySelector('.qr-tab[data-tab="annuaire"]').click();
+
+    verifier(
+        'l\'onglet Annuaire s\'ouvre sans annuaire supplémentaire',
+        doc.getElementById('qr-panel-annuaire').classList.contains('is-active')
+        && doc.querySelectorAll('.qr-directory-row').length === 0
+    );
+
+    saisir('dir-url', ANNUAIRE);
+
+    verifier(
+        'l\'annuaire principal seul ne produit pas « directory_extra »',
+        !('directory_extra' in JSON.parse(apercu())),
+        apercu()
+    );
+
+    doc.getElementById('qr-add-directory').click();
+    const ligne = doc.querySelector('.qr-directory-row input');
+    ligne.value = AUTRE;
+    ligne.dispatchEvent(new window.Event('input', { bubbles: true }));
+
+    const annuaire = JSON.parse(apercu());
+
+    verifier(
+        'le JSON d\'annuaire a la forme attendue',
+        annuaire.directory_url === ANNUAIRE
+        && Array.isArray(annuaire.directory_extra)
+        && annuaire.directory_extra.length === 1
+        && annuaire.directory_extra[0] === AUTRE,
+        apercu()
+    );
+
+    // Ces URL sont longues : mieux vaut confirmer que le QR reste lisible.
+    etatToile.rects = [];
+    ligne.dispatchEvent(new window.Event('input', { bubbles: true }));
+
+    verifier(
+        'le QR d\'annuaire est relu à l\'identique par un décodeur',
+        decoder(etatToile) === JSON.stringify(annuaire),
+        `relu : ${String(decoder(etatToile)).slice(0, 80)}`
+    );
+
+    doc.getElementById('qr-clear-annuaire').click();
+
+    verifier(
+        '« Vider les champs » efface l\'annuaire et ses lignes',
+        doc.getElementById('dir-url').value === ''
+        && doc.querySelectorAll('.qr-directory-row').length === 0
+    );
+
     // ---- 7. Chargement d'une configuration -------------------------------
     doc.querySelector('.qr-tab[data-tab="sip"]').click();
 

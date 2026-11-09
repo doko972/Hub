@@ -212,6 +212,15 @@ body {
 
 .qr-hint { margin-top: 4px; color: var(--text-muted); font-size: 12px; }
 
+.qr-directory-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+.qr-directory-row .qr-input { padding: 4px 0.7rem; }
+
 .qr-check {
     display: flex;
     align-items: center;
@@ -486,6 +495,7 @@ canvas.qr-canvas {
         <div class="qr-tabs">
             <button class="qr-tab is-active" data-tab="sip">📞 Configuration SIP</button>
             <button class="qr-tab" data-tab="favoris">⭐ Favoris</button>
+            <button class="qr-tab" data-tab="annuaire">📒 Annuaire</button>
             <button class="qr-tab" data-tab="qr">🔲 QR Code libre</button>
         </div>
 
@@ -541,7 +551,7 @@ canvas.qr-canvas {
                 <div class="qr-field">
                     <label class="qr-label" for="sip-logo">Logo (URL)</label>
                     <input class="qr-input" id="sip-logo" type="url"
-                           placeholder="https://hrtelecoms.fr/marques/clientA.png">
+                           placeholder="https://dashboard.hrtelecoms.fr/images/logo.png">
                     <p class="qr-hint">Facultatif. Laissé vide, la clé « logo » n'apparaît pas dans le JSON.</p>
                 </div>
 
@@ -589,6 +599,26 @@ canvas.qr-canvas {
                 <button class="qr-btn-add" id="qr-add-contact">＋ Ajouter un contact</button>
                 <p class="qr-hint">BLF (Busy Lamp Field) affiche l'état de la ligne en temps réel sur le softphone.</p>
                 <button class="qr-btn-clear" id="qr-clear-favoris">Vider les contacts</button>
+            </div>
+
+            <!-- Panneau Annuaire -->
+            <div class="qr-panel" id="qr-panel-annuaire">
+                <div class="qr-field">
+                    <label class="qr-label" for="dir-url">Annuaire principal</label>
+                    <input class="qr-input" id="dir-url" type="url"
+                           placeholder="https://centrex.hrtelecoms.fr/annuaire/JETON">
+                    <p class="qr-hint">Obligatoire : sans lui, aucun QR code n'est produit.</p>
+                </div>
+
+                <label class="qr-label">Annuaires supplémentaires</label>
+                <div id="qr-directory-list"></div>
+                <button class="qr-btn-add" id="qr-add-directory">＋ Ajouter un annuaire</button>
+                <p class="qr-hint">
+                    Facultatif. Les lignes vides sont ignorées ; sans aucune,
+                    la clé « directory_extra » n'apparaît pas dans le JSON.
+                </p>
+
+                <button class="qr-btn-clear" id="qr-clear-annuaire">Vider les champs</button>
             </div>
 
             <!-- Panneau QR Code libre -->
@@ -3057,6 +3087,8 @@ var qrcode = function() {
     var FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                        'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
 
+    var DIR_FIELDS = ['dir-url'];
+
     SIP_FIELDS.forEach(function (id) {
         var el = document.getElementById(id);
         el.addEventListener('input', updatePreview);
@@ -3159,6 +3191,54 @@ var qrcode = function() {
     addContactRow();
     addContactRow();
 
+    // ---- Annuaire ----
+    //
+    // Un annuaire principal, et autant d'annuaires secondaires que voulu. Les
+    // lignes sont dynamiques comme les contacts des favoris.
+    var directoryList = document.getElementById('qr-directory-list');
+
+    function addDirectoryRow(url) {
+        var row = document.createElement('div');
+        row.className = 'qr-directory-row';
+
+        var input = document.createElement('input');
+        input.className     = 'qr-input';
+        input.type          = 'url';
+        input.placeholder   = 'https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON';
+        input.value         = url || '';
+        input.dataset.field = 'url';
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('change', updatePreview);
+
+        var remove = document.createElement('button');
+        remove.type        = 'button';
+        remove.className   = 'qr-btn-remove';
+        remove.title       = 'Supprimer';
+        remove.setAttribute('aria-label', 'Supprimer cet annuaire');
+        remove.textContent = '✕';
+        remove.addEventListener('click', function () { row.remove(); updatePreview(); });
+
+        row.append(input, remove);
+        directoryList.appendChild(row);
+    }
+
+    DIR_FIELDS.forEach(function (id) {
+        var el = document.getElementById(id);
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('qr-add-directory').addEventListener('click', function () {
+        addDirectoryRow();
+        updatePreview();
+    });
+
+    document.getElementById('qr-clear-annuaire').addEventListener('click', function () {
+        resetFields(DIR_FIELDS);
+        directoryList.replaceChildren();
+        updatePreview();
+    });
+
     // ---- QR libre ----
     document.querySelectorAll('#qr-panel-qr .qr-input, #qr-panel-qr .qr-textarea').forEach(function (el) {
         el.addEventListener('input', updatePreview);
@@ -3190,10 +3270,15 @@ var qrcode = function() {
     }
 
     function collectState() {
-        var sip = {}, free = {}, contacts = [];
+        var sip = {}, free = {}, dir = {}, contacts = [], directories = [];
 
         SIP_FIELDS.forEach(function (id) { sip[id] = readField(id); });
         FREE_FIELDS.forEach(function (id) { free[id] = readField(id); });
+        DIR_FIELDS.forEach(function (id) { dir[id] = readField(id); });
+
+        directoryList.querySelectorAll('.qr-directory-row').forEach(function (row) {
+            directories.push(row.querySelector('[data-field="url"]').value);
+        });
 
         contactsList.querySelectorAll('.qr-contact-row').forEach(function (row) {
             contacts.push({
@@ -3203,7 +3288,10 @@ var qrcode = function() {
             });
         });
 
-        return { version: 1, tab: activeTab, subTab: qrSubTab, sip: sip, free: free, contacts: contacts };
+        return {
+            version: 1, tab: activeTab, subTab: qrSubTab,
+            sip: sip, free: free, contacts: contacts, dir: dir, directories: directories
+        };
     }
 
     function applyState(state) {
@@ -3212,7 +3300,7 @@ var qrcode = function() {
         // On repart du formulaire d'origine : une configuration enregistrée
         // avant l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage
         // la valeur précédemment affichée resterait, mêlée à celle chargée.
-        resetFields(SIP_FIELDS.concat(FREE_FIELDS));
+        resetFields(SIP_FIELDS.concat(FREE_FIELDS).concat(DIR_FIELDS));
 
         var appliquer = function (connus, source) {
             return function (id) {
@@ -3230,6 +3318,11 @@ var qrcode = function() {
 
         Object.keys(state.sip || {}).forEach(appliquer(SIP_FIELDS, state.sip));
         Object.keys(state.free || {}).forEach(appliquer(FREE_FIELDS, state.free));
+        Object.keys(state.dir || {}).forEach(appliquer(DIR_FIELDS, state.dir));
+
+        // Les annuaires supplémentaires sont dynamiques : on les reconstruit.
+        directoryList.replaceChildren();
+        (state.directories || []).forEach(function (url) { addDirectoryRow(url); });
 
         contactsList.innerHTML = '';
         (state.contacts || []).forEach(function (c) {
@@ -3354,6 +3447,27 @@ var qrcode = function() {
         return contacts.length ? { contacts: contacts } : null;
     }
 
+    function buildDirectoryData() {
+        var principal = document.getElementById('dir-url').value.trim();
+
+        // L'annuaire principal commande : sans lui, les annuaires
+        // supplémentaires n'auraient rien à compléter.
+        if (!principal) return null;
+
+        var supplementaires = [];
+        directoryList.querySelectorAll('.qr-directory-row').forEach(function (row) {
+            var url = row.querySelector('[data-field="url"]').value.trim();
+            if (url) supplementaires.push(url);
+        });
+
+        var data = { directory_url: principal };
+
+        // Absente plutôt que vide, comme les autres champs facultatifs.
+        if (supplementaires.length) data.directory_extra = supplementaires;
+
+        return data;
+    }
+
     function buildGenericQrData() {
         if (qrSubTab === 'url') {
             var url = document.getElementById('qr-url').value.trim();
@@ -3383,17 +3497,30 @@ var qrcode = function() {
         return null;
     }
 
+    // Onglets dont le QR code porte du JSON. Les trois produisaient le même
+    // bloc, recopié à l'identique : la table évite de le redire à chaque
+    // nouvel onglet.
+    var PANNEAUX_JSON = {
+        sip:      { build: function () { return buildSipData(); },       fichier: 'sip-config.json' },
+        favoris:  { build: function () { return buildFavData(); },       fichier: 'favoris.json' },
+        annuaire: { build: function () { return buildDirectoryData(); }, fichier: 'annuaire.json' }
+    };
+
     function buildPayload() {
-        if (activeTab === 'sip' || activeTab === 'favoris') {
-            var data = activeTab === 'sip' ? buildSipData() : buildFavData();
+        var panneau = PANNEAUX_JSON[activeTab];
+
+        if (panneau) {
+            var data = panneau.build();
             if (!data) return null;
 
+            var lisible = JSON.stringify(data, null, 2);
+
             return {
-                preview: JSON.stringify(data, null, 2),
+                preview: lisible,
                 qrValue: JSON.stringify(data),
-                downloadName: activeTab === 'sip' ? 'sip-config.json' : 'favoris.json',
+                downloadName: panneau.fichier,
                 downloadMime: 'application/json',
-                downloadContent: JSON.stringify(data, null, 2),
+                downloadContent: lisible,
                 downloadLabel: '⬇ Télécharger le JSON',
                 copyLabel: '📋 Copier le JSON'
             };

@@ -69,6 +69,8 @@ export function initQrCode() {
     const FREE_FIELDS = ['qr-url', 'qr-text', 'qr-c-first', 'qr-c-last',
                          'qr-c-phone', 'qr-c-email', 'qr-c-org', 'qr-c-url'];
 
+    const DIR_FIELDS  = ['dir-url'];
+
     /**
      * Remet des champs dans l'état rendu par le serveur.
      *
@@ -167,6 +169,54 @@ export function initQrCode() {
     addContactRow();
     addContactRow();
 
+    // ── Annuaire ──
+    //
+    // Un annuaire principal, et autant d'annuaires secondaires que voulu. Les
+    // lignes sont dynamiques comme les contacts des favoris.
+    const directoryList = document.getElementById('qr-directory-list');
+
+    function addDirectoryRow(url = '') {
+        const row = document.createElement('div');
+        row.className = 'qr-directory-row';
+
+        const input = document.createElement('input');
+        input.className     = 'qr-input';
+        input.type          = 'url';
+        input.placeholder   = 'https://centrex.hrtelecoms.fr/annuaire/AUTRE_JETON';
+        input.value         = url;
+        input.dataset.field = 'url';
+        input.addEventListener('input', updatePreview);
+        input.addEventListener('change', updatePreview);
+
+        const remove = document.createElement('button');
+        remove.type        = 'button';
+        remove.className   = 'qr-btn-remove';
+        remove.title       = 'Supprimer';
+        remove.setAttribute('aria-label', 'Supprimer cet annuaire');
+        remove.textContent = '✕';
+        remove.addEventListener('click', () => { row.remove(); updatePreview(); });
+
+        row.append(input, remove);
+        directoryList.appendChild(row);
+    }
+
+    DIR_FIELDS.forEach(id => {
+        const el = document.getElementById(id);
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    document.getElementById('qr-add-directory').addEventListener('click', () => {
+        addDirectoryRow();
+        updatePreview();
+    });
+
+    document.getElementById('qr-clear-annuaire').addEventListener('click', () => {
+        resetFields(DIR_FIELDS);
+        directoryList.replaceChildren();
+        updatePreview();
+    });
+
     // ── QR libre: mise à jour en temps réel ──
     document.querySelectorAll('#qr-panel-qr .qr-input, #qr-panel-qr .qr-textarea').forEach(el => {
         el.addEventListener('input', updatePreview);
@@ -199,9 +249,16 @@ export function initQrCode() {
     function collectState() {
         const sip  = {};
         const free = {};
+        const dir  = {};
 
         SIP_FIELDS.forEach(id => { sip[id] = readField(id); });
         FREE_FIELDS.forEach(id => { free[id] = readField(id); });
+        DIR_FIELDS.forEach(id => { dir[id] = readField(id); });
+
+        const directories = [];
+        directoryList.querySelectorAll('.qr-directory-row').forEach(row => {
+            directories.push(row.querySelector('[data-field="url"]').value);
+        });
 
         const contacts = [];
         contactsList.querySelectorAll('.qr-contact-row').forEach(row => {
@@ -212,7 +269,7 @@ export function initQrCode() {
             });
         });
 
-        return { version: 1, tab: activeTab, subTab: qrSubTab, sip, free, contacts };
+        return { version: 1, tab: activeTab, subTab: qrSubTab, sip, free, contacts, dir, directories };
     }
 
     /** Rejoue un état enregistré dans le formulaire. */
@@ -223,7 +280,7 @@ export function initQrCode() {
         // avant l'ajout d'un champ ne contient pas sa clé, et sans ce nettoyage
         // la valeur précédemment affichée resterait, mêlée à la configuration
         // chargée. Les champs préremplis retrouvent leur valeur par défaut.
-        resetFields([...SIP_FIELDS, ...FREE_FIELDS]);
+        resetFields([...SIP_FIELDS, ...FREE_FIELDS, ...DIR_FIELDS]);
 
         const appliquer = ([id, valeur]) => {
             const el = document.getElementById(id);
@@ -239,6 +296,11 @@ export function initQrCode() {
 
         Object.entries(state.sip ?? {}).forEach(appliquer);
         Object.entries(state.free ?? {}).forEach(appliquer);
+        Object.entries(state.dir ?? {}).forEach(appliquer);
+
+        // Les annuaires supplémentaires sont dynamiques : on les reconstruit.
+        directoryList.replaceChildren();
+        (state.directories ?? []).forEach(url => addDirectoryRow(url));
 
         // Les lignes de contacts sont dynamiques : on les reconstruit.
         contactsList.innerHTML = '';
@@ -414,6 +476,27 @@ export function initQrCode() {
         return contacts.length ? { contacts } : null;
     }
 
+    function buildDirectoryData() {
+        const principal = document.getElementById('dir-url').value.trim();
+
+        // L'annuaire principal commande : sans lui, les annuaires
+        // supplémentaires n'auraient rien à compléter.
+        if (!principal) return null;
+
+        const supplementaires = [];
+        directoryList.querySelectorAll('.qr-directory-row').forEach(row => {
+            const url = row.querySelector('[data-field="url"]').value.trim();
+            if (url) supplementaires.push(url);
+        });
+
+        const data = { directory_url: principal };
+
+        // Absente plutôt que vide, comme les autres champs facultatifs.
+        if (supplementaires.length) data.directory_extra = supplementaires;
+
+        return data;
+    }
+
     function buildGenericQrData() {
         if (qrSubTab === 'url') {
             let url = document.getElementById('qr-url').value.trim();
@@ -436,33 +519,37 @@ export function initQrCode() {
         return null;
     }
 
+    /**
+     * Onglets dont le QR code porte du JSON. Les trois produisaient le même
+     * bloc, recopié à l'identique : la table évite de le redire à chaque
+     * nouvel onglet.
+     */
+    const PANNEAUX_JSON = {
+        sip:      { build: buildSipData,       fichier: 'sip-config.json' },
+        favoris:  { build: buildFavData,       fichier: 'favoris.json' },
+        annuaire: { build: buildDirectoryData, fichier: 'annuaire.json' },
+    };
+
     function buildPayload() {
-        if (activeTab === 'sip') {
-            const data = buildSipData();
+        const panneau = PANNEAUX_JSON[activeTab];
+
+        if (panneau) {
+            const data = panneau.build();
             if (!data) return null;
+
+            const lisible = JSON.stringify(data, null, 2);
+
             return {
-                preview: JSON.stringify(data, null, 2),
+                preview: lisible,
                 qrValue: JSON.stringify(data),
-                downloadName: 'sip-config.json',
+                downloadName: panneau.fichier,
                 downloadMime: 'application/json',
-                downloadContent: JSON.stringify(data, null, 2),
+                downloadContent: lisible,
                 downloadLabel: '⬇ Télécharger le JSON',
                 copyLabel: '📋 Copier le JSON',
             };
         }
-        if (activeTab === 'favoris') {
-            const data = buildFavData();
-            if (!data) return null;
-            return {
-                preview: JSON.stringify(data, null, 2),
-                qrValue: JSON.stringify(data),
-                downloadName: 'favoris.json',
-                downloadMime: 'application/json',
-                downloadContent: JSON.stringify(data, null, 2),
-                downloadLabel: '⬇ Télécharger le JSON',
-                copyLabel: '📋 Copier le JSON',
-            };
-        }
+
         const value = buildGenericQrData();
         if (!value) return null;
         const names = { url: 'qrcode-url.txt', text: 'qrcode-texte.txt', contact: 'contact.vcf' };
